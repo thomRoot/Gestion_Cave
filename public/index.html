@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Cave à Vin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Ma Cave à Vin</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: bœuf, 2015, Bordeaux)...">
+            <button id="searchButton">🔍</button>
+        </div>
+        <button id="addBottleButton">➕ Ajouter une bouteille</button>
+    </div>
+
+    <div class="cave-container" id="caveContainer">
+        <!-- La grille sera générée dynamiquement ici -->
+    </div>
+
+    <!-- Popup pour ajouter/modifier une bouteille -->
+    <div class="popup" id="bottlePopup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h2 id="popupTitle">Ajouter une bouteille</h2>
+            <form id="bottleForm">
+                <div class="form-group">
+                    <label for="bottlePhoto">Photo :</label>
+                    <div class="camera-container">
+                        <video id="cameraPreview" autoplay></video>
+                        <button type="button" id="takePhotoButton">📷 Prendre une photo</button>
+                        <button type="button" id="uploadPhotoButton">📁 Télécharger une image</button>
+                        <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                        <canvas id="photoCanvas" style="display: none;"></canvas>
+                    </div>
+                    <img id="bottlePhotoPreview" style="max-width: 200px; display: none;">
+                </div>
+                <div class="form-group">
+                    <label for="bottleName">Nom :</label>
+                    <input type="text" id="bottleName" required>
+                </div>
+                <div class="form-group">
+                    <label for="bottleYear">Année :</label>
+                    <input type="number" id="bottleYear" min="1900" max="2099">
+                </div>
+                <div class="form-group">
+                    <label for="bottleGrapes">Cépage :</label>
+                    <input type="text" id="bottleGrapes">
+                </div>
+                <div class="form-group">
+                    <label for="bottleRegion">Région :</label>
+                    <input type="text" id="bottleRegion">
+                </div>
+                <div class="form-group">
+                    <label for="bottleDrinkFrom">Période optimale (de) :</label>
+                    <input type="number" id="bottleDrinkFrom" min="1900" max="2099">
+                </div>
+                <div class="form-group">
+                    <label for="bottleDrinkTo">Période optimale (à) :</label>
+                    <input type="number" id="bottleDrinkTo" min="1900" max="2099">
+                </div>
+                <div class="form-group">
+                    <label for="bottleFoodPairing">Accords mets-vins :</label>
+                    <input type="text" id="bottleFoodPairing" placeholder="Ex: Bœuf, Fromage, Gibier">
+                </div>
+                <div class="form-group">
+                    <label for="bottleTemperature">Température de service :</label>
+                    <input type="text" id="bottleTemperature" placeholder="Ex: 16-18°C">
+                </div>
+                <button type="submit" id="saveBottleButton">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup pour afficher les détails d'une bouteille -->
+    <div class="popup" id="bottleDetailsPopup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h2 id="detailsTitle">Détails de la bouteille</h2>
+            <div class="bottle-details">
+                <img id="detailsPhoto" style="max-width: 200px;" src="assets/bottle-icon.png" alt="Bouteille">
+                <p><strong>Nom :</strong> <span id="detailsName"></span></p>
+                <p><strong>Année :</strong> <span id="detailsYear"></span></p>
+                <p><strong>Cépage :</strong> <span id="detailsGrapes"></span></p>
+                <p><strong>Région :</strong> <span id="detailsRegion"></span></p>
+                <p><strong>Période optimale :</strong> <span id="detailsDrinkPeriod"></span></p>
+                <div class="drink-period-bar">
+                    <div id="drinkPeriodBar" class="period-bar"></div>
+                </div>
+                <p><strong>Accords mets-vins :</strong> <span id="detailsFoodPairing"></span></p>
+                <p><strong>Température de service :</strong> <span id="detailsTemperature"></span></p>
+                <div class="button-group">
+                    <button id="editBottleButton">✏️ Modifier</button>
+                    <button id="deleteBottleButton">🗑️ Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup pour la configuration initiale de la cave -->
+    <div class="popup" id="caveConfigPopup">
+        <div class="popup-content">
+            <h2>Configurer votre cave</h2>
+            <form id="caveConfigForm">
+                <div class="form-group">
+                    <label for="caveRows">Nombre de rangées :</label>
+                    <input type="number" id="caveRows" min="1" max="20" value="5">
+                </div>
+                <div class="form-group">
+                    <label for="caveCols">Nombre de colonnes :</label>
+                    <input type="number" id="caveCols" min="1" max="20" value="10">
+                </div>
+                <button type="submit">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="cave.js"></script>
+    <script src="camera.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
