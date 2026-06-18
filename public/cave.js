@@ -72,8 +72,9 @@ function renderCaveGrid() {
             } else {
                 const bottle = caveGrid[row][col];
                 const bottleName = bottle.name || 'Bouteille';
+                const photoSrc = bottle.photo ? `/uploads/${bottle.photo}` : 'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
                 cell.innerHTML = `
-                    <div class="bottle-icon"></div>
+                    <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
                     <div class="bottle-name">${escapeHtml(bottleName)}</div>
                 `;
             }

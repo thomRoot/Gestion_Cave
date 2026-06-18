@@ -158,6 +158,16 @@ function resetImage() {
     }
 }
 
+// Définir l'image actuelle à partir d'une URL (pour l'édition)
+function setCurrentImageFromUrl(imageUrl) {
+    currentImageDataUrl = imageUrl;
+    const photoPreview = document.getElementById('bottlePhotoPreview');
+    if (photoPreview) {
+        photoPreview.src = imageUrl;
+        photoPreview.style.display = 'block';
+    }
+}
+
 // Exporter les fonctions
 window.camera = {
     startCamera,
@@ -166,7 +176,8 @@ window.camera = {
     handleImageFile,
     getCurrentImage,
     hasImage,
-    resetImage
+    resetImage,
+    setCurrentImageFromUrl
 };
 
 // Support du drag & drop

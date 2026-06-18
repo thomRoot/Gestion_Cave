@@ -274,6 +274,15 @@ body {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
+.cave-cell .bottle-thumbnail {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: var(--border-radius-xs);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    background: rgba(0, 0, 0, 0.3);
+}
+
 .cave-cell .bottle-name {
     font-size: 0.65rem;
     text-align: center;
@@ -825,6 +834,11 @@ button {
         aspect-ratio: 1;
     }
     
+    .cave-cell .bottle-thumbnail {
+        width: 32px;
+        height: 32px;
+    }
+    
     .cave-cell .bottle-name {
         font-size: 0.6rem;
     }
@@ -888,6 +902,11 @@ button {
     }
     
     .cave-cell .bottle-icon {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .cave-cell .bottle-thumbnail {
         width: 28px;
         height: 28px;
     }
@@ -963,6 +982,11 @@ button {
     }
     
     .cave-cell .bottle-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .cave-cell .bottle-thumbnail {
         width: 24px;
         height: 24px;
     }

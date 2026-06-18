@@ -4,6 +4,25 @@
 // Variables globales
 let currentBottleImage = null;
 
+// Fonctions de gestion du chargement
+function showLoading(message = "Analyse en cours...") {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        const messageElement = loadingOverlay.querySelector('p');
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+        loadingOverlay.style.display = 'flex';
+    }
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
+}
+
 // Initialiser l'application au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     window.cave.initCave();
@@ -258,6 +277,7 @@ async function analyzeWithAI() {
         }
 
         try {
+            showLoading("Analyse du texte en cours...");
             const response = await fetch('/api/bottles/analyze-text', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -265,6 +285,7 @@ async function analyzeWithAI() {
             });
 
             const result = await response.json();
+            hideLoading();
 
             if (result.success && result.bottleInfo) {
                 fillBottleFormWithAIResult(result.bottleInfo);
@@ -273,6 +294,7 @@ async function analyzeWithAI() {
                 alert("Je n'ai pas pu compléter les informations. Vérifiez les champs saisis.");
             }
         } catch (error) {
+            hideLoading();
             console.error("Erreur analyse IA :", error);
             alert("Erreur de connexion. Vérifiez que le serveur est lancé.");
         }
@@ -281,6 +303,7 @@ async function analyzeWithAI() {
 
     // Si une image est disponible, l'envoyer au serveur
     try {
+        showLoading("Analyse de l'image en cours...");
         const imageDataUrl = window.camera.getCurrentImage();
         
         // Créer un FormData pour envoyer l'image
@@ -304,6 +327,7 @@ async function analyzeWithAI() {
         });
 
         const result = await response.json();
+        hideLoading();
 
         if (result.success && result.bottleInfo) {
             fillBottleFormWithAIResult(result.bottleInfo);
@@ -312,6 +336,7 @@ async function analyzeWithAI() {
             alert("Je n'ai pas pu identifier cette bouteille. Vérifiez la qualité de l'image ou remplissez manuellement les informations.");
         }
     } catch (error) {
+        hideLoading();
         console.error("Erreur analyse IA :", error);
         alert("Erreur lors de l'analyse. Veuillez réessayer.");
     }
@@ -404,12 +429,14 @@ function openEditBottlePopup(bottle) {
     document.getElementById('bottleTemperature').value = bottle.temperature || '';
 
     if (bottle.photo) {
-        document.getElementById('bottlePhotoPreview').src = `/uploads/${bottle.photo}`;
-        document.getElementById('bottlePhotoPreview').style.display = 'block';
+        // Stocker l'image actuelle dans le camera module pour l'édition
+        window.camera.setCurrentImageFromUrl(`/uploads/${bottle.photo}`);
     } else {
-        document.getElementById('bottlePhotoPreview').style.display = 'none';
+        window.camera.resetImage();
     }
 
+    // Démarrer la sélection de fichier pour permettre de changer la photo
+    window.camera.startCamera();
     document.getElementById('bottlePopup').style.display = 'flex';
 }
 
