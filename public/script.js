@@ -130,8 +130,8 @@ function openAIHelpPopup() {
     document.getElementById('aiPromptInput').focus();
 }
 
-// Envoyer un prompt à l'IA
-function sendAIPrompt() {
+// Envoyer un prompt à l'IA (avec VRAIE IA Mistral)
+async function sendAIPrompt() {
     const input = document.getElementById('aiPromptInput');
     const prompt = input.value.trim();
     
@@ -140,10 +140,41 @@ function sendAIPrompt() {
     addAIMessage(prompt, 'user');
     input.value = '';
     
-    setTimeout(() => {
-        const aiResponse = generateAIResponse(prompt);
-        addAIMessage(aiResponse, 'bot');
-    }, 500);
+    // Afficher un indicateur de chargement
+    const messagesContainer = document.getElementById('aiMessages');
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'ai-message bot loading';
+    loadingDiv.innerHTML = '<div class="message-content"><i class="fas fa-spinner fa-spin"></i> Réflexion en cours...</div>';
+    messagesContainer.appendChild(loadingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    try {
+        // Appeler l'API Mistral via le serveur
+        const response = await fetch('/api/bottles/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: prompt })
+        });
+        
+        const result = await response.json();
+        
+        // Supprimer le message de chargement
+        loadingDiv.remove();
+        
+        if (result.success && result.response) {
+            addAIMessage(result.response, 'bot');
+        } else {
+            // Fallback vers la réponse locale si Mistral échoue
+            const fallbackResponse = generateAIResponse(prompt);
+            addAIMessage(fallbackResponse, 'bot');
+        }
+    } catch (error) {
+        console.error("Erreur appel IA Mistral :", error);
+        loadingDiv.remove();
+        // Fallback vers la réponse locale
+        const fallbackResponse = generateAIResponse(prompt);
+        addAIMessage(fallbackResponse, 'bot');
+    }
 }
 
 // Ajouter un message à la conversation IA

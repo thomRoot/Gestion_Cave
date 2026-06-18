@@ -819,6 +819,16 @@ button {
     color: var(--text-secondary);
 }
 
+/* Message de chargement dans le chat IA */
+.ai-message.loading {
+    opacity: 0.8;
+}
+
+.ai-message.loading i {
+    color: var(--secondary-color);
+    margin-right: var(--spacing-xs);
+}
+
 /* ============================================
    RESPONSIVE DESIGN
    ============================================ */
