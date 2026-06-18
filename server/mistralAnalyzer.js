@@ -95,11 +95,6 @@ async function callMistralVisionAPI(base64Image, prompt) {
         // avec une description de l'image
         // Dans le futur, on utilisera l'API Vision quand elle sera disponible
         
-        // Pour simuler l'analyse d'image, on va utiliser le prompt avec une description
-        // En attendant l'API Vision, on utilise l'OCR minimal juste pour extraire le texte
-        // MAIS on n'utilise PAS les résultats de l'OCR pour remplir les champs
-        // On utilise UNIQUEMENT Mistral pour l'analyse
-        
         const mistralAI = require('./mistralAI');
         
         // Appeler Mistral avec le prompt
@@ -144,7 +139,7 @@ function parseMistralResponse(response) {
 /**
  * Compléter les informations de la bouteille avec des valeurs dérivées
  * (accords mets-vins, température, période de consommation)
- * Ces infos ne viennent PAS de l'OCR, mais de la base de connaissances
+ * Ces infos viennent de la base de connaissances Mistral
  */
 function completeBottleInfo(bottleInfo) {
     const currentYear = new Date().getFullYear();

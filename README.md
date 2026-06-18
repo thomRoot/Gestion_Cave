@@ -6,13 +6,15 @@ Une application web moderne pour gérer votre cave à vin avec **Mistral AI** in
 
 ## 🎯 Fonctionnalités Principales
 
-### ✨ Version 4.0.0 - Chat IA Complète avec Mistral
+### ✨ Version 4.0.1 - Mistral AI Exclusif
+- **Analyse 100% Mistral AI** : Plus d'OCR local, uniquement Mistral pour une reconnaissance parfaite
 - **Chat IA conversationnel** : Posez n'importe quelle question sur le vin comme avec Mistral Chat
+- **Tous les champs remplis** : Nom, année, cépage, région, drinkFrom, drinkTo, foodPairing, temperature
+- **Calculs dynamiques** : Périodes de consommation basées sur le type de vin et le millésime
 - **Conseils personnalisés** : Accords mets-vins, températures, périodes de garde, etc.
-- **Analyse intelligente** : Mistral comprend le contexte de vos questions
+- **Indicateur de statut** : Visualisation de la connexion Mistral AI
 - **Historique des conversations** : Gardez une trace de vos échanges
 - **Suggestions intelligentes** : Boutons de suggestions pour vous inspirer
-- **Indicateur de statut** : Voir si Mistral AI est connecté
 
 ### 🤖 Intelligence Artificielle (Mistral AI)
 L'application utilise **exclusivement Mistral AI** pour :
@@ -21,14 +23,6 @@ L'application utilise **exclusivement Mistral AI** pour :
 2. **Chat conversationnel** : Réponses naturelles et contextuelles
 3. **Conseils experts** : Basés sur une connaissance approfondie du vin
 4. **Calculs dynamiques** : Périodes de consommation adaptées à chaque vin
-
-### 💬 Chat IA - Nouveautés Version 4.0
-- **Interface de chat complète** avec messages formatés
-- **Suggestions de questions** pour vous guider
-- **Historique de conversation** pour un échange fluide
-- **Indicateur de saisie** (typing...) pour une meilleure UX
-- **Formatage riche** : gras, italique, listes, etc.
-- **Gestion des erreurs** claire et utile
 
 ### 📊 Base de Connaissances
 Mistral AI connaît :
@@ -50,46 +44,10 @@ Mistral AI connaît :
 ## 🚀 Installation
 
 ### Prérequis
-- Node.js 16+ 
+- Node.js 16+
 - npm ou yarn
 - Un navigateur moderne (Chrome, Firefox, Safari, Edge)
 - **Clé API Mistral** (pour activer l'IA)
-
-## 📱 Optimisation Mobile
-
-- Grille de cave adaptative selon la taille de l'écran
-- Bouton flottant pour ajouter une bouteille sur mobile
-- Taille des cellules ajustée pour les petits écrans
-- Navigation tactile optimisée (appui court/long)
-- Design épuré et intuitif
-
-## 🤖 Intelligence Artificielle
-
-L'application utilise désormais une **IA locale** pour :
-
-1. **Reconnaissance d'images** : Extraction du texte des étiquettes via OCR (Tesseract.js)
-2. **Analyse sémantique** : Identification automatique du nom, année, cépage, région
-3. **Base de connaissances** : Plus de 20 cépages et 30 régions françaises référencés
-4. **Recommandations** : 
-   - Période optimale de consommation (basée sur le cépage et le millésime)
-   - Accords mets-vins personnalisés
-   - Température de service idéale
-
-### Base de Données des Vins
-L'IA connaît :
-- **Cépages** : Cabernet Sauvignon, Merlot, Pinot Noir, Chardonnay, etc.
-- **Régions** : Bordeaux, Bourgogne, Champagne, Loire, Alsace, Rhône, etc.
-- **Appellations** : AOC, IGP, Grand Cru, Premier Cru, etc.
-- **Accords mets-vins** : Pour chaque cépage, des suggestions d'accords
-- **Températures** : Températures de service optimales
-- **Potentiel de garde** : Durée de conservation estimée
-
-## 🚀 Installation
-
-### Prérequis
-- Node.js 16+ 
-- npm ou yarn
-- Un navigateur moderne (Chrome, Firefox, Safari, Edge)
 
 ### Étapes d'installation
 
@@ -104,12 +62,22 @@ cd Gestion_Cave
 npm install
 ```
 
-4. Démarrer le serveur :
+3. Créer le fichier `.env` :
+```bash
+cp .env.example .env
+```
+
+4. Configurer votre clé API Mistral dans `.env` :
+```
+MISTRAL_API_KEY=votre_clé_api_mistral
+```
+
+5. Démarrer le serveur :
 ```bash
 npm start
 ```
 
-5. Ouvrir l'application dans votre navigateur :
+6. Ouvrir l'application dans votre navigateur :
 ```
 http://localhost:3000
 ```
@@ -135,7 +103,7 @@ gestion_cave/
 │       ├── bottles.js      # Routes pour les bouteilles
 │       └── cave.js         # Routes pour la configuration
 ├── VERSION.md              # Historique des versions
-├── MISTRAL_SETUP.md         # Guide de configuration Mistral
+├── MISTRAL_SETUP.md        # Guide de configuration Mistral
 ├── ENV_GUIDE.md            # Guide pour le fichier .env
 ├── package.json            # Dépendances
 └── README.md               # Documentation
@@ -177,39 +145,12 @@ Vous pouvez demander **n'importe quoi** sur le vin :
 - ✅ **Formatage riche** : gras, italique, listes
 - ✅ **Gestion des erreurs** claire
 
----
-
-## 🎨 Design et UX
-
-### Palette de Couleurs
-
-## 🎨 Design et UX
-
-### Palette de Couleurs
-- **Rouge vin** (#8B0000) - Couleur principale
-- **Or** (#D4AF37) - Couleur secondaire (accents)
-- **Noir profond** (#121212) - Arrière-plan
-- **Gris foncé** (#1E1E1E) - Surfaces
-- **Vert** (#4CAF50) - Actions positives
-- **Rouge** (#F44336) - Actions dangereuses
-
-### Polices
-- **Playfair Display** - Titres (élégant, serif)
-- **Roboto** - Texte principal (moderne, lisible)
-
-### Animations
-- Transitions fluides
-- Effets de hover
-- Animations de popup
-- Scroll personnalisé
-
 ## 📸 Fonctionnement de la Reconnaissance Photo
 
 1. **Prise de photo** : Utilise l'API MediaDevices pour accéder à la caméra
 2. **Téléchargement** : Accès à la galerie via `<input type="file" capture="environment">`
-3. **OCR** : Tesseract.js extrait le texte de l'image
-4. **Analyse** : L'IA identifie les informations du vin dans le texte
-5. **Remplissage** : Les champs du formulaire sont remplis automatiquement
+3. **Analyse Mistral AI** : L'image est envoyée à Mistral pour analyse complète
+4. **Remplissage automatique** : Tous les 8 champs du formulaire sont remplis intelligemment
 
 ### Support Mobile
 - `capture="environment"` : Force l'ouverture de la caméra arrière sur mobile
@@ -226,9 +167,14 @@ Vous pouvez demander **n'importe quoi** sur le vin :
 - `GET /api/bottles` - Lister toutes les bouteilles
 - `POST /api/bottles` - Ajouter/mettre à jour une bouteille
 - `DELETE /api/bottles?row=X&col=Y` - Supprimer une bouteille
-- `POST /api/bottles/analyze` - Analyser une image avec l'IA
+- `POST /api/bottles/analyze` - Analyser une image avec Mistral AI
+- `POST /api/bottles/analyze-base64` - Analyser une image en base64
 - `GET /api/bottles/recommendations` - Obtenir des recommandations
 - `GET /api/bottles/search?name=X` - Rechercher un vin par nom
+- `GET /api/bottles/mistral-status` - Vérifier le statut de Mistral AI
+
+### Chat
+- `POST /api/bottles/chat` - Envoyer un message au chat Mistral
 
 ## 💡 Utilisation
 
@@ -246,18 +192,20 @@ Vous pouvez demander **n'importe quoi** sur le vin :
 4. Apportes vos modifications
 5. Enregistrez
 
+**Note** : Les images sont préservées lors de l'édition
+
 ### Rechercher
 - Utilisez la barre de recherche pour trouver des bouteilles par nom, année, cépage, région ou accords
 - Les bouteilles correspondantes seront surlignées en vert
 
-### Aide IA
-- Cliquez sur le bouton "Aide IA" pour discuter avec l'assistant
+### Chat IA
+- Cliquez sur le bouton "Chat IA" pour discuter avec l'assistant
 - Posez des questions sur le vin, les accords, la conservation, etc.
 
 ## 🌐 Compatibilité Navigateurs
 
-| Navigateur | Support Caméra | Support OCR | Recommandé |
-|------------|----------------|-------------|------------|
+| Navigateur | Support Caméra | Support Mistral AI | Recommandé |
+|------------|----------------|---------------------|------------|
 | Chrome | ✅ Oui | ✅ Oui | ✅ Oui |
 | Firefox | ✅ Oui | ✅ Oui | ✅ Oui |
 | Safari | ✅ Oui | ✅ Oui | ✅ Oui |
@@ -314,6 +262,28 @@ Sur mobile, les navigateurs **bloquent l'accès à la caméra** dans certains ca
 
 ---
 
+## 🎨 Design et UX
+
+### Palette de Couleurs
+- **Rouge vin** (#8B0000) - Couleur principale
+- **Or** (#D4AF37) - Couleur secondaire (accents)
+- **Noir profond** (#121212) - Arrière-plan
+- **Gris foncé** (#1E1E1E) - Surfaces
+- **Vert** (#4CAF50) - Actions positives
+- **Rouge** (#F44336) - Actions dangereuses
+
+### Polices
+- **Playfair Display** - Titres (élégant, serif)
+- **Roboto** - Texte principal (moderne, lisible)
+
+### Animations
+- Transitions fluides
+- Effets de hover
+- Animations de popup
+- Scroll personnalisé
+
+---
+
 ## 🔧 Configuration
 
 ### Configuration de la Cave
@@ -327,8 +297,8 @@ Sur mobile, les navigateurs **bloquent l'accès à la caméra** dans certains ca
 
 ## 📊 Performances
 
-- **OCR** : ~2-5 secondes par image (selon la taille et la qualité)
-- **Analyse IA** : Instantanée (base de connaissances locale)
+- **Analyse Mistral AI** : ~3-10 secondes par image (selon la taille et la qualité)
+- **Chat IA** : Réponses en temps réel
 - **Chargement** : Optimisé pour mobile (lazy loading des images)
 
 ## 🛠️ Développement
@@ -341,20 +311,35 @@ Sur mobile, les navigateurs **bloquent l'accès à la caméra** dans certains ca
 - **Frontend** : HTML5, CSS3, JavaScript (ES6+)
 - **Backend** : Node.js, Express
 - **Base de données** : SQLite3
-- **IA/OCR** : Tesseract.js
+- **IA** : Mistral AI API
 - **UI Icons** : Font Awesome 6
 - **Polices** : Google Fonts (Playfair Display, Roboto)
 
 ## 📝 Changelog
 
+### Version 4.0.1
+- ✅ Correction de l'erreur `extractBasicInfoFromText is not defined`
+- ✅ Correction de l'import manquant dans app.js
+- ✅ Suppression définitive de toutes les références à l'OCR local
+
+### Version 4.0.0
+- ✅ **Chat IA complet** : Interface de chat conversationnel
+- ✅ **Analyse Mistral AI uniquement** : Suppression complète de l'OCR local
+- ✅ **Tous les champs remplis** : 8 champs dynamiquement calculés
+- ✅ **Calculs dynamiques** : Périodes de consommation basées sur le vin
+- ✅ **Indicateur de statut** : Visualisation de la connexion Mistral
+
+### Version 3.0.0
+- ✅ Suppression complète de l'OCR local (Tesseract.js)
+- ✅ Utilisation exclusive de Mistral AI pour l'analyse des images
+- ✅ Fin des dates fixes (2026-2031) - calcul dynamique
+- ✅ Suppression de la dépendance tesseract.js
+
 ### Version 2.0.0
-- ✨ **Nouveau design moderne et responsive**
-- 🤖 **Intégration IA locale** (remplace Google Vision)
-- 📱 **Optimisation mobile complète**
-- 🎨 **Amélioration esthétique** (arrière-plan, couleurs, polices)
-- 💬 **Assistant IA conversationnel**
-- 📸 **Correction des boutons de photo** (accès caméra/galerie)
-- 🔄 **Remplissage automatique des champs** via IA
+- ✨ Nouveau design moderne et responsive
+- 🤖 Intégration Mistral AI
+- 📱 Optimisation mobile complète
+- 🎨 Amélioration esthétique
 
 ### Version 1.0.0
 - Version initiale avec Google Vision API
@@ -373,4 +358,4 @@ MIT License - Libre d'utilisation, modification et distribution.
 
 **Créé avec ❤️ pour les amateurs de vin**
 
-*Ma Cave à Vin - Votre cave, intelligente et connectée*
+*Ma Cave à Vin - Votre cave, intelligente et connectée avec Mistral AI*

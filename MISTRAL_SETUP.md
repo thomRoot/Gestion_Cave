@@ -9,7 +9,7 @@ Vous avez maintenant accès à une **vraie intelligence artificielle** grâce à
 | Fonctionnalité | Avant (Recherche de mots-clés) | Maintenant (Mistral AI) |
 |---------------|-------------------------------|------------------------|
 | Chat IA | Réponses préenregistrées | **Réponses dynamiques et intelligentes** |
-| Analyse d'image | OCR basique | **OCR + compréhension du contexte** |
+| Analyse d'image | Reconnaissance basique | **Analyse intelligente avec compréhension du contexte** |
 | Accords mets-vins | Liste statique | **Conseils personnalisés et détaillés** |
 | Questions générales | Réponses génériques | **Réponses adaptées au contexte** |
 
@@ -79,16 +79,15 @@ Température de service : 16-18°C. Accords parfaits !
 ### 2. **Analyse d'image intelligente** 🖼️
 
 Quand vous analysez une étiquette de vin :
-1. L'OCR local extrait le texte
-2. **Mistral interprète ce texte** pour identifier :
+1. **Mistral AI analyse directement l'image** pour identifier :
    - Nom du vin
    - Millésime
    - Cépage
    - Région
    - Producteur
-3. L'application complète automatiquement les champs
+2. L'application complète automatiquement les champs
 
-**Résultat :** Plus de noms absurdes comme "3 nN y \ Aié"rd", mais de **vraies informations** extraites intelligemment.
+**Résultat :** Plus de noms absurdes comme "NS Ji ez" ou "3 nN y \ Aié"rd", mais de **vraies informations** extraites intelligemment.
 
 ### 3. **Conseils personnalisés** 🍷
 
