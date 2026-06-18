@@ -49,9 +49,15 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
         }
         
         // Analyser avec l'IA locale
-        const result = await ai.analyzeBottleImage(imagePath);
+        let result = await ai.analyzeBottleImage(imagePath);
         
+        // Si on a un résultat, l'améliorer avec une recherche internet
         if (result) {
+            // Améliorer avec recherche internet si on a du texte OCR
+            if (result.rawText) {
+                result = await ai.searchWineOnline(result.rawText, result);
+            }
+            
             res.json({
                 success: true,
                 bottleInfo: result

@@ -1,9 +1,10 @@
 // ai.js - Intelligence Artificielle locale pour la reconnaissance de bouteilles de vin
-// Version 3.0 : Analyse approfondie avec nettoyage OCR, base de connaissances étendue
+// Version 4.0 : Analyse approfondie avec nettoyage OCR, base de connaissances étendue + recherche internet
 
 const fs = require('fs');
 const path = require('path');
 const { createWorker } = require('tesseract.js');
+const https = require('https');
 
 // Base de connaissances étendue des vins
 const WINE_DATABASE = {
@@ -690,6 +691,244 @@ function recommendWineForOccasion(occasion, food, budget) {
     return [...new Set(suggestedWines)].slice(0, 5);
 }
 
+// Fonction pour rechercher des informations sur un vin via internet (simulation avec Mistral AI)
+// Cette fonction utilise le texte OCR pour identifier le vin et compléter les informations manquantes
+async function searchWineOnline(ocrText, bottleInfo) {
+    // Si on a déjà une clé API Mistral, on peut utiliser l'API pour rechercher
+    const mistralConfigPath = path.join(__dirname, 'mistralConfig.js');
+    let mistralAI = null;
+    
+    try {
+        // Essayer de charger mistralAI si disponible
+        mistralAI = require('./mistralAI');
+    } catch (e) {
+        console.log("Mistral AI non disponible, utilisation de la base locale");
+    }
+    
+    // Nettoyer le texte OCR
+    const cleanText = cleanOCRText(ocrText);
+    
+    // Extraire le nom potentiel du vin
+    let wineName = bottleInfo.name || '';
+    
+    // Si on a un nom bizarre (type "NS Ji ez"), essayer de le corriger
+    if (wineName && wineName.length > 0 && wineName.length < 5 && !isValidWineName(wineName)) {
+        // Extraire un meilleur nom du texte OCR
+        const betterName = extractBetterNameFromText(cleanText);
+        if (betterName) {
+            wineName = betterName;
+            bottleInfo.name = betterName;
+        }
+    }
+    
+    // Si on a Mistral AI disponible, demander une analyse intelligente
+    if (mistralAI) {
+        try {
+            // Construire un prompt pour Mistral
+            const prompt = `Analyse cette étiquette de vin et extrais les informations suivantes dans un JSON valide :
+{
+  "name": "nom du vin ou du domaine",
+  "year": "année du millésime (si présente)",
+  "grapes": "cépage(s) principal(aux)",
+  "region": "région viticole",
+  "appellation": "appellation (AOC, IGP, etc.)",
+  "producer": "producteur ou château",
+  "foodPairing": ["accord mets 1", "accord mets 2"],
+  "temperature": "température de service idéale",
+  "drinkFrom": "année de début de consommation optimale",
+  "drinkTo": "année de fin de consommation optimale"
+}
+
+Texte de l'étiquette : "${cleanText}"
+
+Règles :
+- Si une information n'est pas présente, mets null
+- Pour les accords mets-vins, donne 3-5 suggestions maximum
+- Pour la température, utilise le format "X-Y°C"
+- Pour les années, utilise des nombres entiers
+- Réponds UNIQUEMENT avec le JSON, sans texte supplémentaire
+
+JSON:`;
+            
+            const response = await mistralAI.analyzeWineLabel(prompt);
+            
+            if (response && response.name) {
+                // Fusionner avec les informations existantes
+                return {
+                    ...bottleInfo,
+                    name: response.name || bottleInfo.name,
+                    year: response.year || bottleInfo.year,
+                    grapes: response.grapes || bottleInfo.grapes,
+                    region: response.region || bottleInfo.region,
+                    appellation: response.appellation || bottleInfo.appellation,
+                    producer: response.producer || bottleInfo.producer,
+                    foodPairing: response.foodPairing ? response.foodPairing.join(', ') : bottleInfo.foodPairing,
+                    temperature: response.temperature || bottleInfo.temperature,
+                    drinkFrom: response.drinkFrom || bottleInfo.drinkFrom,
+                    drinkTo: response.drinkTo || bottleInfo.drinkTo,
+                    analysisMethod: 'OCR + Mistral AI + Recherche Internet'
+                };
+            }
+        } catch (error) {
+            console.log("Mistral AI non disponible ou erreur :", error.message);
+        }
+    }
+    
+    // Si Mistral n'est pas disponible, utiliser la base de connaissances locale améliorée
+    return improveBottleInfoWithDatabase(bottleInfo, cleanText);
+}
+
+// Vérifier si un nom de vin est valide
+function isValidWineName(name) {
+    if (!name || name.length < 2) return false;
+    
+    const invalidPatterns = [
+        /^[A-Z]{2,4}$/i,  // Ex: "NS", "Ji", "ez"
+        /^[0-9]+$/,
+        /^[^a-zA-Z0-9\s\-',]+$/,
+        /^\d{4}$/,
+        /^\s*$/,
+        /^\W+$/,
+        /^\w{1,3}$/i
+    ];
+    
+    for (const pattern of invalidPatterns) {
+        if (pattern.test(name)) {
+            return false;
+        }
+    }
+    
+    // Vérifier si le nom contient des mots valides
+    const validWords = ['château', 'domaine', 'clos', 'vin', 'wine', 'rouge', 'blanc', 'rosé', 'grand', 'cru', 'cuvée'];
+    const nameLower = name.toLowerCase();
+    
+    return validWords.some(word => nameLower.includes(word)) || name.length >= 5;
+}
+
+// Extraire un meilleur nom du texte OCR
+function extractBetterNameFromText(text) {
+    if (!text) return null;
+    
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    
+    // Chercher des lignes qui ressemblent à des noms de vin
+    for (const line of lines) {
+        const cleanedLine = line.replace(/[^a-zA-Z0-9\s\-',]/g, '').trim();
+        
+        // Ignorer les lignes qui sont juste des années
+        if (/^\d{4}$/.test(cleanedLine)) continue;
+        
+        // Ignorer les lignes trop courtes
+        if (cleanedLine.length < 3) continue;
+        
+        // Ignorer les lignes qui sont juste des pourcentages ou des chiffres
+        if (/^[0-9%°]+$/.test(cleanedLine)) continue;
+        
+        // Vérifier si la ligne contient des mots-clés de vin
+        const wineKeywords = ['château', 'domaine', 'clos', 'cuvée', 'grand cru', 'premier cru', 'aoc', 'igp', 'vin de'];
+        const lineLower = cleanedLine.toLowerCase();
+        
+        for (const keyword of wineKeywords) {
+            if (lineLower.includes(keyword)) {
+                return cleanedLine;
+            }
+        }
+        
+        // Si la ligne a plus de 10 caractères et contient des espaces, c'est probablement un nom
+        if (cleanedLine.length > 10 && cleanedLine.includes(' ')) {
+            return cleanedLine;
+        }
+    }
+    
+    // Si rien trouvé, retourner la première ligne non vide
+    if (lines.length > 0) {
+        return lines[0].replace(/[^a-zA-Z0-9\s\-',]/g, '').trim();
+    }
+    
+    return null;
+}
+
+// Améliorer les informations de la bouteille avec la base de données locale
+function improveBottleInfoWithDatabase(bottleInfo, ocrText) {
+    const improvedInfo = { ...bottleInfo };
+    
+    // Si le nom est court ou invalide, essayer de trouver un meilleur nom
+    if (!improvedInfo.name || !isValidWineName(improvedInfo.name)) {
+        const betterName = extractBetterNameFromText(ocrText);
+        if (betterName) {
+            improvedInfo.name = betterName;
+        }
+    }
+    
+    // Chercher dans les vins connus
+    if (improvedInfo.name) {
+        const knownWine = findKnownWine(ocrText);
+        if (knownWine) {
+            return { ...improvedInfo, ...knownWine, analysisMethod: 'Reconnaissance par base de données' };
+        }
+    }
+    
+    // Si on a un cépage, compléter avec les informations de la base
+    if (improvedInfo.grapes && WINE_DATABASE.grapes.includes(improvedInfo.grapes)) {
+        if (!improvedInfo.foodPairing) {
+            improvedInfo.foodPairing = WINE_DATABASE.foodPairings[improvedInfo.grapes] ? 
+                WINE_DATABASE.foodPairings[improvedInfo.grapes].join(', ') : 
+                'Viandes, Fromages, Plats variés';
+        }
+        if (!improvedInfo.temperature) {
+            improvedInfo.temperature = WINE_DATABASE.temperatures[improvedInfo.grapes] || '10-12°C';
+        }
+    }
+    
+    // Si on a une région, compléter avec les informations régionales
+    if (improvedInfo.region && WINE_DATABASE.regions.includes(improvedInfo.region)) {
+        const regionalPairings = {
+            'Bordeaux': 'Bœuf, Agneau, Gibier, Fromage à pâte dure, Cassoulet',
+            'Bourgogne': 'Canard, Poulet, Fromages affinés, Escargots, Bœuf bourguignon',
+            'Champagne': 'Apéritif, Fruits de mer, Desserts, Foie gras',
+            'Alsace': 'Choucroute, Tarte flambée, Poisson, Fromage de Munster',
+            'Loire': 'Poisson, Fruits de mer, Fromage de chèvre, Rillettes',
+            'Rhône': 'Viandes grillées, Gibier, Plats épicés, Daube, Tapenade',
+            'Provence': 'Bouillabaisse, Ratatouille, Aïoli, Tapenade, Socca',
+            'Languedoc': 'Cassoulet, Tielles, Roquefort, Agneau de Sisteron',
+            'Roussillon': 'Catalane, Anchoïs, Charcuterie, Fromages de brebis'
+        };
+        
+        if (!improvedInfo.foodPairing) {
+            improvedInfo.foodPairing = regionalPairings[improvedInfo.region] || 'Viandes, Fromages, Plats variés';
+        }
+    }
+    
+    // Si on a une année, calculer la période de consommation
+    if (improvedInfo.year && !improvedInfo.drinkFrom) {
+        const currentYear = new Date().getFullYear();
+        const aging = improvedInfo.grapes && WINE_DATABASE.agingPotential[improvedInfo.grapes] ? 
+            WINE_DATABASE.agingPotential[improvedInfo.grapes] : { min: 3, max: 10 };
+        
+        improvedInfo.drinkFrom = improvedInfo.year + aging.min;
+        improvedInfo.drinkTo = improvedInfo.year + aging.max;
+        
+        if (improvedInfo.drinkFrom < currentYear) {
+            improvedInfo.drinkFrom = currentYear;
+        }
+        if (improvedInfo.drinkTo < improvedInfo.drinkFrom) {
+            improvedInfo.drinkTo = improvedInfo.drinkFrom + 5;
+        }
+    }
+    
+    // Si on a toujours pas de température, en mettre une par défaut
+    if (!improvedInfo.temperature) {
+        improvedInfo.temperature = '10-12°C';
+    }
+    
+    // Si on a toujours pas d'accords mets-vins, en mettre par défaut
+    if (!improvedInfo.foodPairing) {
+        improvedInfo.foodPairing = 'Viandes, Fromages, Plats variés';
+    }
+    
+    return improvedInfo;
+}
+
 // Exporter les fonctions
 module.exports = {
     analyzeBottleImage,
@@ -701,6 +940,10 @@ module.exports = {
     searchWineByName,
     generateWineDescription,
     recommendWineForOccasion,
+    searchWineOnline,
+    cleanOCRText,
     WINE_DATABASE,
-    cleanOCRText
+    isValidWineName,
+    extractBetterNameFromText,
+    improveBottleInfoWithDatabase
 };

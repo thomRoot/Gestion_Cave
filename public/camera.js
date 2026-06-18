@@ -67,13 +67,20 @@ function initFileUpload() {
 }
 
 // Démarrer la sélection de fichier (appelé depuis cave.js)
-function startCamera() {
+// Si resetImage = true, réinitialise l'image actuelle. Sinon, conserve l'image existante.
+function startCamera(resetImage = true) {
     const photoPreview = document.getElementById('bottlePhotoPreview');
     const cameraPreview = document.getElementById('cameraPreview');
     
-    // Masquer les aperçus
-    if (photoPreview) photoPreview.style.display = 'none';
-    if (cameraPreview) cameraPreview.style.display = 'none';
+    // Si on ne doit pas réinitialiser et qu'il y a déjà une image, la conserver
+    if (!resetImage && currentImageDataUrl) {
+        // Ne rien faire, garder l'image actuelle
+    } else {
+        // Masquer les aperçus
+        if (photoPreview) photoPreview.style.display = 'none';
+        if (cameraPreview) cameraPreview.style.display = 'none';
+        currentImageDataUrl = null;
+    }
     
     // Masquer les boutons de caméra (on n'utilise que la galerie)
     const takePhotoButton = document.getElementById('takePhotoButton');

@@ -54,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedCell = window.cave.getSelectedCell();
         if (selectedCell) {
             const bottle = window.cave.getCaveGrid()[selectedCell.row][selectedCell.col];
+            // Fermer la popup de détails avant d'ouvrir celle de modification
+            document.getElementById('bottleDetailsPopup').style.display = 'none';
             openEditBottlePopup(bottle);
         }
     });
@@ -462,12 +464,17 @@ function openEditBottlePopup(bottle) {
     if (bottle.photo) {
         // Stocker l'image actuelle dans le camera module pour l'édition
         window.camera.setCurrentImageFromUrl(`/uploads/${bottle.photo}`);
+        // Afficher l'aperçu de l'image
+        document.getElementById('bottlePhotoPreview').style.display = 'block';
+        document.getElementById('bottlePhotoPreview').src = `/uploads/${bottle.photo}`;
     } else {
         window.camera.resetImage();
+        document.getElementById('bottlePhotoPreview').style.display = 'none';
     }
 
     // Démarrer la sélection de fichier pour permettre de changer la photo
-    window.camera.startCamera();
+    // NE PAS réinitialiser l'image existante
+    window.camera.startCamera(false); // false = ne pas réinitialiser
     document.getElementById('bottlePopup').style.display = 'flex';
 }
 
