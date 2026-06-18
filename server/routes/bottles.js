@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const ai = require('../ai');
+const aiAnalyzer = require('../aiAnalyzer');
 const mistralAI = require('../mistralAI');
 const mistralConfig = require('../mistralConfig');
 
@@ -39,7 +40,7 @@ router.get('/', (req, res) => {
     });
 });
 
-// Analyser une bouteille avec l'IA (avec image uploadée) - VERSION ROBUSTE
+// Analyser une bouteille avec l'IA (avec image uploadée) - NOUVELLE VERSION ULTRA-ROBUSTE
 router.post('/analyze', upload.single('image'), async (req, res) => {
     try {
         let imagePath = null;
@@ -49,224 +50,28 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
             imagePath = path.join(__dirname, '../../public/uploads', req.file.filename);
         }
         
-        // Analyser avec l'IA locale
-        let result = await ai.analyzeBottleImage(imagePath);
+        // Utiliser le nouvel analyseur robuste
+        const result = await aiAnalyzer.analyzeBottleWithMistral(imagePath, false);
         
-        // Si on a un résultat, l'améliorer avec une recherche internet
-        if (result) {
-            // Améliorer avec recherche internet si on a du texte OCR
-            if (result.rawText) {
-                result = await ai.searchWineOnline(result.rawText, result);
-            }
-            
-            // Vérifier que le résultat est valide et complet
-            const validatedResult = validateAndCompleteBottleInfo(result);
-            
-            res.json({
-                success: true,
-                bottleInfo: validatedResult,
-                mistralAvailable: !!mistralConfig.apiKey,
-                analysisMethod: validatedResult.analysisMethod || 'OCR Local'
-            });
-        } else {
-            // Si l'analyse échoue, retourner des infos par défaut
-            res.json({
-                success: true,
-                bottleInfo: {
-                    name: null,
-                    year: null,
-                    grapes: null,
-                    region: null,
-                    drinkFrom: null,
-                    drinkTo: null,
-                    foodPairing: "Viandes, Fromages, Plats variés",
-                    temperature: "10-12°C",
-                    analysisMethod: 'Fallback'
-                },
-                mistralAvailable: !!mistralConfig.apiKey
-            });
-        }
+        res.json({
+            success: true,
+            bottleInfo: result,
+            mistralAvailable: !!mistralConfig.apiKey,
+            analysisMethod: result.analysisMethod || 'OCR Local'
+        });
+        
     } catch (error) {
         console.error("Erreur analyse IA :", error);
         res.status(500).json({
             success: false,
             error: "Erreur serveur lors de l'analyse",
-            mistralAvailable: !!mistralConfig.apiKey
+            mistralAvailable: !!mistralConfig.apiKey,
+            bottleInfo: aiAnalyzer.getDefaultBottleInfo()
         });
     }
 });
 
-// Valider et compléter les informations de la bouteille
-function validateAndCompleteBottleInfo(bottleInfo) {
-    const validated = { ...bottleInfo };
-    
-    // 1. Valider et corriger le nom
-    if (!validated.name || !ai.isValidWineName(validated.name)) {
-        // Essayer d'extraire un meilleur nom du texte brut
-        if (validated.rawText) {
-            const betterName = ai.extractBetterNameFromText(validated.rawText);
-            if (betterName && ai.isValidWineName(betterName)) {
-                validated.name = betterName;
-            } else {
-                // Si aucun nom valide, mettre un nom générique
-                validated.name = "Vin inconnu";
-            }
-        } else {
-            validated.name = "Vin inconnu";
-        }
-    }
-    
-    // 2. Valider l'année (doit être entre 1800 et 2100)
-    if (validated.year && (validated.year < 1800 || validated.year > 2100)) {
-        validated.year = null;
-    }
-    
-    // 3. Valider le cépage (doit être dans la base de données)
-    if (validated.grapes && !ai.WINE_DATABASE.grapes.includes(validated.grapes)) {
-        // Essayer de trouver un cépage similaire
-        const similarGrape = findSimilarGrape(validated.grapes, ai.WINE_DATABASE.grapes);
-        validated.grapes = similarGrape || null;
-    }
-    
-    // 4. Valider la région
-    if (validated.region && !ai.WINE_DATABASE.regions.includes(validated.region)) {
-        const similarRegion = findSimilarRegion(validated.region, ai.WINE_DATABASE.regions);
-        validated.region = similarRegion || null;
-    }
-    
-    // 5. Compléter les accords mets-vins si manquants
-    if (!validated.foodPairing || validated.foodPairing === "Viandes, Fromages, Plats variés") {
-        if (validated.grapes && ai.WINE_DATABASE.foodPairings[validated.grapes]) {
-            validated.foodPairing = ai.WINE_DATABASE.foodPairings[validated.grapes].join(', ');
-        } else if (validated.region) {
-            const regionalPairings = {
-                'Bordeaux': 'Bœuf, Agneau, Gibier, Fromage à pâte dure, Cassoulet',
-                'Bourgogne': 'Canard, Poulet, Fromages affinés, Escargots, Bœuf bourguignon',
-                'Champagne': 'Apéritif, Fruits de mer, Desserts, Foie gras',
-                'Alsace': 'Choucroute, Tarte flambée, Poisson, Fromage de Munster',
-                'Loire': 'Poisson, Fruits de mer, Fromage de chèvre, Rillettes',
-                'Rhône': 'Viandes grillées, Gibier, Plats épicés, Daube, Tapenade',
-                'Provence': 'Bouillabaisse, Ratatouille, Aïoli, Tapenade, Socca',
-                'Languedoc': 'Cassoulet, Tielles, Roquefort, Agneau de Sisteron',
-                'Roussillon': 'Catalane, Anchoïs, Charcuterie, Fromages de brebis'
-            };
-            validated.foodPairing = regionalPairings[validated.region] || 'Viandes, Fromages, Plats variés';
-        } else {
-            validated.foodPairing = 'Viandes, Fromages, Plats variés';
-        }
-    }
-    
-    // 6. Compléter la température si manquante
-    if (!validated.temperature) {
-        if (validated.grapes && ai.WINE_DATABASE.temperatures[validated.grapes]) {
-            validated.temperature = ai.WINE_DATABASE.temperatures[validated.grapes];
-        } else {
-            // Température par défaut selon le type
-            const redWineGrapes = ['Cabernet Sauvignon', 'Merlot', 'Pinot Noir', 'Syrah', 'Grenache', 'Malbec', 'Tempranillo', 'Sangiovese', 'Barbera', 'Nebbiolo'];
-            if (validated.grapes && redWineGrapes.includes(validated.grapes)) {
-                validated.temperature = '16-18°C';
-            } else {
-                validated.temperature = '10-12°C';
-            }
-        }
-    }
-    
-    // 7. Compléter la période de consommation si manquante
-    if (!validated.drinkFrom || !validated.drinkTo) {
-        const currentYear = new Date().getFullYear();
-        if (validated.year) {
-            const aging = validated.grapes && ai.WINE_DATABASE.agingPotential[validated.grapes] ? 
-                ai.WINE_DATABASE.agingPotential[validated.grapes] : { min: 3, max: 10 };
-            
-            validated.drinkFrom = validated.year + aging.min;
-            validated.drinkTo = validated.year + aging.max;
-            
-            if (validated.drinkFrom < currentYear) {
-                validated.drinkFrom = currentYear;
-            }
-            if (validated.drinkTo < validated.drinkFrom) {
-                validated.drinkTo = validated.drinkFrom + 5;
-            }
-        } else {
-            validated.drinkFrom = currentYear;
-            validated.drinkTo = currentYear + 5;
-        }
-    }
-    
-    // 8. S'assurer que tous les champs sont présents
-    validated.name = validated.name || "Vin inconnu";
-    validated.year = validated.year || null;
-    validated.grapes = validated.grapes || null;
-    validated.region = validated.region || null;
-    validated.drinkFrom = validated.drinkFrom || new Date().getFullYear();
-    validated.drinkTo = validated.drinkTo || new Date().getFullYear() + 5;
-    validated.foodPairing = validated.foodPairing || 'Viandes, Fromages, Plats variés';
-    validated.temperature = validated.temperature || '10-12°C';
-    
-    return validated;
-}
-
-// Trouver un cépage similaire (pour corriger les erreurs OCR)
-function findSimilarGrape(input, grapesList) {
-    if (!input) return null;
-    
-    const inputLower = input.toLowerCase().trim();
-    
-    // Vérifier l'exact match (case insensitive)
-    for (const grape of grapesList) {
-        if (grape.toLowerCase() === inputLower) {
-            return grape;
-        }
-    }
-    
-    // Vérifier si l'input contient un cépage
-    for (const grape of grapesList) {
-        if (inputLower.includes(grape.toLowerCase())) {
-            return grape;
-        }
-    }
-    
-    // Vérifier si un cépage contient l'input
-    for (const grape of grapesList) {
-        if (grape.toLowerCase().includes(inputLower)) {
-            return grape;
-        }
-    }
-    
-    return null;
-}
-
-// Trouver une région similaire
-function findSimilarRegion(input, regionsList) {
-    if (!input) return null;
-    
-    const inputLower = input.toLowerCase().trim();
-    
-    // Vérifier l'exact match
-    for (const region of regionsList) {
-        if (region.toLowerCase() === inputLower) {
-            return region;
-        }
-    }
-    
-    // Vérifier si l'input contient une région
-    for (const region of regionsList) {
-        if (inputLower.includes(region.toLowerCase())) {
-            return region;
-        }
-    }
-    
-    // Vérifier si une région contient l'input
-    for (const region of regionsList) {
-        if (region.toLowerCase().includes(inputLower)) {
-            return region;
-        }
-    }
-    
-    return null;
-}
-
-// Analyser une bouteille avec l'IA (image en base64) - Utilise Mistral + OCR local
+// Analyser une bouteille avec l'IA (image en base64) - NOUVELLE VERSION ULTRA-ROBUSTE
 router.post('/analyze-base64', async (req, res) => {
     try {
         const { image } = req.body;
@@ -278,103 +83,23 @@ router.post('/analyze-base64', async (req, res) => {
             });
         }
         
-        // D'abord, essayer avec OCR local (Tesseract.js)
-        let ocrResult = null;
-        try {
-            ocrResult = await ai.analyzeBottleImageBase64(image);
-        } catch (ocrError) {
-            console.log("OCR local échoué, tentative avec Mistral directement...");
-        }
+        // Utiliser le nouvel analyseur robuste
+        const result = await aiAnalyzer.analyzeBottleWithMistral(image, true);
         
-        // Si OCR a réussi et a donné des résultats, les utiliser
-        if (ocrResult && (ocrResult.name || ocrResult.year || ocrResult.grapes || ocrResult.region)) {
-            // Compléter avec Mistral pour une analyse plus intelligente
-            try {
-                const mistralAnalysis = await mistralAI.analyzeWineLabel(ocrResult.rawText || '');
-                if (mistralAnalysis) {
-                    // Fusionner les résultats
-                    const mergedResult = {
-                        ...ocrResult,
-                        ...mistralAnalysis,
-                        // Conserver les infos de l'OCR local si Mistral n'a pas trouvé
-                        name: mistralAnalysis.name || ocrResult.name,
-                        year: mistralAnalysis.year || ocrResult.year,
-                        grapes: mistralAnalysis.grapes || ocrResult.grapes,
-                        region: mistralAnalysis.region || ocrResult.region
-                    };
-                    
-                    // Ajouter les infos manquantes (accords, température, etc.)
-                    const completeInfo = ai.extractBottleInfoFromText(
-                        `${mergedResult.name || ''} ${mergedResult.year || ''} ${mergedResult.grapes || ''} ${mergedResult.region || ''}`
-                    );
-                    
-                    res.json({
-                        success: true,
-                        bottleInfo: {
-                            ...mergedResult,
-                            drinkFrom: completeInfo.drinkFrom,
-                            drinkTo: completeInfo.drinkTo,
-                            foodPairing: completeInfo.foodPairing,
-                            temperature: completeInfo.temperature,
-                            analysisMethod: 'OCR Local + Mistral AI'
-                        }
-                    });
-                    return;
-                }
-            } catch (mistralError) {
-                console.log("Mistral non disponible, utilisation des résultats OCR seulement");
-            }
-            
-            // Si Mistral échoue, utiliser les résultats OCR
-            res.json({
-                success: true,
-                bottleInfo: ocrResult
-            });
-            return;
-        }
+        res.json({
+            success: true,
+            bottleInfo: result,
+            mistralAvailable: !!mistralConfig.apiKey,
+            analysisMethod: result.analysisMethod || 'OCR Local'
+        });
         
-        // Si OCR a échoué complètement, essayer avec Mistral directement sur le texte brut
-        try {
-            // Extraire le texte brut de l'image base64 (sans OCR)
-            const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-            // On ne peut pas faire grand chose sans OCR, donc on utilise un fallback
-            const fallbackInfo = {
-                name: "Bouteille de vin",
-                year: null,
-                grapes: null,
-                region: null,
-                drinkFrom: null,
-                drinkTo: null,
-                foodPairing: "Viandes, Fromages, Plats variés",
-                temperature: "10-12°C",
-                analysisMethod: 'Fallback - OCR non disponible'
-            };
-            
-            res.json({
-                success: true,
-                bottleInfo: fallbackInfo
-            });
-        } catch (error) {
-            res.json({
-                success: true,
-                bottleInfo: {
-                    name: "Bouteille de vin",
-                    year: null,
-                    grapes: null,
-                    region: null,
-                    drinkFrom: null,
-                    drinkTo: null,
-                    foodPairing: "Viandes, Fromages, Plats variés",
-                    temperature: "10-12°C",
-                    analysisMethod: 'Fallback'
-                }
-            });
-        }
     } catch (error) {
         console.error("Erreur analyse IA base64 :", error);
         res.status(500).json({
             success: false,
-            error: "Erreur serveur lors de l'analyse"
+            error: "Erreur serveur lors de l'analyse",
+            mistralAvailable: !!mistralConfig.apiKey,
+            bottleInfo: aiAnalyzer.getDefaultBottleInfo()
         });
     }
 });
