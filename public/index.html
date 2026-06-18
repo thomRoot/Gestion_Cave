@@ -56,38 +56,7 @@
             
             <div class="ai-chat-container">
                 <div class="ai-messages" id="aiMessages">
-                    <div class="ai-message bot welcome-message">
-                        <div class="message-avatar">
-                            <i class="fas fa-wine-glass-alt"></i>
-                        </div>
-                        <div class="message-content">
-                            <p><strong>Bonjour !</strong> 🍷</p>
-                            <p>Je suis votre assistant IA spécialisé en vin. Vous pouvez me demander <strong>n'importe quoi</strong> :</p>
-                            <div class="suggestions-grid">
-                                <button class="suggestion-btn" onclick="suggestPrompt('Quel vin rouge conseilles-tu avec un boeuf bourguignon ?')">
-                                    <i class="fas fa-utensils"></i> Accords mets-vins
-                                </button>
-                                <button class="suggestion-btn" onclick="suggestPrompt('À quelle température servir un Bordeaux 2018 ?')">
-                                    <i class="fas fa-thermometer-half"></i> Température
-                                </button>
-                                <button class="suggestion-btn" onclick="suggestPrompt('Quels sont les meilleurs cépages pour vieillir 10 ans ?')">
-                                    <i class="fas fa-calendar-alt"></i> Conservation
-                                </button>
-                                <button class="suggestion-btn" onclick="suggestPrompt('Peux-tu m\'expliquer la différence entre AOC et IGP ?')">
-                                    <i class="fas fa-info-circle"></i> Explications
-                                </button>
-                                <button class="suggestion-btn" onclick="suggestPrompt('Quel vin offrir pour un dîner romantique ?')">
-                                    <i class="fas fa-heart"></i> Conseils
-                                </button>
-                                <button class="suggestion-btn" onclick="suggestPrompt('Quels sont les vins bio les plus intéressants en 2024 ?')">
-                                    <i class="fas fa-leaf"></i> Tendances
-                                </button>
-                            </div>
-                            <p style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
-                                <em>Exemples : "Quel vin avec du fromage ?", "C'est quoi un Grand Cru ?", "Comment conserver mon vin ?"</em>
-                            </p>
-                        </div>
-                    </div>
+                    <!-- Les messages seront ajoutés dynamiquement -->
                 </div>
                 
                 <div class="ai-input-container">
@@ -198,7 +167,7 @@
             </h2>
             <div class="bottle-details">
                 <div class="bottle-image-container">
-                    <img id="detailsPhoto" src="assets/bottle-icon.png" alt="Bouteille">
+                    <img id="detailsPhoto" src="https://cdn-icons-png.flaticon.com/512/3173/3173612.png" alt="Bouteille">
                 </div>
                 
                 <div class="bottle-info-grid">

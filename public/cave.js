@@ -1,5 +1,5 @@
 // cave.js - Gestion de la grille de la cave à vin
-// Version 2.0 avec support mobile amélioré
+// Version 5.0.0 - Avec barre de progression de maturation
 
 // Variables globales
 let caveRows = 5;
@@ -73,18 +73,26 @@ function renderCaveGrid() {
                 const bottle = caveGrid[row][col];
                 const bottleName = bottle.name || 'Bouteille';
                 const photoSrc = bottle.photo ? `/uploads/${bottle.photo}` : 'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
-            
                 
-               const maturityStatus = getMaturityStatus(bottle.drinkFrom, bottle.drinkTo);
-const periodText = bottle.drinkFrom && bottle.drinkTo ?
-    `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
+                // Calculer le statut de maturité
+                const maturityStatus = getMaturityStatus(bottle.drinkFrom, bottle.drinkTo);
+                
+                // Calculer le pourcentage de maturation pour la barre de progression
+                const maturityPercent = calculateMaturityPercentage(bottle.drinkFrom, bottle.drinkTo);
+                
+                // Texte de la période
+                const periodText = bottle.drinkFrom && bottle.drinkTo ?
+                    `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
 
-cell.innerHTML = `
-    <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
-    <div class="bottle-name">${escapeHtml(bottleName)}</div>
-    <div class="bottle-period"><span class="period-text">${periodText}</span></div>
-    ${maturityStatus ? `<div class="bottle-maturity ${maturityStatus}">${getMaturityIcon(maturityStatus)}</div>` : ''}
-`;
+                cell.innerHTML = `
+                    <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
+                    <div class="bottle-name">${escapeHtml(bottleName)}</div>
+                    <div class="bottle-period"><span class="period-text">${periodText}</span></div>
+                    <div class="bottle-maturity-bar">
+                        <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
+                    </div>
+                    ${maturityStatus ? `<div class="bottle-maturity ${maturityStatus}">${getMaturityIcon(maturityStatus)}</div>` : ''}
+                `;
             }
 
             // Gestion du clic sur une cellule
@@ -125,6 +133,25 @@ cell.innerHTML = `
             caveContainer.appendChild(cell);
         }
     }
+}
+
+// Calculer le pourcentage de maturation
+function calculateMaturityPercentage(drinkFrom, drinkTo) {
+    if (!drinkFrom || !drinkTo) return 0;
+    
+    const currentYear = new Date().getFullYear();
+    const startYear = parseInt(drinkFrom);
+    const endYear = parseInt(drinkTo);
+    
+    if (isNaN(startYear) || isNaN(endYear)) return 0;
+    
+    const totalPeriod = endYear - startYear;
+    if (totalPeriod <= 0) return 100;
+    
+    const elapsed = Math.min(currentYear - startYear, totalPeriod);
+    const percentage = (elapsed / totalPeriod) * 100;
+    
+    return Math.min(Math.max(percentage, 0), 100);
 }
 
 // Ouvrir la popup d'ajout de bouteille
@@ -170,12 +197,20 @@ function updateDrinkPeriodBar(drinkFrom, drinkTo) {
     
     if (drinkFrom && drinkTo) {
         // Calculer le pourcentage de la période écoulée
-        const totalPeriod = drinkTo - drinkFrom;
-        const elapsed = Math.min(currentYear - drinkFrom, totalPeriod);
-        const percentage = (elapsed / totalPeriod) * 100;
+        const startYear = parseInt(drinkFrom);
+        const endYear = parseInt(drinkTo);
         
-        bar.style.width = `${Math.min(percentage, 100)}%`;
-        text.textContent = `${drinkFrom} - ${drinkTo}`;
+        if (!isNaN(startYear) && !isNaN(endYear)) {
+            const totalPeriod = endYear - startYear;
+            const elapsed = Math.min(currentYear - startYear, totalPeriod);
+            const percentage = (elapsed / totalPeriod) * 100;
+            
+            bar.style.width = `${Math.min(percentage, 100)}%`;
+            text.textContent = `${drinkFrom} - ${drinkTo}`;
+        } else {
+            bar.style.width = '0%';
+            text.textContent = 'Non spécifié';
+        }
     } else {
         bar.style.width = '0%';
         text.textContent = 'Non spécifié';
@@ -204,6 +239,7 @@ function saveCaveConfig(rows, cols) {
 
 // Échapper le HTML pour éviter les injections XSS
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
@@ -214,10 +250,14 @@ function getMaturityStatus(drinkFrom, drinkTo) {
     if (!drinkFrom || !drinkTo) return null;
     
     const currentYear = new Date().getFullYear();
+    const startYear = parseInt(drinkFrom);
+    const endYear = parseInt(drinkTo);
     
-    if (currentYear < drinkFrom) {
+    if (isNaN(startYear) || isNaN(endYear)) return null;
+    
+    if (currentYear < startYear) {
         return 'waiting'; // À attendre
-    } else if (currentYear >= drinkFrom && currentYear <= drinkTo) {
+    } else if (currentYear >= startYear && currentYear <= endYear) {
         return 'ready'; // Prêt à boire
     } else {
         return 'past'; // À boire rapidement ou passé
@@ -249,34 +289,8 @@ window.cave = {
     getSelectedCell: () => selectedCell,
     getCaveGrid: () => caveGrid,
     setCaveGrid: (grid) => { caveGrid = grid; },
-    updateDrinkPeriodBar
+    updateDrinkPeriodBar,
+    calculateMaturityPercentage,
+    getMaturityStatus,
+    getMaturityIcon
 };
-
-// Calculer le statut de maturité d'une bouteille
-function getMaturityStatus(drinkFrom, drinkTo) {
-    if (!drinkFrom || !drinkTo) return null;
-
-    const currentYear = new Date().getFullYear();
-
-    if (currentYear < drinkFrom) {
-        return 'waiting';
-    } else if (currentYear >= drinkFrom && currentYear <= drinkTo) {
-        return 'ready';
-    } else {
-        return 'past';
-    }
-}
-
-// Retourner l'icône de maturité
-function getMaturityIcon(status) {
-    switch(status) {
-        case 'waiting':
-            return '<i class="fas fa-hourglass-half"></i>';
-        case 'ready':
-            return '<i class="fas fa-check"></i>';
-        case 'past':
-            return '<i class="fas fa-exclamation-triangle"></i>';
-        default:
-            return '';
-    }
-}
