@@ -73,9 +73,19 @@ function renderCaveGrid() {
                 const bottle = caveGrid[row][col];
                 const bottleName = bottle.name || 'Bouteille';
                 const photoSrc = bottle.photo ? `/uploads/${bottle.photo}` : 'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
+                
+                // Calculer le statut de maturité
+                const maturityStatus = getMaturityStatus(bottle.drinkFrom, bottle.drinkTo);
+                
+                // Formater la période de consommation
+                const periodText = bottle.drinkFrom && bottle.drinkTo ?
+                    `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
+                
                 cell.innerHTML = `
                     <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
                     <div class="bottle-name">${escapeHtml(bottleName)}</div>
+                    <div class="bottle-period"><span class="period-text">${periodText}</span></div>
+                    ${maturityStatus ? `<div class="bottle-maturity ${maturityStatus}">${getMaturityIcon(maturityStatus)}</div>` : ''}
                 `;
             }
 
@@ -153,24 +163,24 @@ function openBottleDetailsPopup(bottle) {
 
 // Mettre à jour la barre de période de consommation
 function updateDrinkPeriodBar(drinkFrom, drinkTo) {
-    const bar = document.getElementById('drinkPeriodBar');
+    const bar = document.getElementById('drinkPeriodFill');
+    const text = document.getElementById('drinkPeriodText');
+    
+    if (!bar || !text) return;
+    
     const currentYear = new Date().getFullYear();
-
-    if (!drinkFrom || !drinkTo) {
-        bar.className = 'period-bar';
-        bar.style.width = '0%';
-        return;
-    }
-
-    if (currentYear < drinkFrom) {
-        bar.className = 'period-bar too-early';
-        bar.style.width = '33%';
-    } else if (currentYear >= drinkFrom && currentYear <= drinkTo) {
-        bar.className = 'period-bar optimal';
-        bar.style.width = '100%';
+    
+    if (drinkFrom && drinkTo) {
+        // Calculer le pourcentage de la période écoulée
+        const totalPeriod = drinkTo - drinkFrom;
+        const elapsed = Math.min(currentYear - drinkFrom, totalPeriod);
+        const percentage = (elapsed / totalPeriod) * 100;
+        
+        bar.style.width = `${Math.min(percentage, 100)}%`;
+        text.textContent = `${drinkFrom} - ${drinkTo}`;
     } else {
-        bar.className = 'period-bar too-late';
-        bar.style.width = '33%';
+        bar.style.width = '0%';
+        text.textContent = 'Non spécifié';
     }
 }
 
@@ -199,6 +209,35 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Calculer le statut de maturité d'une bouteille
+function getMaturityStatus(drinkFrom, drinkTo) {
+    if (!drinkFrom || !drinkTo) return null;
+    
+    const currentYear = new Date().getFullYear();
+    
+    if (currentYear < drinkFrom) {
+        return 'waiting'; // À attendre
+    } else if (currentYear >= drinkFrom && currentYear <= drinkTo) {
+        return 'ready'; // Prêt à boire
+    } else {
+        return 'past'; // À boire rapidement ou passé
+    }
+}
+
+// Retourner l'icône de maturité
+function getMaturityIcon(status) {
+    switch(status) {
+        case 'waiting':
+            return '<i class="fas fa-hourglass-half"></i>';
+        case 'ready':
+            return '<i class="fas fa-check"></i>';
+        case 'past':
+            return '<i class="fas fa-exclamation-triangle"></i>';
+        default:
+            return '';
+    }
 }
 
 // Exporter les fonctions pour les utiliser dans d'autres scripts
