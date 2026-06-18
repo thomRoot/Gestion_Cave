@@ -1,8 +1,18 @@
 // camera.js - Gestion de la caméra et des photos pour Ma Cave à Vin
-// Version améliorée pour mobile avec support Android/iOS
+// Version optimisée pour mobile (Android/iOS) avec fallback automatique
 
 let stream = null;
 let currentImageDataUrl = null;
+
+// Vérifier si on est sur mobile
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Vérifier si on est en HTTPS (obligatoire pour la caméra sur mobile)
+function isSecureContext() {
+    return window.isSecureContext || location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+}
 
 // Démarrer la caméra
 function startCamera() {
@@ -22,16 +32,28 @@ function startCamera() {
 
     // Vérifier si l'API mediaDevices est disponible
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("Votre navigateur ne supporte pas l'accès à la caméra. Veuillez utiliser un navigateur moderne.");
+        showCameraError("Votre navigateur ne supporte pas l'accès à la caméra. Veuillez utiliser Chrome, Firefox ou Safari (version récente).");
+        return;
+    }
+
+    // Vérifier le contexte sécurisé (obligatoire sur mobile)
+    if (isMobile() && !isSecureContext()) {
+        showCameraError(
+            "Pour utiliser la caméra sur mobile, vous devez :\n\n" +
+            "1. Utiliser une connexion HTTPS (pas HTTP)\n" +
+            "2. Ou tester en local sur localhost\n\n" +
+            "En attendant, vous pouvez télécharger une photo depuis votre galerie.",
+            true // Proposer le fallback
+        );
         return;
     }
 
     // Options pour la caméra - privilégier la caméra arrière sur mobile
     const constraints = {
         video: {
-            facingMode: 'environment', // Caméra arrière par défaut
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            facingMode: isMobile() ? 'environment' : 'user', // Caméra arrière sur mobile
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 }
         },
         audio: false
     };
@@ -52,7 +74,6 @@ function startCamera() {
 
             // Gestion du bouton "Télécharger une image"
             uploadPhotoButton.onclick = () => {
-                // Utiliser capture="environment" pour forcer la caméra sur mobile
                 photoUpload.click();
             };
 
@@ -65,25 +86,43 @@ function startCamera() {
             };
         })
         .catch((error) => {
-            console.error("Erreur lors de l'accès à la caméra :", error);
+            console.error("Erreur caméra :", error);
             
-            // Messages d'erreur spécifiques
+            // Messages d'erreur spécifiques pour mobile
             let errorMessage = "Impossible d'accéder à la caméra.";
+            let showFallback = true;
+            
             if (error.name === 'NotAllowedError') {
                 errorMessage = "Permission refusée. Veuillez autoriser l'accès à la caméra dans les paramètres de votre navigateur.";
             } else if (error.name === 'NotFoundError') {
-                errorMessage = "Aucune caméra trouvée. Veuillez vérifier que votre appareil en a une.";
+                errorMessage = "Aucune caméra trouvée sur cet appareil.";
             } else if (error.name === 'NotReadableError') {
                 errorMessage = "La caméra est déjà utilisée par une autre application.";
+            } else if (error.name === 'OverconstrainedError') {
+                errorMessage = "Impossible de satisfaire les contraintes demandées. Essayez avec une autre caméra.";
+            } else if (error.name === 'SecurityError') {
+                errorMessage = "Accès bloqué pour des raisons de sécurité. Utilisez HTTPS ou testez en local.";
+                showFallback = true;
+            } else if (isMobile() && !isSecureContext()) {
+                errorMessage = "Sur mobile, la caméra nécessite une connexion HTTPS. Testez en local ou utilisez la galerie.";
+                showFallback = true;
             }
             
-            alert(errorMessage);
-            
-            // Proposer de télécharger une image à la place
-            if (confirm("Souhaitez-vous télécharger une image depuis votre galerie à la place ?")) {
-                photoUpload.click();
-            }
+            showCameraError(errorMessage, showFallback);
         });
+}
+
+// Afficher une erreur de caméra avec option de fallback
+function showCameraError(message, showFallback) {
+    const photoUpload = document.getElementById('photoUpload');
+    
+    // Afficher l'erreur
+    alert(message);
+    
+    // Proposer le fallback vers la galerie
+    if (showFallback && confirm("Souhaitez-vous télécharger une image depuis votre galerie à la place ?")) {
+        photoUpload.click();
+    }
 }
 
 // Gérer un fichier image (depuis la galerie ou drag & drop)
@@ -92,7 +131,13 @@ function handleImageFile(file) {
     const cameraPreview = document.getElementById('cameraPreview');
     
     if (!file.type.match('image.*')) {
-        alert("Veuillez sélectionner un fichier image valide.");
+        alert("Veuillez sélectionner un fichier image valide (JPEG, PNG, etc.).");
+        return;
+    }
+
+    // Vérifier la taille du fichier (max 10Mo)
+    if (file.size > 10 * 1024 * 1024) {
+        alert("Le fichier est trop volumineux (max 10Mo). Veuillez choisir une image plus petite.");
         return;
     }
 
@@ -125,7 +170,7 @@ function takePhoto() {
 
     // Vérifier que la caméra est active
     if (!stream || cameraPreview.videoWidth === 0) {
-        alert("La caméra n'est pas prête. Veuillez patienter.");
+        alert("La caméra n'est pas prête. Veuillez patienter ou réessayer.");
         return;
     }
 
@@ -139,7 +184,7 @@ function takePhoto() {
     const context = canvas.getContext('2d');
     context.drawImage(cameraPreview, 0, 0, width, height);
 
-    // Convertir le canvas en image
+    // Convertir le canvas en image (qualité 0.9 pour réduire la taille)
     currentImageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
     photoPreview.src = currentImageDataUrl;
     photoPreview.style.display = 'block';
@@ -197,7 +242,7 @@ function setupDragAndDrop() {
 
     photoPreviewContainer.addEventListener('dragover', (e) => {
         e.preventDefault();
-        photoPreviewContainer.style.border = '2px dashed var(--secondary-color)';
+        photoPreviewContainer.style.border = '2px dashed #D4AF37';
     });
 
     photoPreviewContainer.addEventListener('dragleave', () => {

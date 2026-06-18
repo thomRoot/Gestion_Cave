@@ -468,6 +468,23 @@ body {
     margin-bottom: var(--spacing-md);
 }
 
+/* Message d'aide mobile */
+.mobile-help-message {
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.mobile-help-message i {
+    margin-right: var(--spacing-xs);
+    color: var(--secondary-color);
+}
+
 .photo-preview-container {
     position: relative;
     margin-bottom: var(--spacing-md);

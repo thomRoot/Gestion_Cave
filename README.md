@@ -177,8 +177,57 @@ gestion_cave/
 | Firefox | ✅ Oui | ✅ Oui | ✅ Oui |
 | Safari | ✅ Oui | ✅ Oui | ✅ Oui |
 | Edge | ✅ Oui | ✅ Oui | ✅ Oui |
-| Mobile Chrome | ✅ Oui | ✅ Oui | ✅ Oui |
-| Mobile Safari | ✅ Oui | ✅ Oui | ✅ Oui |
+| Mobile Chrome | ✅ Oui* | ✅ Oui | ✅ Oui |
+| Mobile Firefox | ✅ Oui* | ✅ Oui | ✅ Oui |
+| Mobile Safari | ⚠️ Partiel | ✅ Oui | ❌ Non |
+
+*✅ Sur mobile, la caméra fonctionne **uniquement en HTTPS** ou en **local (localhost)***
+
+---
+
+## ⚠️ Problèmes de Caméra sur Mobile ?
+
+### **Pourquoi ça ne marche pas ?**
+Sur mobile, les navigateurs **bloquent l'accès à la caméra** dans certains cas :
+
+1. **Connexion non sécurisée (HTTP)**
+   - ❌ La caméra est **bloquée** sur HTTP
+   - ✅ **Solution** : Utilisez **HTTPS** ou testez en **local (localhost)**
+
+2. **Permissions non accordées**
+   - Le navigateur demande l'autorisation → **Acceptez**
+   - Sur Android : Vérifiez les permissions dans **Paramètres → Applications → [Votre navigateur] → Autorisations → Caméra**
+
+3. **Navigateur non supporté**
+   - ❌ Safari mobile a des restrictions
+   - ✅ **Solution** : Utilisez **Chrome** ou **Firefox** sur mobile
+
+4. **Appareil sans caméra**
+   - Certains tablettes/anciens téléphones n'ont pas de caméra
+   - ✅ **Solution** : Utilisez le bouton **"Galerie"** pour télécharger une photo
+
+### **Solutions pour tester sur mobile**
+
+#### **Option 1 : Tester en local (recommandé)**
+1. Lancez le serveur sur votre PC : `npm start`
+2. Sur votre mobile, connectez-vous à : `http://[ADRESSE_IP_PC]:3000`
+   - Exemple : `http://192.168.1.42:3000`
+3. **La caméra fonctionnera** car c'est en local
+
+#### **Option 2 : Utiliser HTTPS**
+- Déployez l'application sur un hébergement avec **HTTPS** (ex: Heroku, Vercel, Netlify)
+- Ou utilisez **ngrok** pour exposer votre local en HTTPS :
+  ```bash
+  npm install -g ngrok
+  ngrok http 3000
+  ```
+  → Ouvrez l'URL `https://xxxx.ngrok.io` sur votre mobile
+
+#### **Option 3 : Utiliser la galerie**
+- Si la caméra ne fonctionne pas, cliquez sur **"Galerie"** pour sélectionner une photo existante
+- Le bouton **"Analyser avec IA"** fonctionnera de la même manière
+
+---
 
 ## 🔧 Configuration
 
