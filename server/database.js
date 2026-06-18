@@ -1,18 +1,60 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
-// Chemin vers la base de données
-const dbPath = path.join(__dirname, '../data/cave.db');
+// Chemin vers la base de données - utiliser un chemin absolu ou temporaire
+// Essayer plusieurs chemins pour compatibilité (NAS Synology, Docker, local)
+function getDbPath() {
+    const possiblePaths = [
+        // 1. Chemin standard (local)
+        path.join(__dirname, '../data/cave.db'),
+        // 2. Chemin absolu dans /workspace
+        '/workspace/thomRoot__Gestion_Cave/data/cave.db',
+        // 3. Dossier temporaire (pour Docker/NAS)
+        path.join(__dirname, '../cave.db'),
+        // 4. Dossier courant
+        './cave.db',
+        // 5. Dossier /tmp (pour systèmes restreints)
+        '/tmp/cave.db'
+    ];
+
+    // Trouver le premier chemin valide
+    for (const dbPath of possiblePaths) {
+        try {
+            const dir = path.dirname(dbPath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            // Tester si on peut écrire dans le dossier
+            const testFile = path.join(dir, '.write_test');
+            fs.writeFileSync(testFile, 'test');
+            fs.unlinkSync(testFile);
+            return dbPath;
+        } catch (e) {
+            // Essayer le chemin suivant
+            continue;
+        }
+    }
+
+    // Si aucun chemin ne fonctionne, utiliser :memory: (base en mémoire)
+    console.warn("Aucun chemin valide trouvé pour la base de données, utilisation de la mémoire temporaire");
+    return ':memory:';
+}
+
+const dbPath = getDbPath();
 let db;
 
 // Initialiser la base de données
 function initDatabase() {
+    console.log(`Tentative de connexion à la base de données : ${dbPath}`);
+    
     db = new sqlite3.Database(dbPath, (err) => {
         if (err) {
             console.error("Erreur lors de l'ouverture de la base de données :", err);
+            console.log("Essayez de créer manuellement le dossier 'data/' avec : mkdir -p data && chmod 755 data");
             return;
         }
-        console.log("Connecté à la base de données SQLite.");
+        console.log(`Connecté à la base de données SQLite (${dbPath}).`);
 
         // Créer les tables si elles n'existent pas
         createTables();
