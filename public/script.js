@@ -23,9 +23,42 @@ function hideLoading() {
     }
 }
 
+// Vérifier le statut de Mistral AI
+async function checkMistralStatus() {
+    try {
+        const response = await fetch('/api/bottles/mistral-status');
+        const data = await response.json();
+        
+        const statusElement = document.getElementById('mistralStatus');
+        const statusTextElement = document.getElementById('mistralStatusText');
+        
+        if (statusElement && statusTextElement) {
+            statusElement.style.display = 'flex';
+            
+            if (data.mistralAvailable) {
+                statusElement.className = 'mistral-status connected';
+                statusTextElement.textContent = `Connecté (${data.model})`;
+            } else {
+                statusElement.className = 'mistral-status disconnected';
+                statusTextElement.textContent = 'Non configuré';
+                // Remplacer l'icône
+                const icon = statusElement.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-exclamation-circle';
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Erreur vérification Mistral :", error);
+    }
+}
+
 // Initialiser l'application au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     window.cave.initCave();
+    
+    // Vérifier le statut de Mistral au chargement
+    checkMistralStatus();
 
     // Gestion de la configuration de la cave
     document.getElementById('caveConfigForm').addEventListener('submit', (e) => {
@@ -412,6 +445,14 @@ function saveBottle() {
     }
 
     // Récupérer les données du formulaire
+    let photoValue = window.camera.getCurrentImage();
+    
+    // Si on modifie une bouteille et qu'aucune nouvelle photo n'a été sélectionnée,
+    // conserver l'ancienne photo
+    if (!photoValue && currentEditingBottlePhoto) {
+        photoValue = currentEditingBottlePhoto;
+    }
+
     const bottleData = {
         row: selectedCell.row,
         col: selectedCell.col,
@@ -423,7 +464,7 @@ function saveBottle() {
         drinkTo: document.getElementById('bottleDrinkTo').value,
         foodPairing: document.getElementById('bottleFoodPairing').value,
         temperature: document.getElementById('bottleTemperature').value,
-        photo: window.camera.getCurrentImage()
+        photo: photoValue
     };
 
     // Envoyer les données au serveur
@@ -439,6 +480,8 @@ function saveBottle() {
             window.cave.loadCaveGrid();
             window.camera.resetImage();
             document.getElementById('bottleForm').reset();
+            // Réinitialiser la variable globale
+            currentEditingBottlePhoto = null;
         } else {
             alert("Erreur lors de la sauvegarde : " + (result.error || "Inconnu"));
         }
@@ -448,6 +491,9 @@ function saveBottle() {
         alert("Erreur de connexion au serveur. Vérifiez qu'il est lancé.");
     });
 }
+
+// Variable globale pour stocker l'ancienne photo lors de la modification
+let currentEditingBottlePhoto = null;
 
 // Ouvrir la popup de modification de bouteille
 function openEditBottlePopup(bottle) {
@@ -460,6 +506,9 @@ function openEditBottlePopup(bottle) {
     document.getElementById('bottleDrinkTo').value = bottle.drinkTo || '';
     document.getElementById('bottleFoodPairing').value = bottle.foodPairing || '';
     document.getElementById('bottleTemperature').value = bottle.temperature || '';
+
+    // Stocker l'ancienne photo pour la conserver si aucune nouvelle n'est sélectionnée
+    currentEditingBottlePhoto = bottle.photo || null;
 
     if (bottle.photo) {
         // Stocker l'image actuelle dans le camera module pour l'édition
