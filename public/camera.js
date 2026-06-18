@@ -1,5 +1,5 @@
 // camera.js - Gestion de la galerie avec compression d'images pour l'IA
-// Version optimisée : compression automatique avant envoi
+// Version corrigée : bouton "Sélectionner une image" fonctionnel
 
 let currentImageDataUrl = null;
 
@@ -40,34 +40,51 @@ function compressImage(file, maxWidth = 800, maxHeight = 600, quality = 0.7) {
     });
 }
 
-// Démarrer la sélection de fichier (galerie uniquement)
-function startCamera() {
+// Initialiser la sélection de fichier
+function initFileUpload() {
     const photoUpload = document.getElementById('photoUpload');
     const photoPreview = document.getElementById('bottlePhotoPreview');
     const cameraPreview = document.getElementById('cameraPreview');
-    
-    // Masquer l'aperçu de la photo si elle existe
-    photoPreview.style.display = 'none';
-    cameraPreview.style.display = 'none';
-    
-    // Masquer les boutons de caméra (on n'utilise que la galerie)
-    document.getElementById('takePhotoButton').style.display = 'none';
-    
-    // Afficher uniquement le bouton Galerie
-    document.getElementById('uploadPhotoButton').style.display = 'inline-flex';
-    
-    // Gestion du bouton "Sélectionner une image"
-    document.getElementById('uploadPhotoButton').onclick = () => {
+    const uploadButton = document.getElementById('uploadPhotoButton');
+
+    if (!photoUpload || !photoPreview || !uploadButton) {
+        console.error("Éléments manquants pour la gestion des fichiers");
+        return;
+    }
+
+    // Gestion du clic sur le bouton "Sélectionner une image"
+    uploadButton.onclick = () => {
         photoUpload.click();
     };
 
-    // Gestion du changement de fichier (galerie)
+    // Gestion du changement de fichier
     photoUpload.onchange = async (event) => {
         const file = event.target.files[0];
         if (file) {
             await handleImageFile(file);
         }
     };
+}
+
+// Démarrer la sélection de fichier (appelé depuis cave.js)
+function startCamera() {
+    const photoPreview = document.getElementById('bottlePhotoPreview');
+    const cameraPreview = document.getElementById('cameraPreview');
+    
+    // Masquer les aperçus
+    if (photoPreview) photoPreview.style.display = 'none';
+    if (cameraPreview) cameraPreview.style.display = 'none';
+    
+    // Masquer les boutons de caméra (on n'utilise que la galerie)
+    const takePhotoButton = document.getElementById('takePhotoButton');
+    if (takePhotoButton) takePhotoButton.style.display = 'none';
+    
+    // Afficher le bouton Galerie
+    const uploadButton = document.getElementById('uploadPhotoButton');
+    if (uploadButton) uploadButton.style.display = 'inline-flex';
+
+    // Initialiser la gestion des fichiers
+    initFileUpload();
 }
 
 // Gérer un fichier image (depuis la galerie) avec compression
@@ -102,11 +119,17 @@ async function handleImageFile(file) {
             currentImageDataUrl = compressedDataUrl;
         }
         
-        photoPreview.src = currentImageDataUrl;
-        photoPreview.style.display = 'block';
-        cameraPreview.style.display = 'none';
-        document.getElementById('uploadPhotoButton').style.display = 'none';
-        document.getElementById('photoUpload').value = '';
+        if (photoPreview) {
+            photoPreview.src = currentImageDataUrl;
+            photoPreview.style.display = 'block';
+        }
+        if (cameraPreview) cameraPreview.style.display = 'none';
+        
+        const uploadButton = document.getElementById('uploadPhotoButton');
+        if (uploadButton) uploadButton.style.display = 'none';
+        
+        const photoUpload = document.getElementById('photoUpload');
+        if (photoUpload) photoUpload.value = '';
         
         console.log(`Image compressée : ${(byteSize / 1024 / 1024).toFixed(2)} Mo`);
     } catch (error) {
@@ -129,8 +152,10 @@ function hasImage() {
 function resetImage() {
     currentImageDataUrl = null;
     const photoPreview = document.getElementById('bottlePhotoPreview');
-    photoPreview.style.display = 'none';
-    photoPreview.src = '';
+    if (photoPreview) {
+        photoPreview.style.display = 'none';
+        photoPreview.src = '';
+    }
 }
 
 // Exporter les fonctions
@@ -168,4 +193,9 @@ function setupDragAndDrop() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', setupDragAndDrop);
+// Initialiser quand le DOM est chargé
+document.addEventListener('DOMContentLoaded', () => {
+    setupDragAndDrop();
+    // Initialiser aussi la gestion des fichiers au chargement
+    initFileUpload();
+});
