@@ -4,8 +4,7 @@ const database = require('../database');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const ai = require('../ai');
-const aiAnalyzer = require('../aiAnalyzer');
+const mistralAnalyzer = require('../mistralAnalyzer');
 const mistralAI = require('../mistralAI');
 const mistralConfig = require('../mistralConfig');
 
@@ -40,7 +39,7 @@ router.get('/', (req, res) => {
     });
 });
 
-// Analyser une bouteille avec l'IA (avec image uploadée) - NOUVELLE VERSION ULTRA-ROBUSTE
+// Analyser une bouteille avec l'IA - UNIQUEMENT Mistral AI, AUCUN OCR LOCAL
 router.post('/analyze', upload.single('image'), async (req, res) => {
     try {
         let imagePath = null;
@@ -50,28 +49,28 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
             imagePath = path.join(__dirname, '../../public/uploads', req.file.filename);
         }
         
-        // Utiliser le nouvel analyseur robuste
-        const result = await aiAnalyzer.analyzeBottleWithMistral(imagePath, false);
+        // Utiliser UNIQUEMENT Mistral AI pour l'analyse
+        const result = await mistralAnalyzer.analyzeBottleWithMistralOnly(imagePath, false);
         
         res.json({
             success: true,
             bottleInfo: result,
             mistralAvailable: !!mistralConfig.apiKey,
-            analysisMethod: result.analysisMethod || 'OCR Local'
+            analysisMethod: result.analysisMethod
         });
         
     } catch (error) {
-        console.error("Erreur analyse IA :", error);
+        console.error("Erreur analyse Mistral AI :", error);
         res.status(500).json({
             success: false,
             error: "Erreur serveur lors de l'analyse",
             mistralAvailable: !!mistralConfig.apiKey,
-            bottleInfo: aiAnalyzer.getDefaultBottleInfo()
+            bottleInfo: mistralAnalyzer.getFallbackBottleInfo(error.message)
         });
     }
 });
 
-// Analyser une bouteille avec l'IA (image en base64) - NOUVELLE VERSION ULTRA-ROBUSTE
+// Analyser une bouteille avec l'IA (image en base64) - UNIQUEMENT Mistral AI
 router.post('/analyze-base64', async (req, res) => {
     try {
         const { image } = req.body;
@@ -83,23 +82,23 @@ router.post('/analyze-base64', async (req, res) => {
             });
         }
         
-        // Utiliser le nouvel analyseur robuste
-        const result = await aiAnalyzer.analyzeBottleWithMistral(image, true);
+        // Utiliser UNIQUEMENT Mistral AI pour l'analyse
+        const result = await mistralAnalyzer.analyzeBottleWithMistralOnly(image, true);
         
         res.json({
             success: true,
             bottleInfo: result,
             mistralAvailable: !!mistralConfig.apiKey,
-            analysisMethod: result.analysisMethod || 'OCR Local'
+            analysisMethod: result.analysisMethod
         });
         
     } catch (error) {
-        console.error("Erreur analyse IA base64 :", error);
+        console.error("Erreur analyse Mistral AI base64 :", error);
         res.status(500).json({
             success: false,
             error: "Erreur serveur lors de l'analyse",
             mistralAvailable: !!mistralConfig.apiKey,
-            bottleInfo: aiAnalyzer.getDefaultBottleInfo()
+            bottleInfo: mistralAnalyzer.getFallbackBottleInfo(error.message)
         });
     }
 });

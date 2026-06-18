@@ -124,13 +124,13 @@ async function askChatQuestion(question) {
 
 /**
  * Analyser du texte d'étiquette de vin avec Mistral
- * @param {string} ocrText - Le texte extrait par OCR
+ * @param {string} text - Le texte à analyser
  * @returns {Promise<Object>} - Les informations extraites (name, year, grapes, region, producer)
  */
-async function analyzeWineLabel(ocrText) {
+async function analyzeWineLabel(text) {
     try {
         const prompt = `Analyse ce texte d'étiquette de vin et extrais les informations dans un objet JSON.
-Texte de l'étiquette : """${ocrText}"""
+Texte de l'étiquette : """${text}"""
 
 Retourne UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, producer.
 Si une information n'est pas trouvée, utilise null.`;
@@ -147,52 +147,19 @@ Si une information n'est pas trouvée, utilise null.`;
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);
             }
-            // Si pas de JSON trouvé, retourner une analyse basique
-            return extractBasicInfoFromText(ocrText);
+            // Si pas de JSON trouvé, retourner null pour indiquer l'échec
+            return null;
         } catch (parseError) {
             console.error('Erreur de parsing JSON:', parseError);
-            return extractBasicInfoFromText(ocrText);
+            return null;
         }
     } catch (error) {
-        console.error('Mistral non disponible pour l\'analyse, utilisation du fallback:', error.message);
-        return extractBasicInfoFromText(ocrText);
+        console.error('Mistral non disponible pour l\'analyse:', error.message);
+        return null;
     }
 }
 
-/**
- * Extraire des informations basiques du texte (fallback)
- * @param {string} text - Le texte à analyser
- * @returns {Object} - Informations basiques
- */
-function extractBasicInfoFromText(text) {
-    const info = {
-        name: null,
-        year: null,
-        grapes: null,
-        region: null,
-        producer: null
-    };
-    
-    if (!text || text.trim() === '') {
-        return info;
-    }
-    
-    const cleanText = text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-    
-    // Extraire l'année
-    const yearMatch = cleanText.match(/\b(18|19|20)\d{2}\b/);
-    if (yearMatch) {
-        info.year = parseInt(yearMatch[0]);
-    }
-    
-    // Extraire le nom (première ligne ou autour des mots-clés)
-    const lines = cleanText.split('\n').filter(l => l.trim().length > 0);
-    if (lines.length > 0) {
-        info.name = lines[0].trim().substring(0, 100); // Limiter à 100 caractères
-    }
-    
-    return info;
-}
+
 
 /**
  * Générer une réponse de fallback (si Mistral n'est pas disponible)

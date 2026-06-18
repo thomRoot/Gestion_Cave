@@ -61,11 +61,6 @@ cd Gestion_Cave
 npm install
 ```
 
-3. Installer Tesseract.js (pour l'OCR) :
-```bash
-npm install tesseract.js
-```
-
 4. Démarrer le serveur :
 ```bash
 npm start
