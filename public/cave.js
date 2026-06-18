@@ -73,20 +73,18 @@ function renderCaveGrid() {
                 const bottle = caveGrid[row][col];
                 const bottleName = bottle.name || 'Bouteille';
                 const photoSrc = bottle.photo ? `/uploads/${bottle.photo}` : 'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
+            
                 
-                // Calculer le statut de maturité
-                const maturityStatus = getMaturityStatus(bottle.drinkFrom, bottle.drinkTo);
-                
-                // Formater la période de consommation
-                const periodText = bottle.drinkFrom && bottle.drinkTo ?
-                    `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
-                
-                cell.innerHTML = `
-                    <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
-                    <div class="bottle-name">${escapeHtml(bottleName)}</div>
-                    <div class="bottle-period"><span class="period-text">${periodText}</span></div>
-                    ${maturityStatus ? `<div class="bottle-maturity ${maturityStatus}">${getMaturityIcon(maturityStatus)}</div>` : ''}
-                `;
+               const maturityStatus = getMaturityStatus(bottle.drinkFrom, bottle.drinkTo);
+const periodText = bottle.drinkFrom && bottle.drinkTo ?
+    `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
+
+cell.innerHTML = `
+    <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
+    <div class="bottle-name">${escapeHtml(bottleName)}</div>
+    <div class="bottle-period"><span class="period-text">${periodText}</span></div>
+    ${maturityStatus ? `<div class="bottle-maturity ${maturityStatus}">${getMaturityIcon(maturityStatus)}</div>` : ''}
+`;
             }
 
             // Gestion du clic sur une cellule
