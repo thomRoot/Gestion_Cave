@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const fs = require('fs');
 const database = require('./database');
-const ai = require('./ai');
+const mistralAnalyzer = require('./mistralAnalyzer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
