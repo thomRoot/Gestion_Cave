@@ -64,10 +64,19 @@ function renderCaveGrid() {
                 cell.classList.add('empty');
             } else {
                 const bottle = caveGrid[row][col];
-                cell.innerHTML = `
-                    <div class="bottle-icon"></div>
-                    <div class="bottle-name">${bottle.name || 'Bouteille'}</div>
-                `;
+                // Si la bouteille est consommée, on la marque différemment
+                if (bottle.isConsumed) {
+                    cell.classList.add('consumed');
+                    cell.innerHTML = `
+                        <div class="bottle-icon consumed-icon"></div>
+                        <div class="bottle-name">${bottle.name || 'Bouteille'} (Consommée)</div>
+                    `;
+                } else {
+                    cell.innerHTML = `
+                        <div class="bottle-icon"></div>
+                        <div class="bottle-name">${bottle.name || 'Bouteille'}</div>
+                    `;
+                }
                 cell.dataset.row = row;
                 cell.dataset.col = col;
             }
@@ -113,6 +122,39 @@ function openBottleDetailsPopup(bottle) {
         `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
     document.getElementById('detailsFoodPairing').textContent = bottle.foodPairing || 'Non spécifié';
     document.getElementById('detailsTemperature').textContent = bottle.temperature || 'Non spécifié';
+
+    // Afficher les notes si disponibles
+    const notesContainer = document.getElementById('detailsNotes');
+    if (bottle.notes) {
+        try {
+            const notes = JSON.parse(bottle.notes);
+            if (notes.rating || notes.reviews) {
+                let notesHTML = '<p><strong>Notes et récompenses :</strong></p>';
+                if (notes.source) {
+                    notesHTML += `<p>Source : ${notes.source}</p>`;
+                }
+                if (notes.rating) {
+                    notesHTML += `<p>⭐ Note : ${notes.rating}/100</p>`;
+                }
+                if (notes.reviews) {
+                    notesHTML += `<p>📝 Avis : ${notes.reviews}</p>`;
+                }
+                if (notes.price) {
+                    notesHTML += `<p>💰 Prix moyen : ${notes.price}€</p>`;
+                }
+                if (notes.link) {
+                    notesHTML += `<p>🔗 <a href="${notes.link}" target="_blank">Voir sur ${notes.source}</a></p>`;
+                }
+                notesContainer.innerHTML = notesHTML;
+            } else {
+                notesContainer.innerHTML = '';
+            }
+        } catch (e) {
+            notesContainer.innerHTML = '';
+        }
+    } else {
+        notesContainer.innerHTML = '';
+    }
 
     // Mettre à jour la barre de période
     updateDrinkPeriodBar(bottle.drinkFrom, bottle.drinkTo);

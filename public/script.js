@@ -33,6 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.getElementById('consumeBottleButton').addEventListener('click', () => {
+        const selectedCell = window.cave.getSelectedCell();
+        if (selectedCell) {
+            consumeBottle(selectedCell.row, selectedCell.col);
+        }
+    });
+
     document.getElementById('deleteBottleButton').addEventListener('click', () => {
         const selectedCell = window.cave.getSelectedCell();
         if (selectedCell) {
@@ -40,12 +47,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Gestion du bouton Historique
+    document.getElementById('historyButton').addEventListener('click', openHistoryPopup);
+
     // Gestion des boutons de fermeture des popups
     document.querySelectorAll('.popup .close').forEach(closeButton => {
         closeButton.addEventListener('click', () => {
             closeButton.closest('.popup').style.display = 'none';
             window.camera.stopCamera();
         });
+    });
+
+    // Fermer la popup d'historique en cliquant à l'extérieur
+    document.getElementById('historyPopup').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('historyPopup')) {
+            e.target.style.display = 'none';
+        }
     });
 
     // Fermer les popups en cliquant à l'extérieur
@@ -143,6 +160,75 @@ function deleteBottle(row, col) {
     .catch(error => {
         console.error("Erreur lors de la suppression de la bouteille :", error);
     });
+}
+
+// Consommer une bouteille (la retirer de la cave)
+function consumeBottle(row, col) {
+    if (!confirm('Êtes-vous sûr de vouloir retirer cette bouteille de la cave (marquée comme consommée) ?')) {
+        return;
+    }
+
+    fetch('/api/bottles/consume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ row, col })
+    })
+    .then(response => response.json())
+    .then(() => {
+        document.getElementById('bottleDetailsPopup').style.display = 'none';
+        window.cave.loadCaveGrid();
+    })
+    .catch(error => {
+        console.error("Erreur lors de la consommation de la bouteille :", error);
+    });
+}
+
+// Ouvrir la popup d'historique
+function openHistoryPopup() {
+    fetch('/api/bottles/history')
+        .then(response => response.json())
+        .then(history => {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<p>Aucune action enregistrée.</p>';
+            } else {
+                history.forEach(item => {
+                    const actionText = getActionText(item.action);
+                    const date = new Date(item.createdAt).toLocaleString('fr-FR');
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div class="history-action">
+                            <strong>${actionText}</strong>
+                            <span class="history-date">${date}</span>
+                        </div>
+                        <div class="history-details">
+                            ${item.bottleName ? `Bouteille : ${item.bottleName}` : ''}
+                            ${item.row !== null && item.col !== null ? ` | Position : (${item.row}, ${item.col})` : ''}
+                        </div>
+                    `;
+                    historyList.appendChild(historyItem);
+                });
+            }
+
+            document.getElementById('historyPopup').style.display = 'flex';
+        })
+        .catch(error => {
+            console.error("Erreur lors du chargement de l'historique :", error);
+        });
+}
+
+// Retourne le texte de l'action
+function getActionText(action) {
+    const actions = {
+        'add': '➕ Ajout d\'une bouteille',
+        'edit': '✏️ Modification d\'une bouteille',
+        'delete': '🗑️ Suppression d\'une bouteille',
+        'consume': '🍷 Consommation d\'une bouteille'
+    };
+    return actions[action] || action;
 }
 
 // Effectuer une recherche

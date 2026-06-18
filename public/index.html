@@ -13,7 +13,10 @@
             <input type="text" id="searchInput" placeholder="Rechercher (ex: bœuf, 2015, Bordeaux)...">
             <button id="searchButton">🔍</button>
         </div>
-        <button id="addBottleButton">➕ Ajouter une bouteille</button>
+        <div class="header-buttons">
+            <button id="addBottleButton">➕ Ajouter une bouteille</button>
+            <button id="historyButton">📜 Historique</button>
+        </div>
     </div>
 
     <div class="cave-container" id="caveContainer">
@@ -91,11 +94,22 @@
                 </div>
                 <p><strong>Accords mets-vins :</strong> <span id="detailsFoodPairing"></span></p>
                 <p><strong>Température de service :</strong> <span id="detailsTemperature"></span></p>
+                <div id="detailsNotes" class="bottle-notes"></div>
                 <div class="button-group">
                     <button id="editBottleButton">✏️ Modifier</button>
+                    <button id="consumeBottleButton">🍷 Retirer (Consommer)</button>
                     <button id="deleteBottleButton">🗑️ Supprimer</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Popup pour afficher l'historique -->
+    <div class="popup" id="historyPopup">
+        <div class="popup-content history-content">
+            <span class="close">&times;</span>
+            <h2>Historique des actions</h2>
+            <div id="historyList" class="history-list"></div>
         </div>
     </div>
 

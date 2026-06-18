@@ -47,6 +47,23 @@ function createTables() {
                 foodPairing TEXT,
                 temperature TEXT,
                 photo TEXT,
+                isConsumed BOOLEAN DEFAULT 0,
+                consumedAt DATETIME,
+                notes TEXT,
+                createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Table pour l'historique des actions
+        db.run(`
+            CREATE TABLE IF NOT EXISTS history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                action TEXT NOT NULL, -- 'add', 'edit', 'delete', 'consume'
+                bottleId INTEGER,
+                bottleName TEXT,
+                row INTEGER,
+                col INTEGER,
+                details TEXT, -- JSON avec les détails de l'action
                 createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -177,6 +194,62 @@ function deleteBottle(row, col, callback) {
     });
 }
 
+// Marquer une bouteille comme consommée
+function consumeBottle(row, col, callback) {
+    db.get("SELECT * FROM bottles WHERE row = ? AND col = ?", [row, col], (err, bottle) => {
+        if (err) {
+            console.error("Erreur lors de la récupération de la bouteille :", err);
+            callback(err);
+            return;
+        }
+        if (!bottle) {
+            callback(new Error("Bouteille non trouvée"));
+            return;
+        }
+
+        db.run(
+            "UPDATE bottles SET isConsumed = 1, consumedAt = CURRENT_TIMESTAMP WHERE row = ? AND col = ?",
+            [row, col],
+            function(err) {
+                if (err) {
+                    console.error("Erreur lors de la mise à jour de la bouteille :", err);
+                    callback(err);
+                } else {
+                    callback(null, bottle);
+                }
+            }
+        );
+    });
+}
+
+// Ajouter une entrée dans l'historique
+function addHistoryEntry(action, bottleId, bottleName, row, col, details, callback) {
+    db.run(
+        "INSERT INTO history (action, bottleId, bottleName, row, col, details) VALUES (?, ?, ?, ?, ?, ?)",
+        [action, bottleId, bottleName, row, col, JSON.stringify(details)],
+        function(err) {
+            if (err) {
+                console.error("Erreur lors de l'ajout à l'historique :", err);
+                callback(err);
+            } else {
+                callback(null);
+            }
+        }
+    );
+}
+
+// Récupérer l'historique
+function getHistory(callback) {
+    db.all("SELECT * FROM history ORDER BY createdAt DESC", (err, rows) => {
+        if (err) {
+            console.error("Erreur lors de la récupération de l'historique :", err);
+            callback(err, null);
+        } else {
+            callback(null, rows);
+        }
+    });
+}
+
 // Exporter les fonctions
 module.exports = {
     initDatabase,
@@ -184,5 +257,8 @@ module.exports = {
     getCaveConfig,
     saveBottle,
     getAllBottles,
-    deleteBottle
+    deleteBottle,
+    consumeBottle,
+    addHistoryEntry,
+    getHistory
 };

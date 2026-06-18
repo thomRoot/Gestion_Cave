@@ -15,6 +15,13 @@ body {
     color: #8B0000; /* Rouge vin */
 }
 
+.header-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
 .search-bar {
     margin: 10px 0;
     display: flex;
@@ -92,6 +99,25 @@ body {
     content: "+";
     font-size: 24px;
     color: #999;
+}
+
+/* Style pour les bouteilles consommées */
+.cave-cell.consumed {
+    background-color: #f8f8f8;
+    opacity: 0.7;
+}
+
+.cave-cell.consumed .bottle-icon {
+    opacity: 0.5;
+}
+
+.cave-cell.consumed .bottle-name {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.consumed-icon {
+    filter: grayscale(100%);
 }
 
 .cave-cell .bottle-icon {
@@ -278,6 +304,71 @@ button[type="submit"]:hover, .button-group button:hover {
 
 .bottle-details p {
     margin: 8px 0;
+}
+
+/* Style pour les notes de la bouteille */
+.bottle-notes {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f0f8ff;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.bottle-notes p {
+    margin: 5px 0;
+}
+
+/* Style pour l'historique */
+.history-content {
+    max-width: 600px;
+    max-height: 80vh;
+}
+
+.history-list {
+    margin-top: 15px;
+}
+
+.history-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.history-date {
+    color: #666;
+    font-size: 0.8em;
+}
+
+.history-details {
+    color: #555;
+    font-size: 0.9em;
+}
+
+/* Style pour les boutons du groupe */
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.button-group button {
+    width: auto;
+    flex: 1;
+    min-width: 120px;
 }
 
 /* Responsive */

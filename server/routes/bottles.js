@@ -35,7 +35,7 @@ router.get('/', (req, res) => {
 });
 
 // Ajouter ou mettre à jour une bouteille
-router.post('/', upload.single('photo'), (req, res) => {
+router.post('/', upload.single('photo'), async (req, res) => {
     const bottleData = req.body;
     
     // Si une photo a été uploadée, utiliser son nom de fichier
@@ -57,10 +57,32 @@ router.post('/', upload.single('photo'), (req, res) => {
         bottleData.photo = filename;
     }
 
+    // Rechercher les notes pour cette bouteille
+    try {
+        const notes = await ai.searchWineNotes(bottleData.name, bottleData.year, bottleData.region);
+        if (notes.rating || notes.reviews) {
+            bottleData.notes = JSON.stringify(notes);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la recherche de notes :", error);
+    }
+
     database.saveBottle(bottleData, (err) => {
         if (err) {
             res.status(500).json({ error: "Erreur lors de la sauvegarde de la bouteille" });
         } else {
+            // Ajouter à l'historique
+            database.addHistoryEntry(
+                bottleData.id ? 'edit' : 'add',
+                bottleData.id,
+                bottleData.name,
+                bottleData.row,
+                bottleData.col,
+                { bottleName: bottleData.name, row: bottleData.row, col: bottleData.col },
+                (err) => {
+                    if (err) console.error("Erreur lors de l'ajout à l'historique :", err);
+                }
+            );
             res.json({ success: true });
         }
     });
@@ -70,11 +92,72 @@ router.post('/', upload.single('photo'), (req, res) => {
 router.delete('/', (req, res) => {
     const { row, col } = req.query;
 
-    database.deleteBottle(row, col, (err) => {
+    database.getAllBottles((err, bottles) => {
         if (err) {
-            res.status(500).json({ error: "Erreur lors de la suppression de la bouteille" });
+            res.status(500).json({ error: "Erreur lors de la récupération de la bouteille" });
+            return;
+        }
+
+        const bottle = bottles.find(b => b.row == row && b.col == col);
+        if (bottle) {
+            // Ajouter à l'historique avant suppression
+            database.addHistoryEntry(
+                'delete',
+                bottle.id,
+                bottle.name,
+                bottle.row,
+                bottle.col,
+                { bottleName: bottle.name, row: bottle.row, col: bottle.col },
+                (err) => {
+                    if (err) console.error("Erreur lors de l'ajout à l'historique :", err);
+                }
+            );
+        }
+
+        database.deleteBottle(row, col, (err) => {
+            if (err) {
+                res.status(500).json({ error: "Erreur lors de la suppression de la bouteille" });
+            } else {
+                res.json({ success: true });
+            }
+        });
+    });
+});
+
+// Marquer une bouteille comme consommée
+router.post('/consume', (req, res) => {
+    const { row, col } = req.body;
+
+    database.consumeBottle(row, col, (err, bottle) => {
+        if (err) {
+            res.status(500).json({ error: "Erreur lors de la consommation de la bouteille" });
+            return;
+        }
+
+        // Ajouter à l'historique
+        database.addHistoryEntry(
+            'consume',
+            bottle.id,
+            bottle.name,
+            bottle.row,
+            bottle.col,
+            { bottleName: bottle.name, row: bottle.row, col: bottle.col },
+            (err) => {
+                if (err) console.error("Erreur lors de l'ajout à l'historique :", err);
+            }
+        );
+
+        res.json({ success: true, bottle: bottle });
+    });
+});
+
+// Récupérer l'historique
+router.get('/history', (req, res) => {
+    database.getHistory((err, history) => {
+        if (err) {
+            res.status(500).json({ error: "Erreur lors de la récupération de l'historique" });
         } else {
-            res.json({ success: true });
+            res.json(history);
         }
     });
 });

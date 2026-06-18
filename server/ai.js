@@ -7,6 +7,10 @@ const path = require('path');
 // Vous pouvez obtenir une clé gratuite ici : https://console.cloud.google.com/apis/credentials
 const GOOGLE_VISION_API_KEY = 'YOUR_GOOGLE_VISION_API_KEY';
 
+// Clé API pour Wine-Searcher (optionnelle, à remplacer par votre clé si disponible)
+// Sinon, on utilisera une recherche locale ou une API gratuite alternative
+const WINE_SEARCHER_API_KEY = null; // 'YOUR_WINE_SEARCHER_API_KEY';
+
 // Fonction pour analyser une image de bouteille avec Google Vision
 async function analyzeBottleImage(imagePath) {
     try {
@@ -176,10 +180,73 @@ function getTemperatureForGrapes(grapes) {
     }
 }
 
+// Rechercher les notes d'une bouteille (Vivino, Wine-Searcher, etc.)
+async function searchWineNotes(bottleName, year, region) {
+    // Si on a une clé Wine-Searcher, on l'utilise
+    if (WINE_SEARCHER_API_KEY) {
+        try {
+            const response = await axios.get(
+                `https://api.wine-searcher.com/ws-rest/v1/wine/find?wineName=${encodeURIComponent(bottleName)}&vintage=${year}&region=${encodeURIComponent(region)}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${WINE_SEARCHER_API_KEY}`
+                    }
+                }
+            );
+            if (response.data.wines && response.data.wines.length > 0) {
+                const wine = response.data.wines[0];
+                return {
+                    source: 'Wine-Searcher',
+                    rating: wine.rating ? wine.rating.average : null,
+                    reviews: wine.rating ? wine.rating.reviews : null,
+                    price: wine.price ? wine.price.average : null,
+                    link: wine.url
+                };
+            }
+        } catch (error) {
+            console.error("Erreur avec Wine-Searcher :", error.message);
+        }
+    }
+
+    // Sinon, on utilise une base de données locale ou une API gratuite alternative
+    // Exemple : Vivino (nécessite une clé API)
+    // Ou on retourne des données simulées pour la démo
+    return {
+        source: 'Local Database',
+        rating: getLocalRating(bottleName, year, region),
+        reviews: `Notes locales pour ${bottleName} ${year || ''} ${region || ''}`.trim(),
+        price: null,
+        link: null
+    };
+}
+
+// Base de données locale pour les notes (simulée)
+function getLocalRating(bottleName, year, region) {
+    const localRatings = [
+        { name: 'Château Margaux', year: 2015, region: 'Bordeaux', rating: 98 },
+        { name: 'Château Margaux', year: 2016, region: 'Bordeaux', rating: 99 },
+        { name: 'Domaine de la Romanée-Conti', year: 2010, region: 'Bourgogne', rating: 100 },
+        { name: 'Lafite Rothschild', year: 2000, region: 'Bordeaux', rating: 97 },
+        { name: 'Côte-Rôtie', year: 2018, region: 'Rhône', rating: 95 },
+        { name: 'Chablis', year: 2020, region: 'Bourgogne', rating: 92 },
+        { name: 'Sancerre', year: 2019, region: 'Loire', rating: 90 },
+        { name: 'Champagne Krug', year: 2008, region: 'Champagne', rating: 96 }
+    ];
+
+    const match = localRatings.find(r => 
+        r.name.toLowerCase().includes(bottleName.toLowerCase()) &&
+        (!year || r.year === year) &&
+        (!region || r.region.toLowerCase().includes(region.toLowerCase()))
+    );
+
+    return match ? match.rating : null;
+}
+
 // Exporter les fonctions
 module.exports = {
     analyzeBottleImage,
     extractBottleInfoFromText,
     getFoodPairingForGrapes,
-    getTemperatureForGrapes
+    getTemperatureForGrapes,
+    searchWineNotes
 };
