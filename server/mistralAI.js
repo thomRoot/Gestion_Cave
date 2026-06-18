@@ -232,6 +232,5 @@ module.exports = {
     analyzeWineLabel,
     getWinePairingAdvice,
     getWineInfo,
-    extractBasicInfoFromText,
     generateFallbackResponse
 };
