@@ -1,7 +1,7 @@
 {
   "name": "gestion_cave",
-  "version": "3.0.0",
-  "description": "Application de gestion de cave à vin avec Mistral AI (sans OCR local)",
+  "version": "4.0.0",
+  "description": "Application de gestion de cave à vin avec Mistral AI (sans OCR local) - Version 4.0.0",
   "main": "server/app.js",
   "scripts": {
     "start": "node server/app.js",

@@ -126,10 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
         window.cave.openAddBottlePopup();
     });
 
-    // Gestion du bouton "Aide IA"
-    document.getElementById('aiHelpButton').addEventListener('click', () => {
-        openAIHelpPopup();
-    });
+    // Gestion du bouton "Chat IA"
+    const aiChatButton = document.getElementById('aiChatButton');
+    if (aiChatButton) {
+        aiChatButton.addEventListener('click', () => {
+            openAIChatPopup();
+        });
+    }
 
     // Gestion du bouton "Vider la cave"
     document.getElementById('resetDbButton').addEventListener('click', () => {
@@ -139,15 +142,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Gestion du bouton "Analyser avec IA" (version simplifiée sans envoi d'image)
-    document.getElementById('analyzeWithAI').addEventListener('click', analyzeWithAI);
+    const analyzeWithAIButton = document.getElementById('analyzeWithAI');
+    if (analyzeWithAIButton) {
+        analyzeWithAIButton.addEventListener('click', analyzeWithAI);
+    }
 
-    // Gestion de l'envoi de message à l'IA
-    document.getElementById('aiSendButton').addEventListener('click', sendAIPrompt);
-    document.getElementById('aiPromptInput').addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-            sendAIPrompt();
-        }
-    });
+    // Gestion du chat IA
+    const aiChatInput = document.getElementById('aiChatInput');
+    const aiChatSendButton = document.getElementById('aiChatSendButton');
+    if (aiChatInput && aiChatSendButton) {
+        aiChatSendButton.addEventListener('click', sendAIChatMessage);
+        aiChatInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                sendAIChatMessage();
+            }
+        });
+    }
 });
 
 // Ouvrir la popup d'aide IA
@@ -606,7 +616,246 @@ function resetDatabase() {
     });
 }
 
+// NOUVELLES FONCTIONS DE CHAT IA - Version Complète
+
+// Variable globale pour le chat
+let conversationHistory = [];
+
+// Ouvrir la popup de chat IA
+function openAIChatPopup() {
+    const popup = document.getElementById('aiChatPopup');
+    popup.style.display = 'flex';
+    
+    // Initialiser le chat si c'est la première fois
+    const messagesContainer = document.getElementById('aiMessages');
+    if (messagesContainer && messagesContainer.children.length === 0) {
+        // Ajouter le message de bienvenue
+        addChatMessage(
+            `Bonjour ! 🍷 Je suis votre assistant IA spécialisé en vin. Vous pouvez me demander <strong>n'importe quoi</strong> :
+            <br><br>
+            - "Quel vin avec du bœuf bourguignon ?"
+            - "À quelle température servir un Bordeaux 2018 ?"
+            - "Quels sont les meilleurs cépages pour vieillir 10 ans ?"
+            - "Peux-tu m'expliquer la différence entre AOC et IGP ?"
+            - "Quel vin offrir pour un dîner romantique ?"
+            <br><br>
+            Je suis là pour vous aider !`,
+            'bot',
+            true
+        );
+    }
+    
+    // Mettre à jour l'indicateur du modèle
+    updateModelInfo();
+    
+    // Focus sur l'input
+    const chatInput = document.getElementById('aiChatInput');
+    if (chatInput) {
+        chatInput.focus();
+    }
+    
+    // Faire défiler vers le bas
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+// Fermer le chat IA
+function closeAIChatPopup() {
+    const popup = document.getElementById('aiChatPopup');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+}
+
+// Envoyer un message au chat IA
+async function sendAIChatMessage() {
+    const input = document.getElementById('aiChatInput');
+    const sendButton = document.getElementById('aiChatSendButton');
+    
+    if (!input || !sendButton) return;
+    
+    const message = input.value.trim();
+    if (!message) return;
+    
+    // Désactiver le bouton pendant l'envoi
+    sendButton.disabled = true;
+    input.disabled = true;
+    
+    // Ajouter le message de l'utilisateur
+    addChatMessage(message, 'user', false);
+    input.value = '';
+    
+    // Afficher l'indicateur de saisie
+    const messagesContainer = document.getElementById('aiMessages');
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'ai-message bot';
+    typingDiv.innerHTML = `
+        <div class="message-avatar">
+            <i class="fas fa-wine-glass-alt"></i>
+        </div>
+        <div class="message-content">
+            <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+    messagesContainer.appendChild(typingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Mettre à jour le statut
+    updateChatStatus('Réflexion en cours...');
+    
+    try {
+        // Appeler l'API Mistral via le serveur
+        const response = await fetch('/api/bottles/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                question: message,
+                history: conversationHistory
+            })
+        });
+        
+        const result = await response.json();
+        
+        // Supprimer l'indicateur de saisie
+        typingDiv.remove();
+        
+        if (result.success && result.response) {
+            // Ajouter la réponse de Mistral
+            addChatMessage(result.response, 'bot', false);
+            
+            // Ajouter à l'historique
+            conversationHistory.push({
+                role: 'user',
+                content: message
+            });
+            conversationHistory.push({
+                role: 'assistant',
+                content: result.response
+            });
+            
+            // Limiter l'historique à 20 échanges
+            if (conversationHistory.length > 20) {
+                conversationHistory = conversationHistory.slice(-20);
+            }
+            
+            updateChatStatus('✓ Réponse reçue');
+            setTimeout(() => updateChatStatus(''), 2000);
+        } else {
+            // Erreur
+            addChatMessage(
+                `Désolé, je n'ai pas pu obtenir de réponse. ${result.error || 'Vérifiez que Mistral AI est bien configuré.'}`,
+                'bot',
+                false,
+                true
+            );
+            updateChatStatus('⚠ Erreur');
+        }
+    } catch (error) {
+        console.error("Erreur chat IA :", error);
+        typingDiv.remove();
+        addChatMessage(
+            `Désolé, une erreur s'est produite : ${error.message}. Vérifiez votre connexion et que Mistral AI est configuré.`,
+            'bot',
+            false,
+            true
+        );
+        updateChatStatus('⚠ Erreur de connexion');
+    } finally {
+        // Réactiver les inputs
+        sendButton.disabled = false;
+        input.disabled = false;
+        input.focus();
+    }
+}
+
+// Ajouter un message au chat
+function addChatMessage(message, type, isWelcome = false, isError = false) {
+    const messagesContainer = document.getElementById('aiMessages');
+    if (!messagesContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    const className = `ai-message ${type} ${isWelcome ? 'welcome-message' : ''} ${isError ? 'error' : ''}`;
+    messageDiv.className = className;
+    
+    // Formater le message (remplacer les sauts de ligne par <br>)
+    const formattedMessage = formatChatMessage(message);
+    
+    // Ajouter l'avatar pour les messages bot
+    let avatarHtml = '';
+    if (type === 'bot') {
+        avatarHtml = '<div class="message-avatar"><i class="fas fa-wine-glass-alt"></i></div>';
+    } else if (type === 'user') {
+        avatarHtml = '<div class="message-avatar"><i class="fas fa-user"></i></div>';
+    }
+    
+    messageDiv.innerHTML = `${avatarHtml}<div class="message-content">${formattedMessage}</div>`;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Formater un message du chat
+function formatChatMessage(message) {
+    if (!message) return '';
+    
+    // Remplacer les sauts de ligne
+    let formatted = message.replace(/\n/g, '<br>');
+    
+    // Remplacer le markdown basique
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    formatted = formatted.replace(/`(.*?)`/g, '<code>$1</code>');
+    
+    // Remplacer les listes
+    formatted = formatted.replace(/\n\s*[-•*•]\s+/g, '<br>• ');
+    
+    return formatted;
+}
+
+// Mettre à jour l'indicateur du modèle
+function updateModelInfo() {
+    const modelInfo = document.getElementById('mistralModelInfo');
+    if (modelInfo) {
+        // Le modèle est récupéré depuis le serveur
+        fetch('/api/bottles/mistral-status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.mistralAvailable) {
+                    modelInfo.textContent = `Modèle : ${data.model}`;
+                } else {
+                    modelInfo.textContent = 'Modèle : Non configuré';
+                }
+            })
+            .catch(() => {
+                modelInfo.textContent = 'Modèle : Inconnu';
+            });
+    }
+}
+
+// Mettre à jour le statut du chat
+function updateChatStatus(status) {
+    const chatStatus = document.getElementById('chatStatus');
+    if (chatStatus) {
+        chatStatus.textContent = status;
+    }
+}
+
+// Fonction pour les suggestions de prompts
+function suggestPrompt(prompt) {
+    const input = document.getElementById('aiChatInput');
+    if (input) {
+        input.value = prompt;
+        input.focus();
+    }
+}
+
 // Exporter les fonctions
 window.openAddBottlePopup = window.cave.openAddBottlePopup;
 window.openBottleDetailsPopup = window.cave.openBottleDetailsPopup;
 window.fillBottleFormWithAIResult = fillBottleFormWithAIResult;
+window.openAIChatPopup = openAIChatPopup;
+window.suggestPrompt = suggestPrompt;

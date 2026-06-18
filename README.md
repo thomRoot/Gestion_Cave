@@ -1,16 +1,59 @@
 # Ma Cave à Vin - Application de Gestion Intelligente
 
-Une application web moderne pour gérer votre cave à vin avec reconnaissance IA intégrée, optimisée pour mobile et tablette.
+**Version Actuelle : 4.0.0** 🍷
+
+Une application web moderne pour gérer votre cave à vin avec **Mistral AI** intégrée, optimisée pour mobile et tablette.
 
 ## 🎯 Fonctionnalités Principales
 
-### ✨ Nouvelle Version 2.0
-- **Design responsive** optimisé pour mobile, tablette et desktop
-- **Reconnaissance IA locale** (remplace Google Vision) pour analyser les étiquettes de vin
-- **Bouton "Aide IA"** avec assistant conversationnel intégré
-- **Remplissage automatique** des champs (nom, année, cépage, région, période optimale, accords mets-vins, température)
-- **Arrière-plan élégant** avec effets visuels modernes
-- **Boutons de photo fonctionnels** avec accès à l'appareil photo et à la galerie
+### ✨ Version 4.0.0 - Chat IA Complète avec Mistral
+- **Chat IA conversationnel** : Posez n'importe quelle question sur le vin comme avec Mistral Chat
+- **Conseils personnalisés** : Accords mets-vins, températures, périodes de garde, etc.
+- **Analyse intelligente** : Mistral comprend le contexte de vos questions
+- **Historique des conversations** : Gardez une trace de vos échanges
+- **Suggestions intelligentes** : Boutons de suggestions pour vous inspirer
+- **Indicateur de statut** : Voir si Mistral AI est connecté
+
+### 🤖 Intelligence Artificielle (Mistral AI)
+L'application utilise **exclusivement Mistral AI** pour :
+
+1. **Analyse d'images** : Reconnaissance intelligente des étiquettes de vin
+2. **Chat conversationnel** : Réponses naturelles et contextuelles
+3. **Conseils experts** : Basés sur une connaissance approfondie du vin
+4. **Calculs dynamiques** : Périodes de consommation adaptées à chaque vin
+
+### 💬 Chat IA - Nouveautés Version 4.0
+- **Interface de chat complète** avec messages formatés
+- **Suggestions de questions** pour vous guider
+- **Historique de conversation** pour un échange fluide
+- **Indicateur de saisie** (typing...) pour une meilleure UX
+- **Formatage riche** : gras, italique, listes, etc.
+- **Gestion des erreurs** claire et utile
+
+### 📊 Base de Connaissances
+Mistral AI connaît :
+- **Tous les cépages** : Cabernet Sauvignon, Merlot, Pinot Noir, Chardonnay, Syrah, etc.
+- **Toutes les régions** : Bordeaux, Bourgogne, Champagne, Loire, Alsace, Rhône, Espagne, Italie, etc.
+- **Les appellations** : AOC, IGP, DOC, Grand Cru, Premier Cru, etc.
+- **Les accords mets-vins** : Pour chaque type de vin et de plat
+- **Les températures** : Adaptées à chaque cépage
+- **Les périodes de garde** : Calculées dynamiquement
+
+## 📱 Optimisation Mobile
+
+- Grille de cave adaptative selon la taille de l'écran
+- Bouton flottant pour ajouter une bouteille sur mobile
+- Taille des cellules ajustée pour les petits écrans
+- Navigation tactile optimisée (appui court/long)
+- Design épuré et intuitif
+
+## 🚀 Installation
+
+### Prérequis
+- Node.js 16+ 
+- npm ou yarn
+- Un navigateur moderne (Chrome, Firefox, Safari, Edge)
+- **Clé API Mistral** (pour activer l'IA)
 
 ## 📱 Optimisation Mobile
 
@@ -79,19 +122,66 @@ gestion_cave/
 │   ├── index.html          # Page principale
 │   ├── style.css           # Styles modernes et responsive
 │   ├── script.js           # Logique principale
-│   ├── camera.js           # Gestion de la caméra et des photos
+│   ├── camera.js           # Gestion des photos
 │   ├── cave.js             # Gestion de la grille de la cave
 │   └── uploads/            # Dossier pour les photos uploadées
 ├── server/                 # Backend Node.js
 │   ├── app.js              # Configuration Express
-│   ├── ai.js               # Intelligence Artificielle locale
+│   ├── mistralAnalyzer.js  # Analyse avec Mistral AI (UNIQUEMENT)
+│   ├── mistralAI.js        # Appels API Mistral
+│   ├── mistralConfig.js    # Configuration Mistral
 │   ├── database.js         # Gestion SQLite
 │   └── routes/             # Routes API
 │       ├── bottles.js      # Routes pour les bouteilles
 │       └── cave.js         # Routes pour la configuration
+├── VERSION.md              # Historique des versions
+├── MISTRAL_SETUP.md         # Guide de configuration Mistral
+├── ENV_GUIDE.md            # Guide pour le fichier .env
 ├── package.json            # Dépendances
 └── README.md               # Documentation
 ```
+
+## 💬 Utilisation du Chat IA
+
+### Comment ouvrir le chat
+1. Cliquez sur le bouton **"Chat IA"** dans le header (en haut à droite)
+2. Une popup s'ouvre avec l'interface de chat
+3. Posez votre question dans le champ de texte
+
+### Exemples de questions
+Vous pouvez demander **n'importe quoi** sur le vin :
+
+**Accords mets-vins** :
+- "Quel vin rouge avec un boeuf bourguignon ?"
+- "Que servir avec un plateau de fromages ?"
+- "Quel vin blanc avec des huîtres ?"
+
+**Températures** :
+- "À quelle température servir un Bordeaux 2018 ?"
+- "Comment conserver un vin blanc ?"
+
+**Conseils** :
+- "Quel vin offrir pour un dîner romantique ?"
+- "Quels sont les meilleurs cépages pour vieillir 10 ans ?"
+- "Peux-tu m'expliquer la différence entre AOC et IGP ?"
+
+**Analyse** :
+- "Peux-tu analyser cette étiquette de vin ?" (après avoir upload une photo)
+- "C'est quoi ce vin ?"
+
+### Fonctionnalités du chat
+- ✅ **Réponses en temps réel** avec Mistral AI
+- ✅ **Historique de conversation** pour suivre l'échange
+- ✅ **Suggestions de questions** pour vous inspirer
+- ✅ **Indicateur de saisie** (typing...) pour une meilleure UX
+- ✅ **Formatage riche** : gras, italique, listes
+- ✅ **Gestion des erreurs** claire
+
+---
+
+## 🎨 Design et UX
+
+### Palette de Couleurs
 
 ## 🎨 Design et UX
 

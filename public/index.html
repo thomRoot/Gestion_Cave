@@ -22,8 +22,8 @@
             <button id="searchButton"><i class="fas fa-search"></i></button>
         </div>
         <div class="header-buttons">
-            <button id="aiHelpButton" class="ai-help-btn">
-                <i class="fas fa-robot"></i> Aide IA
+            <button id="aiChatButton" class="ai-chat-btn">
+                <i class="fas fa-comments"></i> Chat IA
             </button>
             <button id="addBottleButton">
                 <i class="fas fa-plus"></i> Ajouter
@@ -47,31 +47,59 @@
         <i class="fas fa-plus"></i>
     </button>
 
-    <!-- Popup pour l'aide IA -->
-    <div class="popup" id="aiHelpPopup">
-        <div class="popup-content ai-popup">
+    <!-- Popup pour le Chat IA - Version Complète -->
+    <div class="popup" id="aiChatPopup">
+        <div class="popup-content ai-chat-popup">
             <span class="close">&times;</span>
-            <h2><i class="fas fa-robot"></i> Assistant IA</h2>
+            <h2><i class="fas fa-robot"></i> Chat IA - Conseiller en Vin</h2>
+            <p class="chat-subtitle">Posez-moi n'importe quelle question sur le vin !</p>
+            
             <div class="ai-chat-container">
                 <div class="ai-messages" id="aiMessages">
-                    <div class="ai-message bot">
+                    <div class="ai-message bot welcome-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-wine-glass-alt"></i>
+                        </div>
                         <div class="message-content">
-                            <p>Bonjour ! Je suis votre assistant IA pour la gestion de votre cave à vin.</p>
-                            <p>Je peux vous aider à :</p>
-                            <ul>
-                                <li>Reconnaître une bouteille à partir d'une photo</li>
-                                <li>Remplir automatiquement les informations (nom, année, cépage, etc.)</li>
-                                <li>Vous conseiller sur les accords mets-vins</li>
-                                <li>Déterminer la période optimale de consommation</li>
-                                <li>Trouver la température de service idéale</li>
-                            </ul>
-                            <p>Il vous suffit de prendre une photo de votre bouteille ou de la télécharger !</p>
+                            <p><strong>Bonjour !</strong> 🍷</p>
+                            <p>Je suis votre assistant IA spécialisé en vin. Vous pouvez me demander <strong>n'importe quoi</strong> :</p>
+                            <div class="suggestions-grid">
+                                <button class="suggestion-btn" onclick="suggestPrompt('Quel vin rouge conseilles-tu avec un boeuf bourguignon ?')">
+                                    <i class="fas fa-utensils"></i> Accords mets-vins
+                                </button>
+                                <button class="suggestion-btn" onclick="suggestPrompt('À quelle température servir un Bordeaux 2018 ?')">
+                                    <i class="fas fa-thermometer-half"></i> Température
+                                </button>
+                                <button class="suggestion-btn" onclick="suggestPrompt('Quels sont les meilleurs cépages pour vieillir 10 ans ?')">
+                                    <i class="fas fa-calendar-alt"></i> Conservation
+                                </button>
+                                <button class="suggestion-btn" onclick="suggestPrompt('Peux-tu m\'expliquer la différence entre AOC et IGP ?')">
+                                    <i class="fas fa-info-circle"></i> Explications
+                                </button>
+                                <button class="suggestion-btn" onclick="suggestPrompt('Quel vin offrir pour un dîner romantique ?')">
+                                    <i class="fas fa-heart"></i> Conseils
+                                </button>
+                                <button class="suggestion-btn" onclick="suggestPrompt('Quels sont les vins bio les plus intéressants en 2024 ?')">
+                                    <i class="fas fa-leaf"></i> Tendances
+                                </button>
+                            </div>
+                            <p style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
+                                <em>Exemples : "Quel vin avec du fromage ?", "C'est quoi un Grand Cru ?", "Comment conserver mon vin ?"</em>
+                            </p>
                         </div>
                     </div>
                 </div>
+                
                 <div class="ai-input-container">
-                    <input type="text" id="aiPromptInput" placeholder="Posez-moi une question sur votre vin...">
-                    <button id="aiSendButton"><i class="fas fa-paper-plane"></i></button>
+                    <input type="text" id="aiChatInput" placeholder="Posez votre question ici..." autocomplete="off">
+                    <button id="aiChatSendButton" class="ai-send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                
+                <div class="chat-info">
+                    <span id="mistralModelInfo">Modèle : mistral-tiny</span>
+                    <span id="chatStatus"></span>
                 </div>
             </div>
         </div>
