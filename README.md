@@ -1,6 +1,6 @@
 # Ma Cave à Vin - Application de Gestion Intelligente
 
-**Version Actuelle : 4.0.0** 🍷
+**Version Actuelle : 4.0.1** 🍷
 
 Une application web moderne pour gérer votre cave à vin avec **Mistral AI** intégrée, optimisée pour mobile et tablette.
 

@@ -1,10 +1,17 @@
 # Historique des Versions - Ma Cave à Vin
 
-## 📋 Version Actuelle : **4.0.0** (Dernière mise à jour: 18 juin 2026)
+## 📋 Version Actuelle : **4.0.1** (Dernière mise à jour: 18 juin 2026)
 
 ---
 
 ## 📜 Historique des Versions
+
+### Version 4.0.1 - Corrections de bugs
+**Date** : 18 juin 2026  
+**Modifications** :
+- ✅ Correction de l'erreur `extractBasicInfoFromText is not defined`
+- ✅ Correction de l'import manquant dans app.js
+- ✅ Suppression définitive de toutes les références à l'OCR local
 
 ### Version 4.0.0 - Mistral AI Chat Amélioré
 **Date** : 18 juin 2026  
