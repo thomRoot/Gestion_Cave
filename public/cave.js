@@ -125,7 +125,7 @@ function openAddBottlePopup() {
     document.getElementById('bottlePhotoPreview').style.display = 'none';
     document.getElementById('bottlePopup').style.display = 'flex';
 
-    // Démarrer la caméra
+    // Démarrer la sélection de fichier (galerie uniquement)
     window.camera.startCamera();
 }
 

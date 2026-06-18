@@ -1,5 +1,5 @@
 // script.js - Gestion principale de l'application Ma Cave à Vin
-// Version 2.0 avec intégration IA locale
+// Version corrigée : pas de caméra, analyse IA simplifiée, bouton enregistrer fonctionnel
 
 // Variables globales
 let currentBottleImage = null;
@@ -50,8 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.popup .close').forEach(closeButton => {
         closeButton.addEventListener('click', () => {
             closeButton.closest('.popup').style.display = 'none';
-            window.camera.stopCamera();
-            resetLoadingOverlay();
+            window.camera.resetImage();
         });
     });
 
@@ -59,8 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('popup')) {
             e.target.style.display = 'none';
-            window.camera.stopCamera();
-            resetLoadingOverlay();
+            window.camera.resetImage();
         }
     });
 
@@ -79,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         openAIHelpPopup();
     });
 
-    // Gestion du bouton "Analyser avec IA"
+    // Gestion du bouton "Analyser avec IA" (version simplifiée sans envoi d'image)
     document.getElementById('analyzeWithAI').addEventListener('click', analyzeWithAI);
 
     // Gestion de l'envoi de message à l'IA
@@ -96,7 +94,6 @@ function openAIHelpPopup() {
     const popup = document.getElementById('aiHelpPopup');
     popup.style.display = 'flex';
     
-    // Effacer les anciens messages (sauf le message de bienvenue)
     const messagesContainer = document.getElementById('aiMessages');
     const welcomeMessage = messagesContainer.querySelector('.ai-message.bot');
     if (welcomeMessage) {
@@ -104,7 +101,6 @@ function openAIHelpPopup() {
         messagesContainer.appendChild(welcomeMessage);
     }
     
-    // Focus sur l'input
     document.getElementById('aiPromptInput').focus();
 }
 
@@ -115,11 +111,9 @@ function sendAIPrompt() {
     
     if (!prompt) return;
     
-    // Ajouter le message de l'utilisateur
     addAIMessage(prompt, 'user');
     input.value = '';
     
-    // Simuler une réponse de l'IA (en attendant l'intégration réelle)
     setTimeout(() => {
         const aiResponse = generateAIResponse(prompt);
         addAIMessage(aiResponse, 'bot');
@@ -133,155 +127,96 @@ function addAIMessage(message, type) {
     messageDiv.className = `ai-message ${type}`;
     messageDiv.innerHTML = `<div class="message-content">${formatAIMessage(message)}</div>`;
     messagesContainer.appendChild(messageDiv);
-    
-    // Scroll vers le bas
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 // Formater un message IA
 function formatAIMessage(message) {
-    // Remplacer les sauts de ligne par des balises <br>
     return message.replace(/\n/g, '<br>');
 }
 
-// Générer une réponse IA (simulée pour l'instant)
+// Générer une réponse IA
 function generateAIResponse(prompt) {
     const promptLower = prompt.toLowerCase();
     
-    // Réponses basées sur des mots-clés
-    if (promptLower.includes('bonjour') || promptLower.includes('salut') || promptLower.includes('hello')) {
-        return "Bonjour ! Comment puis-je vous aider avec votre cave à vin aujourd'hui ?";
+    if (promptLower.includes('bonjour') || promptLower.includes('salut')) {
+        return "Bonjour ! Je suis votre assistant pour la gestion de cave à vin. Posez-moi vos questions !";
     }
     
-    if (promptLower.includes('comment ça marche') || promptLower.includes('comment utiliser')) {
-        return "C'est simple ! Prenez une photo de votre bouteille de vin ou téléchargez-en une depuis votre galerie. " +
-               "Ensuite, cliquez sur 'Analyser avec IA' et je remplirai automatiquement tous les champs pour vous : " +
-               "nom, année, cépage, région, période optimale de consommation, accords mets-vins et température de service.";
+    if (promptLower.includes('comment ça marche')) {
+        return "Sélectionnez une image de bouteille, remplissez les champs (ou utilisez 'Analyser avec IA' pour les remplir automatiquement), puis enregistrez.";
     }
     
-    if (promptLower.includes('reconnaître') || promptLower.includes('photo') || promptLower.includes('image')) {
-        return "Pour reconnaître une bouteille, ouvrez le formulaire d'ajout, prenez une photo ou téléchargez une image, " +
-               "puis cliquez sur 'Analyser avec IA'. Je vais extraire le texte de l'étiquette et identifier les informations du vin.";
+    if (promptLower.includes('accords') || promptLower.includes('mets')) {
+        return "Dites-moi quel vin ou quel plat, je vous conseillerai les meilleurs accords ! Exemple : 'Quel vin avec du bœuf ?'";
     }
     
-    if (promptLower.includes('accords') || promptLower.includes('mets') || promptLower.includes('nourriture')) {
-        return "Je peux vous conseiller sur les accords mets-vins ! Dites-moi quel vin vous avez ou quel plat vous préparez, " +
-               "et je vous suggérerai les meilleures associations. Par exemple : 'Quel vin avec du bœuf ?' ou 'Que boire avec du fromage ?'";
+    if (promptLower.includes('température')) {
+        return "16-18°C pour les rouges, 10-12°C pour les blancs, 6-8°C pour les champagnes.";
     }
     
-    if (promptLower.includes('température') || promptLower.includes('servir')) {
-        return "La température de service idéale dépend du type de vin : " +
-               "16-18°C pour les vins rouges, 10-12°C pour les blancs, et 6-8°C pour les champagnes. " +
-               "Je peux vous donner la température exacte pour chaque bouteille que vous ajoutez.";
-    }
-    
-    if (promptLower.includes('période') || promptLower.includes('boire') || promptLower.includes('conserver')) {
-        return "La période optimale de consommation dépend du millésime et du cépage. " +
-               "Par exemple, un Bordeaux 2015 peut se boire de 2025 à 2035. " +
-               "Je calcule automatiquement ces dates en fonction des informations de la bouteille.";
-    }
-    
-    if (promptLower.includes('merci') || promptLower.includes('thank')) {
-        return "Avec plaisir ! N'hésitez pas si vous avez d'autres questions sur votre cave à vin. 🍷";
-    }
-    
-    // Réponse par défaut
-    return "Je suis là pour vous aider avec votre cave à vin. Vous pouvez me demander comment reconnaître une bouteille, " +
-           "quels accords mets-vins choisir, ou toute autre question sur le vin !";
+    return "Je suis là pour vous aider avec votre cave à vin. Posez-moi une question !";
 }
 
-// Afficher le loading overlay
-function showLoadingOverlay(message = 'Analyse en cours...') {
-    const overlay = document.getElementById('loadingOverlay');
-    const spinner = overlay.querySelector('p');
-    if (spinner) {
-        spinner.textContent = message;
-    }
-    overlay.style.display = 'flex';
-}
-
-// Masquer le loading overlay
-function resetLoadingOverlay() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-}
-
-// Analyser une bouteille avec l'IA
+// Analyser avec IA (version simplifiée sans envoi d'image)
 async function analyzeWithAI() {
-    // Vérifier qu'une image est disponible
-    if (!window.camera.hasImage()) {
-        alert("Veuillez d'abord prendre une photo ou télécharger une image de la bouteille.");
+    // Récupérer les données déjà saisies dans le formulaire
+    const name = document.getElementById('bottleName').value;
+    const year = document.getElementById('bottleYear').value;
+    const grapes = document.getElementById('bottleGrapes').value;
+    const region = document.getElementById('bottleRegion').value;
+
+    if (!name && !year && !grapes && !region) {
+        alert("Veuillez remplir au moins un champ (nom, année, cépage ou région) pour que je puisse vous aider.");
         return;
     }
 
-    // Afficher le loading
-    showLoadingOverlay('Analyse de l\'image en cours...');
-
     try {
-        // Récupérer l'image actuelle
-        const imageDataUrl = window.camera.getCurrentImage();
-        
-        // Envoyer l'image au serveur pour analyse IA
+        // Envoyer les données au serveur pour analyse
         const response = await fetch('/api/bottles/analyze', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                image: imageDataUrl
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, year, grapes, region })
         });
 
         const result = await response.json();
 
         if (result.success && result.bottleInfo) {
-            // Remplir automatiquement les champs du formulaire
             fillBottleFormWithAIResult(result.bottleInfo);
-            
-            // Afficher un message de succès
-            alert(`Analyse terminée ! J'ai identifié : ${result.bottleInfo.name || 'une bouteille de vin'}. Les champs ont été remplis automatiquement.`);
+            alert("Analyse terminée ! Les champs ont été complétés automatiquement.");
         } else {
-            alert("Je n'ai pas pu identifier clairement cette bouteille. Veuillez vérifier la qualité de la photo ou remplir manuellement les informations.");
+            alert("Je n'ai pas pu compléter les informations. Vérifiez les champs saisis.");
         }
     } catch (error) {
-        console.error("Erreur lors de l'analyse IA :", error);
-        alert("Une erreur est survenue lors de l'analyse. Veuillez réessayer.");
-    } finally {
-        resetLoadingOverlay();
+        console.error("Erreur analyse IA :", error);
+        alert("Erreur de connexion. Vérifiez que le serveur est lancé.");
     }
 }
 
 // Remplir le formulaire avec les résultats de l'IA
 function fillBottleFormWithAIResult(bottleInfo) {
-    // Remplir les champs un par un
-    if (bottleInfo.name) {
+    if (bottleInfo.name && !document.getElementById('bottleName').value) {
         document.getElementById('bottleName').value = bottleInfo.name;
     }
-    
-    if (bottleInfo.year) {
+    if (bottleInfo.year && !document.getElementById('bottleYear').value) {
         document.getElementById('bottleYear').value = bottleInfo.year;
     }
-    
-    if (bottleInfo.grapes) {
+    if (bottleInfo.grapes && !document.getElementById('bottleGrapes').value) {
         document.getElementById('bottleGrapes').value = bottleInfo.grapes;
     }
-    
-    if (bottleInfo.region) {
+    if (bottleInfo.region && !document.getElementById('bottleRegion').value) {
         document.getElementById('bottleRegion').value = bottleInfo.region;
     }
-    
-    if (bottleInfo.drinkFrom) {
+    if (bottleInfo.drinkFrom && !document.getElementById('bottleDrinkFrom').value) {
         document.getElementById('bottleDrinkFrom').value = bottleInfo.drinkFrom;
     }
-    
-    if (bottleInfo.drinkTo) {
+    if (bottleInfo.drinkTo && !document.getElementById('bottleDrinkTo').value) {
         document.getElementById('bottleDrinkTo').value = bottleInfo.drinkTo;
     }
-    
-    if (bottleInfo.foodPairing) {
+    if (bottleInfo.foodPairing && !document.getElementById('bottleFoodPairing').value) {
         document.getElementById('bottleFoodPairing').value = bottleInfo.foodPairing;
     }
-    
-    if (bottleInfo.temperature) {
+    if (bottleInfo.temperature && !document.getElementById('bottleTemperature').value) {
         document.getElementById('bottleTemperature').value = bottleInfo.temperature;
     }
 }
@@ -289,11 +224,10 @@ function fillBottleFormWithAIResult(bottleInfo) {
 // Sauvegarder une bouteille
 function saveBottle() {
     const selectedCell = window.cave.getSelectedCell();
-    if (!selectedCell) return;
-
-    const form = document.getElementById('bottleForm');
-    const photoPreview = document.getElementById('bottlePhotoPreview');
-    const photoDataUrl = photoPreview.src;
+    if (!selectedCell) {
+        alert("Aucune cellule sélectionnée. Veuillez cliquer sur une cellule vide d'abord.");
+        return;
+    }
 
     // Récupérer les données du formulaire
     const bottleData = {
@@ -306,14 +240,9 @@ function saveBottle() {
         drinkFrom: document.getElementById('bottleDrinkFrom').value,
         drinkTo: document.getElementById('bottleDrinkTo').value,
         foodPairing: document.getElementById('bottleFoodPairing').value,
-        temperature: document.getElementById('bottleTemperature')?.value || null,
-        photo: photoDataUrl
+        temperature: document.getElementById('bottleTemperature').value,
+        photo: window.camera.getCurrentImage()
     };
-
-    // Si une image est disponible via la caméra, l'utiliser
-    if (window.camera.hasImage() && !photoDataUrl.includes('data:image')) {
-        bottleData.photo = window.camera.getCurrentImage();
-    }
 
     // Envoyer les données au serveur
     fetch('/api/bottles', {
@@ -322,22 +251,25 @@ function saveBottle() {
         body: JSON.stringify(bottleData)
     })
     .then(response => response.json())
-    .then(() => {
-        // Fermer la popup et recharger la grille
-        document.getElementById('bottlePopup').style.display = 'none';
-        window.cave.loadCaveGrid();
-        window.camera.stopCamera();
-        window.camera.resetImage();
+    .then(result => {
+        if (result.success) {
+            document.getElementById('bottlePopup').style.display = 'none';
+            window.cave.loadCaveGrid();
+            window.camera.resetImage();
+            document.getElementById('bottleForm').reset();
+        } else {
+            alert("Erreur lors de la sauvegarde : " + (result.error || "Inconnu"));
+        }
     })
     .catch(error => {
-        console.error("Erreur lors de la sauvegarde de la bouteille :", error);
-        alert("Erreur lors de la sauvegarde. Veuillez réessayer.");
+        console.error("Erreur sauvegarde :", error);
+        alert("Erreur de connexion au serveur. Vérifiez qu'il est lancé.");
     });
 }
 
 // Ouvrir la popup de modification de bouteille
 function openEditBottlePopup(bottle) {
-    document.getElementById('popupTitle').textContent = 'Modifier la bouteille';
+    document.getElementById('popupTitle').innerHTML = '<i class="fas fa-wine-bottle"></i> Modifier une bouteille';
     document.getElementById('bottleName').value = bottle.name || '';
     document.getElementById('bottleYear').value = bottle.year || '';
     document.getElementById('bottleGrapes').value = bottle.grapes || '';
@@ -367,13 +299,17 @@ function deleteBottle(row, col) {
         method: 'DELETE'
     })
     .then(response => response.json())
-    .then(() => {
-        document.getElementById('bottleDetailsPopup').style.display = 'none';
-        window.cave.loadCaveGrid();
+    .then(result => {
+        if (result.success) {
+            document.getElementById('bottleDetailsPopup').style.display = 'none';
+            window.cave.loadCaveGrid();
+        } else {
+            alert("Erreur lors de la suppression.");
+        }
     })
     .catch(error => {
-        console.error("Erreur lors de la suppression de la bouteille :", error);
-        alert("Erreur lors de la suppression. Veuillez réessayer.");
+        console.error("Erreur suppression :", error);
+        alert("Erreur de connexion au serveur.");
     });
 }
 
@@ -381,18 +317,15 @@ function deleteBottle(row, col) {
 function performSearch() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     if (!searchTerm) {
-        // Réinitialiser le surlignage
         document.querySelectorAll('.cave-cell').forEach(cell => {
             cell.classList.remove('highlight');
         });
         return;
     }
 
-    // Récupérer toutes les bouteilles
     const grid = window.cave.getCaveGrid();
     const bottles = grid.flat().filter(bottle => bottle !== null);
 
-    // Filtrer les bouteilles correspondantes
     const matchingBottles = bottles.filter(bottle => {
         return (
             (bottle.name && bottle.name.toLowerCase().includes(searchTerm)) ||
@@ -403,7 +336,6 @@ function performSearch() {
         );
     });
 
-    // Surligner les bouteilles correspondantes dans la grille
     document.querySelectorAll('.cave-cell').forEach(cell => {
         cell.classList.remove('highlight');
     });
@@ -416,7 +348,7 @@ function performSearch() {
     });
 }
 
-// Exporter les fonctions pour les utiliser dans d'autres scripts
+// Exporter les fonctions
 window.openAddBottlePopup = window.cave.openAddBottlePopup;
 window.openBottleDetailsPopup = window.cave.openBottleDetailsPopup;
 window.fillBottleFormWithAIResult = fillBottleFormWithAIResult;

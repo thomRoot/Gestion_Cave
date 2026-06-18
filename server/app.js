@@ -21,14 +21,17 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, uniqueSuffix + path.extname(file.originalname));
+    },
+    limits: {
+        fileSize: 5 * 1024 * 1024 // Limite à 5Mo
     }
 });
 
 const upload = multer({ storage });
 
-// Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware - Augmenter la limite de taille pour les requêtes JSON
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes

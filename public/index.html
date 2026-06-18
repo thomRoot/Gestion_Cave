@@ -89,16 +89,10 @@
                             <img id="bottlePhotoPreview" style="display: none;">
                         </div>
                         <div class="camera-buttons">
-                            <button type="button" id="takePhotoButton" class="btn-primary">
-                                <i class="fas fa-camera"></i> Prendre une photo
+                            <button type="button" id="uploadPhotoButton" class="btn-primary">
+                                <i class="fas fa-image"></i> Sélectionner une image
                             </button>
-                            <button type="button" id="uploadPhotoButton" class="btn-secondary">
-                                <i class="fas fa-image"></i> Galerie
-                            </button>
-                            <input type="file" id="photoUpload" accept="image/*" capture="environment" style="display: none;">
-                        </div>
-                        <div class="mobile-help-message" id="mobileHelpMessage">
-                            <p><i class="fas fa-info-circle"></i> <strong>Sur mobile :</strong> Si la caméra ne s'ouvre pas, utilisez simplement le bouton <strong>"Galerie"</strong> pour télécharger une photo.</p>
+                            <input type="file" id="photoUpload" accept="image/*" style="display: none;">
                         </div>
                         <canvas id="photoCanvas" style="display: none;"></canvas>
                     </div>

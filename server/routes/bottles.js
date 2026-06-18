@@ -19,6 +19,9 @@ const upload = multer({
         filename: (req, file, cb) => {
             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
             cb(null, uniqueSuffix + path.extname(file.originalname));
+        },
+        limits: {
+            fileSize: 5 * 1024 * 1024 // 5Mo max
         }
     })
 });
@@ -34,32 +37,36 @@ router.get('/', (req, res) => {
     });
 });
 
-// Analyser une image de bouteille avec l'IA
+// Analyser une bouteille avec l'IA (SANS envoi d'image, juste texte)
 router.post('/analyze', async (req, res) => {
     try {
-        const { image } = req.body;
+        const { name, year, grapes, region } = req.body;
         
-        if (!image) {
-            return res.status(400).json({ 
-                success: false, 
-                error: "Aucune image fournie" 
-            });
-        }
-        
-        // Analyser l'image avec l'IA locale
-        const result = await ai.analyzeBottleImageBase64(image);
-        
-        if (result) {
-            res.json({
+        // Si on a déjà des infos, on les utilise directement
+        if (name || year || grapes || region) {
+            const bottleInfo = ai.extractBottleInfoFromText(
+                `${name || ''} ${year || ''} ${grapes || ''} ${region || ''}`
+            );
+            return res.json({
                 success: true,
-                bottleInfo: result
-            });
-        } else {
-            res.status(500).json({
-                success: false,
-                error: "Échec de l'analyse de l'image"
+                bottleInfo
             });
         }
+        
+        // Sinon, retourner des infos par défaut
+        res.json({
+            success: true,
+            bottleInfo: {
+                name: null,
+                year: null,
+                grapes: null,
+                region: null,
+                drinkFrom: null,
+                drinkTo: null,
+                foodPairing: "Viandes, Fromages, Plats variés",
+                temperature: "10-12°C"
+            }
+        });
     } catch (error) {
         console.error("Erreur lors de l'analyse IA :", error);
         res.status(500).json({
@@ -94,6 +101,7 @@ router.post('/', upload.single('photo'), (req, res) => {
 
     database.saveBottle(bottleData, (err) => {
         if (err) {
+            console.error("Erreur sauvegarde bouteille :", err);
             res.status(500).json({ error: "Erreur lors de la sauvegarde de la bouteille" });
         } else {
             res.json({ success: true });
@@ -117,39 +125,18 @@ router.delete('/', (req, res) => {
 // Obtenir des recommandations de vin
 router.get('/recommendations', (req, res) => {
     const { occasion, food, budget } = req.query;
-    
     const recommendations = ai.recommendWineForOccasion(occasion, food, budget);
-    
-    res.json({
-        success: true,
-        recommendations
-    });
+    res.json({ success: true, recommendations });
 });
 
 // Rechercher un vin par nom
 router.get('/search', (req, res) => {
     const { name } = req.query;
-    
     if (!name) {
-        return res.status(400).json({ 
-            success: false, 
-            error: "Le nom du vin est requis" 
-        });
+        return res.status(400).json({ success: false, error: "Le nom du vin est requis" });
     }
-    
     const wineInfo = ai.searchWineByName(name);
-    
-    if (wineInfo) {
-        res.json({
-            success: true,
-            wine: wineInfo
-        });
-    } else {
-        res.json({
-            success: false,
-            message: "Aucun vin trouvé avec ce nom"
-        });
-    }
+    res.json({ success: wineInfo ? true : false, wine: wineInfo });
 });
 
 module.exports = router;
