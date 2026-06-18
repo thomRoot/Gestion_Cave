@@ -21,7 +21,7 @@ const upload = multer({
             cb(null, uniqueSuffix + path.extname(file.originalname));
         },
         limits: {
-            fileSize: 5 * 1024 * 1024 // 5Mo max
+            fileSize: 5 * 1024 * 1024 // 5Mo max pour le fichier source
         }
     })
 });
@@ -37,12 +37,54 @@ router.get('/', (req, res) => {
     });
 });
 
-// Analyser une bouteille avec l'IA (SANS envoi d'image, juste texte)
-router.post('/analyze', async (req, res) => {
+// Analyser une bouteille avec l'IA (avec image compressée)
+router.post('/analyze', upload.single('image'), async (req, res) => {
+    try {
+        let imagePath = null;
+        
+        // Si une image a été uploadée
+        if (req.file) {
+            imagePath = path.join(__dirname, '../../public/uploads', req.file.filename);
+        }
+        
+        // Analyser avec l'IA locale
+        const result = await ai.analyzeBottleImage(imagePath);
+        
+        if (result) {
+            res.json({
+                success: true,
+                bottleInfo: result
+            });
+        } else {
+            // Si l'analyse échoue, retourner des infos par défaut
+            res.json({
+                success: true,
+                bottleInfo: {
+                    name: null,
+                    year: null,
+                    grapes: null,
+                    region: null,
+                    drinkFrom: null,
+                    drinkTo: null,
+                    foodPairing: "Viandes, Fromages, Plats variés",
+                    temperature: "10-12°C"
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Erreur analyse IA :", error);
+        res.status(500).json({
+            success: false,
+            error: "Erreur serveur lors de l'analyse"
+        });
+    }
+});
+
+// Analyser avec texte uniquement (fallback)
+router.post('/analyze-text', async (req, res) => {
     try {
         const { name, year, grapes, region } = req.body;
         
-        // Si on a déjà des infos, on les utilise directement
         if (name || year || grapes || region) {
             const bottleInfo = ai.extractBottleInfoFromText(
                 `${name || ''} ${year || ''} ${grapes || ''} ${region || ''}`
@@ -53,7 +95,6 @@ router.post('/analyze', async (req, res) => {
             });
         }
         
-        // Sinon, retourner des infos par défaut
         res.json({
             success: true,
             bottleInfo: {
@@ -68,10 +109,10 @@ router.post('/analyze', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Erreur lors de l'analyse IA :", error);
+        console.error("Erreur analyse texte :", error);
         res.status(500).json({
             success: false,
-            error: "Erreur serveur lors de l'analyse"
+            error: "Erreur serveur"
         });
     }
 });
@@ -85,7 +126,7 @@ router.post('/', upload.single('photo'), (req, res) => {
         bottleData.photo = req.file.filename;
     }
 
-    // Si une photo en base64 est fournie (depuis la caméra), la sauvegarder
+    // Si une photo en base64 est fournie (depuis la galerie), la sauvegarder
     if (bottleData.photo && bottleData.photo.startsWith('data:image/')) {
         const base64Data = bottleData.photo.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
@@ -137,6 +178,20 @@ router.get('/search', (req, res) => {
     }
     const wineInfo = ai.searchWineByName(name);
     res.json({ success: wineInfo ? true : false, wine: wineInfo });
+});
+
+// Réinitialiser la base de données (NOUVEAU)
+router.post('/reset-db', (req, res) => {
+    try {
+        const dbPath = path.join(__dirname, '../../data/cave.db');
+        if (fs.existsSync(dbPath)) {
+            fs.unlinkSync(dbPath);
+        }
+        res.json({ success: true, message: "Base de données réinitialisée" });
+    } catch (error) {
+        console.error("Erreur réinitialisation DB :", error);
+        res.status(500).json({ success: false, error: "Erreur lors de la réinitialisation" });
+    }
 });
 
 module.exports = router;
