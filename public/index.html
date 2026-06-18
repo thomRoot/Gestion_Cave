@@ -2,74 +2,156 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ma Cave à Vin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ma Cave à Vin - Gestion Intelligente</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Arrière-plan élégant -->
+    <div class="background-overlay"></div>
+    
     <div class="header">
-        <h1>Ma Cave à Vin</h1>
+        <div class="logo-container">
+            <i class="fas fa-wine-bottle"></i>
+            <h1>Ma Cave à Vin</h1>
+        </div>
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Rechercher (ex: bœuf, 2015, Bordeaux)...">
-            <button id="searchButton">🔍</button>
+            <button id="searchButton"><i class="fas fa-search"></i></button>
         </div>
-        <button id="addBottleButton">➕ Ajouter une bouteille</button>
+        <div class="header-buttons">
+            <button id="aiHelpButton" class="ai-help-btn">
+                <i class="fas fa-robot"></i> Aide IA
+            </button>
+            <button id="addBottleButton">
+                <i class="fas fa-plus"></i> Ajouter
+            </button>
+        </div>
     </div>
 
     <div class="cave-container" id="caveContainer">
         <!-- La grille sera générée dynamiquement ici -->
     </div>
 
+    <!-- Bouton flottant pour ajouter une bouteille (mobile) -->
+    <button id="mobileAddButton" class="mobile-fab">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Popup pour l'aide IA -->
+    <div class="popup" id="aiHelpPopup">
+        <div class="popup-content ai-popup">
+            <span class="close">&times;</span>
+            <h2><i class="fas fa-robot"></i> Assistant IA</h2>
+            <div class="ai-chat-container">
+                <div class="ai-messages" id="aiMessages">
+                    <div class="ai-message bot">
+                        <div class="message-content">
+                            <p>Bonjour ! Je suis votre assistant IA pour la gestion de votre cave à vin.</p>
+                            <p>Je peux vous aider à :</p>
+                            <ul>
+                                <li>Reconnaître une bouteille à partir d'une photo</li>
+                                <li>Remplir automatiquement les informations (nom, année, cépage, etc.)</li>
+                                <li>Vous conseiller sur les accords mets-vins</li>
+                                <li>Déterminer la période optimale de consommation</li>
+                                <li>Trouver la température de service idéale</li>
+                            </ul>
+                            <p>Il vous suffit de prendre une photo de votre bouteille ou de la télécharger !</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-input-container">
+                    <input type="text" id="aiPromptInput" placeholder="Posez-moi une question sur votre vin...">
+                    <button id="aiSendButton"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Popup pour ajouter/modifier une bouteille -->
     <div class="popup" id="bottlePopup">
         <div class="popup-content">
             <span class="close">&times;</span>
-            <h2 id="popupTitle">Ajouter une bouteille</h2>
+            <h2 id="popupTitle">
+                <i class="fas fa-wine-bottle"></i> 
+                <span>Ajouter une bouteille</span>
+            </h2>
             <form id="bottleForm">
                 <div class="form-group">
-                    <label for="bottlePhoto">Photo :</label>
+                    <label for="bottlePhoto">
+                        <i class="fas fa-camera"></i> Photo de la bouteille
+                    </label>
                     <div class="camera-container">
-                        <video id="cameraPreview" autoplay></video>
-                        <button type="button" id="takePhotoButton">📷 Prendre une photo</button>
-                        <button type="button" id="uploadPhotoButton">📁 Télécharger une image</button>
-                        <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                        <div class="photo-preview-container">
+                            <video id="cameraPreview" autoplay playsinline></video>
+                            <img id="bottlePhotoPreview" style="display: none;">
+                        </div>
+                        <div class="camera-buttons">
+                            <button type="button" id="takePhotoButton" class="btn-primary">
+                                <i class="fas fa-camera"></i> Prendre une photo
+                            </button>
+                            <button type="button" id="uploadPhotoButton" class="btn-secondary">
+                                <i class="fas fa-image"></i> Galerie
+                            </button>
+                            <input type="file" id="photoUpload" accept="image/*" capture="environment" style="display: none;">
+                        </div>
                         <canvas id="photoCanvas" style="display: none;"></canvas>
                     </div>
-                    <img id="bottlePhotoPreview" style="max-width: 200px; display: none;">
                 </div>
-                <div class="form-group">
-                    <label for="bottleName">Nom :</label>
-                    <input type="text" id="bottleName" required>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bottleName"><i class="fas fa-tag"></i> Nom *</label>
+                        <input type="text" id="bottleName" required placeholder="Ex: Château Margaux 2015">
+                    </div>
+                    <div class="form-group">
+                        <label for="bottleYear"><i class="fas fa-calendar"></i> Année</label>
+                        <input type="number" id="bottleYear" min="1900" max="2099" placeholder="Ex: 2015">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="bottleYear">Année :</label>
-                    <input type="number" id="bottleYear" min="1900" max="2099">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bottleGrapes"><i class="fas fa-leaf"></i> Cépage</label>
+                        <input type="text" id="bottleGrapes" placeholder="Ex: Cabernet Sauvignon">
+                    </div>
+                    <div class="form-group">
+                        <label for="bottleRegion"><i class="fas fa-map-marker-alt"></i> Région</label>
+                        <input type="text" id="bottleRegion" placeholder="Ex: Bordeaux">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="bottleGrapes">Cépage :</label>
-                    <input type="text" id="bottleGrapes">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bottleDrinkFrom"><i class="fas fa-calendar-check"></i> À boire à partir de</label>
+                        <input type="number" id="bottleDrinkFrom" min="1900" max="2099" placeholder="Ex: 2025">
+                    </div>
+                    <div class="form-group">
+                        <label for="bottleDrinkTo"><i class="fas fa-calendar-times"></i> Jusqu'à</label>
+                        <input type="number" id="bottleDrinkTo" min="1900" max="2099" placeholder="Ex: 2035">
+                    </div>
                 </div>
+                
                 <div class="form-group">
-                    <label for="bottleRegion">Région :</label>
-                    <input type="text" id="bottleRegion">
+                    <label for="bottleFoodPairing"><i class="fas fa-utensils"></i> Accords mets-vins</label>
+                    <textarea id="bottleFoodPairing" rows="2" placeholder="Ex: Bœuf, Fromage, Gibier"></textarea>
                 </div>
+                
                 <div class="form-group">
-                    <label for="bottleDrinkFrom">Période optimale (de) :</label>
-                    <input type="number" id="bottleDrinkFrom" min="1900" max="2099">
-                </div>
-                <div class="form-group">
-                    <label for="bottleDrinkTo">Période optimale (à) :</label>
-                    <input type="number" id="bottleDrinkTo" min="1900" max="2099">
-                </div>
-                <div class="form-group">
-                    <label for="bottleFoodPairing">Accords mets-vins :</label>
-                    <input type="text" id="bottleFoodPairing" placeholder="Ex: Bœuf, Fromage, Gibier">
-                </div>
-                <div class="form-group">
-                    <label for="bottleTemperature">Température de service :</label>
+                    <label for="bottleTemperature"><i class="fas fa-thermometer-half"></i> Température de service</label>
                     <input type="text" id="bottleTemperature" placeholder="Ex: 16-18°C">
                 </div>
-                <button type="submit" id="saveBottleButton">Enregistrer</button>
+                
+                <div class="form-actions">
+                    <button type="button" id="analyzeWithAI" class="btn-ai">
+                        <i class="fas fa-magic"></i> Analyser avec IA
+                    </button>
+                    <button type="submit" id="saveBottleButton" class="btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -78,22 +160,56 @@
     <div class="popup" id="bottleDetailsPopup">
         <div class="popup-content">
             <span class="close">&times;</span>
-            <h2 id="detailsTitle">Détails de la bouteille</h2>
+            <h2 id="detailsTitle">
+                <i class="fas fa-info-circle"></i> 
+                <span>Détails de la bouteille</span>
+            </h2>
             <div class="bottle-details">
-                <img id="detailsPhoto" style="max-width: 200px;" src="assets/bottle-icon.png" alt="Bouteille">
-                <p><strong>Nom :</strong> <span id="detailsName"></span></p>
-                <p><strong>Année :</strong> <span id="detailsYear"></span></p>
-                <p><strong>Cépage :</strong> <span id="detailsGrapes"></span></p>
-                <p><strong>Région :</strong> <span id="detailsRegion"></span></p>
-                <p><strong>Période optimale :</strong> <span id="detailsDrinkPeriod"></span></p>
-                <div class="drink-period-bar">
-                    <div id="drinkPeriodBar" class="period-bar"></div>
+                <div class="bottle-image-container">
+                    <img id="detailsPhoto" src="assets/bottle-icon.png" alt="Bouteille">
                 </div>
-                <p><strong>Accords mets-vins :</strong> <span id="detailsFoodPairing"></span></p>
-                <p><strong>Température de service :</strong> <span id="detailsTemperature"></span></p>
+                
+                <div class="bottle-info-grid">
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-tag"></i> Nom</span>
+                        <span class="info-value" id="detailsName"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-calendar"></i> Année</span>
+                        <span class="info-value" id="detailsYear"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-leaf"></i> Cépage</span>
+                        <span class="info-value" id="detailsGrapes"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-map-marker-alt"></i> Région</span>
+                        <span class="info-value" id="detailsRegion"></span>
+                    </div>
+                    <div class="info-item full-width">
+                        <span class="info-label"><i class="fas fa-calendar-alt"></i> Période optimale</span>
+                        <span class="info-value" id="detailsDrinkPeriod"></span>
+                    </div>
+                    <div class="drink-period-bar">
+                        <div id="drinkPeriodBar" class="period-bar"></div>
+                    </div>
+                    <div class="info-item full-width">
+                        <span class="info-label"><i class="fas fa-utensils"></i> Accords mets-vins</span>
+                        <span class="info-value" id="detailsFoodPairing"></span>
+                    </div>
+                    <div class="info-item full-width">
+                        <span class="info-label"><i class="fas fa-thermometer-half"></i> Température de service</span>
+                        <span class="info-value" id="detailsTemperature"></span>
+                    </div>
+                </div>
+                
                 <div class="button-group">
-                    <button id="editBottleButton">✏️ Modifier</button>
-                    <button id="deleteBottleButton">🗑️ Supprimer</button>
+                    <button id="editBottleButton" class="btn-secondary">
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button id="deleteBottleButton" class="btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
                 </div>
             </div>
         </div>
@@ -102,7 +218,8 @@
     <!-- Popup pour la configuration initiale de la cave -->
     <div class="popup" id="caveConfigPopup">
         <div class="popup-content">
-            <h2>Configurer votre cave</h2>
+            <span class="close">&times;</span>
+            <h2><i class="fas fa-cog"></i> Configurer votre cave</h2>
             <form id="caveConfigForm">
                 <div class="form-group">
                     <label for="caveRows">Nombre de rangées :</label>
@@ -112,8 +229,18 @@
                     <label for="caveCols">Nombre de colonnes :</label>
                     <input type="number" id="caveCols" min="1" max="20" value="10">
                 </div>
-                <button type="submit">Enregistrer</button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Indicateurs de chargement -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Analyse en cours...</p>
         </div>
     </div>
 

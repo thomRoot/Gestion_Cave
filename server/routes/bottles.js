@@ -34,6 +34,41 @@ router.get('/', (req, res) => {
     });
 });
 
+// Analyser une image de bouteille avec l'IA
+router.post('/analyze', async (req, res) => {
+    try {
+        const { image } = req.body;
+        
+        if (!image) {
+            return res.status(400).json({ 
+                success: false, 
+                error: "Aucune image fournie" 
+            });
+        }
+        
+        // Analyser l'image avec l'IA locale
+        const result = await ai.analyzeBottleImageBase64(image);
+        
+        if (result) {
+            res.json({
+                success: true,
+                bottleInfo: result
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: "Échec de l'analyse de l'image"
+            });
+        }
+    } catch (error) {
+        console.error("Erreur lors de l'analyse IA :", error);
+        res.status(500).json({
+            success: false,
+            error: "Erreur serveur lors de l'analyse"
+        });
+    }
+});
+
 // Ajouter ou mettre à jour une bouteille
 router.post('/', upload.single('photo'), (req, res) => {
     const bottleData = req.body;
@@ -77,6 +112,44 @@ router.delete('/', (req, res) => {
             res.json({ success: true });
         }
     });
+});
+
+// Obtenir des recommandations de vin
+router.get('/recommendations', (req, res) => {
+    const { occasion, food, budget } = req.query;
+    
+    const recommendations = ai.recommendWineForOccasion(occasion, food, budget);
+    
+    res.json({
+        success: true,
+        recommendations
+    });
+});
+
+// Rechercher un vin par nom
+router.get('/search', (req, res) => {
+    const { name } = req.query;
+    
+    if (!name) {
+        return res.status(400).json({ 
+            success: false, 
+            error: "Le nom du vin est requis" 
+        });
+    }
+    
+    const wineInfo = ai.searchWineByName(name);
+    
+    if (wineInfo) {
+        res.json({
+            success: true,
+            wine: wineInfo
+        });
+    } else {
+        res.json({
+            success: false,
+            message: "Aucun vin trouvé avec ce nom"
+        });
+    }
 });
 
 module.exports = router;

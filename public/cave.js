@@ -1,3 +1,6 @@
+// cave.js - Gestion de la grille de la cave à vin
+// Version 2.0 avec support mobile amélioré
+
 // Variables globales
 let caveRows = 5;
 let caveCols = 10;
@@ -53,23 +56,26 @@ function renderCaveGrid() {
     const caveContainer = document.getElementById('caveContainer');
     caveContainer.innerHTML = '';
 
-    // Définir le nombre de colonnes CSS
-    caveContainer.style.gridTemplateColumns = `repeat(${caveCols}, 80px)`;
+    // Définir le nombre de colonnes CSS - utiliser minmax pour une grille responsive
+    caveContainer.style.gridTemplateColumns = `repeat(${caveCols}, minmax(70px, 1fr))`;
 
     for (let row = 0; row < caveRows; row++) {
         for (let col = 0; col < caveCols; col++) {
             const cell = document.createElement('div');
             cell.className = 'cave-cell';
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+            
             if (!caveGrid[row][col]) {
                 cell.classList.add('empty');
+                cell.innerHTML = '<div class="bottle-icon"></div>';
             } else {
                 const bottle = caveGrid[row][col];
+                const bottleName = bottle.name || 'Bouteille';
                 cell.innerHTML = `
                     <div class="bottle-icon"></div>
-                    <div class="bottle-name">${bottle.name || 'Bouteille'}</div>
+                    <div class="bottle-name">${escapeHtml(bottleName)}</div>
                 `;
-                cell.dataset.row = row;
-                cell.dataset.col = col;
             }
 
             // Gestion du clic sur une cellule
@@ -77,12 +83,34 @@ function renderCaveGrid() {
                 if (!caveGrid[row][col]) {
                     // Cellule vide : ouvrir le formulaire d'ajout
                     selectedCell = { row, col };
-                    window.openAddBottlePopup();
+                    openAddBottlePopup();
                 } else {
                     // Cellule occupée : ouvrir la popup de détails
                     selectedCell = { row, col };
-                    window.openBottleDetailsPopup(caveGrid[row][col]);
+                    openBottleDetailsPopup(caveGrid[row][col]);
                 }
+            });
+
+            // Gestion du touch pour mobile (appui long pour les détails)
+            cell.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                const startTime = Date.now();
+                
+                cell.addEventListener('touchend', (endEvent) => {
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    // Si appui court sur cellule vide
+                    if (duration < 300 && !caveGrid[row][col]) {
+                        selectedCell = { row, col };
+                        openAddBottlePopup();
+                    }
+                    // Si appui long sur cellule occupée
+                    else if (duration >= 300 && caveGrid[row][col]) {
+                        selectedCell = { row, col };
+                        openBottleDetailsPopup(caveGrid[row][col]);
+                    }
+                }, { once: true });
             });
 
             caveContainer.appendChild(cell);
@@ -92,7 +120,7 @@ function renderCaveGrid() {
 
 // Ouvrir la popup d'ajout de bouteille
 function openAddBottlePopup() {
-    document.getElementById('popupTitle').textContent = 'Ajouter une bouteille';
+    document.getElementById('popupTitle').innerHTML = '<i class="fas fa-wine-bottle"></i> Ajouter une bouteille';
     document.getElementById('bottleForm').reset();
     document.getElementById('bottlePhotoPreview').style.display = 'none';
     document.getElementById('bottlePopup').style.display = 'flex';
@@ -103,8 +131,10 @@ function openAddBottlePopup() {
 
 // Ouvrir la popup de détails d'une bouteille
 function openBottleDetailsPopup(bottle) {
-    document.getElementById('detailsTitle').textContent = bottle.name || 'Détails de la bouteille';
-    document.getElementById('detailsPhoto').src = bottle.photo ? `/uploads/${bottle.photo}` : 'assets/bottle-icon.png';
+    document.getElementById('detailsTitle').innerHTML = '<i class="fas fa-info-circle"></i> <span>' + (bottle.name || 'Détails de la bouteille') + '</span>';
+    
+    const photoSrc = bottle.photo ? `/uploads/${bottle.photo}` : 'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
+    document.getElementById('detailsPhoto').src = photoSrc;
     document.getElementById('detailsName').textContent = bottle.name || 'Inconnu';
     document.getElementById('detailsYear').textContent = bottle.year || 'Inconnu';
     document.getElementById('detailsGrapes').textContent = bottle.grapes || 'Inconnu';
@@ -159,7 +189,15 @@ function saveCaveConfig(rows, cols) {
     })
     .catch(error => {
         console.error("Erreur lors de la sauvegarde de la configuration :", error);
+        alert("Erreur lors de la sauvegarde de la configuration. Veuillez réessayer.");
     });
+}
+
+// Échapper le HTML pour éviter les injections XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Exporter les fonctions pour les utiliser dans d'autres scripts

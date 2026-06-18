@@ -1,118 +1,331 @@
-/* Styles de base */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #f5f5f5;
+/* ============================================
+   MA CAVE À VIN - Styles Modernes & Responsive
+   ============================================ */
+
+/* Variables CSS */
+:root {
+    /* Couleurs principales */
+    --primary-color: #8B0000; /* Rouge vin */
+    --primary-dark: #6B0000;
+    --primary-light: #A00000;
+    --secondary-color: #D4AF37; /* Or */
+    --secondary-dark: #B8941F;
+    --accent-color: #4E342E; /* Marron foncé */
+    --background-color: #121212;
+    --surface-color: #1E1E1E;
+    --surface-light: #2A2A2A;
+    
+    /* Couleurs de texte */
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --text-muted: #707070;
+    
+    /* Couleurs de statut */
+    --success-color: #4CAF50;
+    --warning-color: #FF9800;
+    --error-color: #F44336;
+    --info-color: #2196F3;
+    
+    /* Espacements */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Bordures */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
+    
+    /* Ombres */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Polices */
+    --font-primary: 'Playfair Display', serif;
+    --font-secondary: 'Roboto', sans-serif;
 }
 
+/* Reset de base */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-secondary);
+    background: var(--background-color);
+    color: var(--text-primary);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Arrière-plan élégant avec effet de texture */
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(ellipse at 20% 80%, rgba(139, 0, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(78, 52, 46, 0.2) 0%, transparent 70%),
+        var(--background-color);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ============================================
+   EN-TÊTE
+   ============================================ */
 .header {
-    text-align: center;
-    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--surface-color) 0%, var(--surface-light) 100%);
+    padding: var(--spacing-md) var(--spacing-lg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.logo-container i {
+    font-size: 2rem;
+    color: var(--secondary-color);
 }
 
 .header h1 {
-    color: #8B0000; /* Rouge vin */
+    font-family: var(--font-primary);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    letter-spacing: 1px;
 }
 
 .search-bar {
-    margin: 10px 0;
     display: flex;
-    justify-content: center;
-    gap: 10px;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
 }
 
 .search-bar input {
-    padding: 8px;
-    width: 300px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--surface-light);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all var(--transition-normal);
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.3);
+}
+
+.search-bar input::placeholder {
+    color: var(--text-muted);
 }
 
 .search-bar button {
-    padding: 8px 15px;
-    background-color: #8B0000;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius-md);
     cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-bar button:hover {
-    background-color: #A00000;
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.header-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+.header-buttons button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 #addBottleButton {
-    padding: 8px 15px;
-    background-color: #4CAF50;
+    background: var(--success-color);
     color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 10px;
 }
 
 #addBottleButton:hover {
-    background-color: #45a049;
+    background: #3e8e41;
+    transform: translateY(-1px);
 }
 
-/* Grille de la cave */
+.ai-help-btn {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+    color: var(--accent-color);
+}
+
+.ai-help-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   GRILLE DE LA CAVE
+   ============================================ */
 .cave-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 80px);
-    gap: 10px;
-    justify-content: center;
-    margin: 20px auto;
-    max-width: 900px;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin: 0 auto;
+    max-width: 1200px;
 }
 
 .cave-cell {
-    width: 80px;
-    height: 80px;
-    border: 1px solid #ccc;
+    aspect-ratio: 1;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #f9f9f9;
+    background: var(--surface-color);
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
 }
 
 .cave-cell:hover {
-    background-color: #e9e9e9;
+    background: var(--surface-light);
+    transform: scale(1.02);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+}
+
+.cave-cell:active {
+    transform: scale(0.98);
 }
 
 .cave-cell.empty {
-    background-color: #eee;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .cave-cell.empty::after {
     content: "+";
-    font-size: 24px;
-    color: #999;
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 300;
 }
 
 .cave-cell .bottle-icon {
     width: 40px;
     height: 40px;
-    background-image: url('assets/bottle-icon.png');
+    background-image: url('https://cdn-icons-png.flaticon.com/512/3173/3173612.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .cave-cell .bottle-name {
-    font-size: 10px;
+    font-size: 0.65rem;
     text-align: center;
-    margin-top: 5px;
-    color: #333;
+    margin-top: 4px;
+    color: var(--text-secondary);
     word-break: break-word;
-    max-width: 70px;
+    max-width: 90%;
+    line-height: 1.2;
+    font-weight: 400;
 }
 
-/* Popup */
+.cave-cell.highlight {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%);
+    border: 2px solid var(--success-color);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+/* ============================================
+   BOUTON FLOTTANT (Mobile)
+   ============================================ */
+.mobile-fab {
+    position: fixed;
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-normal);
+    z-index: 1000;
+}
+
+.mobile-fab:hover {
+    background: var(--primary-light);
+    transform: scale(1.05);
+}
+
+.mobile-fab:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   POPUPS
+   ============================================ */
 .popup {
     display: none;
     position: fixed;
@@ -120,179 +333,685 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
     justify-content: center;
     align-items: center;
+    padding: var(--spacing-md);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .popup-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 90%;
-    max-width: 500px;
+    background: var(--surface-color);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    width: 100%;
+    max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: popupSlideIn 0.3s ease;
+}
+
+@keyframes popupSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .popup .close {
-    float: right;
-    font-size: 24px;
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    font-size: 1.5rem;
+    color: var(--text-muted);
     cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all var(--transition-normal);
 }
 
 .popup .close:hover {
-    color: #8B0000;
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
 }
 
+.popup h2 {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.popup h2 i {
+    color: var(--secondary-color);
+}
+
+/* ============================================
+   FORMULAIRE DE BOUTEILLE
+   ============================================ */
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-md);
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
-.form-group input {
+.form-group label i {
+    margin-right: var(--spacing-xs);
+    color: var(--primary-color);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
     width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--surface-light);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all var(--transition-normal);
+    font-family: inherit;
 }
 
-button[type="submit"], .button-group button {
-    padding: 10px 15px;
-    background-color: #8B0000;
-    color: white;
-    border: none;
-    border-radius: 4px;
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+}
+
+/* Camera Container */
+.camera-container {
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.photo-preview-container {
+    position: relative;
+    margin-bottom: var(--spacing-md);
+    background: black;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    aspect-ratio: 4/3;
+}
+
+#cameraPreview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+#bottlePhotoPreview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.camera-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+/* ============================================
+   BOUTONS
+   ============================================ */
+button {
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
     cursor: pointer;
-    width: 100%;
-    margin-top: 10px;
+    transition: all var(--transition-normal);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
 }
 
-button[type="submit"]:hover, .button-group button:hover {
-    background-color: #A00000;
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--surface-light);
+    color: var(--text-primary);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-danger {
+    background: var(--error-color);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-lg);
+}
+
+.btn-danger:hover {
+    background: #d32f2f;
+}
+
+.btn-ai {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+    color: var(--accent-color);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    width: 100%;
+    font-weight: 600;
+}
+
+.btn-ai:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.form-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
 }
 
 .button-group {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
 }
 
 .button-group button {
-    width: auto;
     flex: 1;
+}
+
+/* ============================================
+   DÉTAILS DE LA BOUTEILLE
+   ============================================ */
+.bottle-details {
+    text-align: center;
+}
+
+.bottle-image-container {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+}
+
+.bottle-image-container img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: var(--border-radius-sm);
+    object-fit: contain;
+    box-shadow: var(--shadow-md);
+}
+
+.bottle-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.info-item {
+    background: var(--surface-light);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    text-align: left;
+}
+
+.info-item.full-width {
+    grid-column: span 2;
+}
+
+.info-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.info-label i {
+    margin-right: var(--spacing-xs);
+    color: var(--primary-color);
+}
+
+.info-value {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
 }
 
 /* Barre de période de consommation */
 .drink-period-bar {
-    margin: 10px 0;
-    height: 20px;
-    background-color: #eee;
-    border-radius: 10px;
+    grid-column: span 2;
+    margin: var(--spacing-md) 0;
+    height: 8px;
+    background: var(--surface-light);
+    border-radius: var(--border-radius-xl);
     overflow: hidden;
 }
 
 .period-bar {
     height: 100%;
-    border-radius: 10px;
-    transition: all 0.3s;
+    border-radius: var(--border-radius-xl);
+    transition: all var(--transition-slow);
 }
 
-/* Couleurs de la barre */
 .period-bar.too-early {
-    background-color: #4285F4; /* Bleu */
+    background: linear-gradient(90deg, var(--info-color), #1976D2);
     width: 33%;
 }
 
 .period-bar.optimal {
-    background-color: #34A853; /* Vert */
+    background: linear-gradient(90deg, var(--success-color), #2E7D32);
     width: 100%;
 }
 
 .period-bar.too-late {
-    background-color: #EA4335; /* Rouge */
+    background: linear-gradient(90deg, var(--error-color), #C62828);
     width: 33%;
+    margin-left: auto;
 }
 
-/* Camera preview */
-.camera-container {
-    text-align: center;
-    margin-bottom: 15px;
+/* ============================================
+   POPUP AIDE IA
+   ============================================ */
+.ai-popup {
+    max-width: 500px;
 }
 
-#cameraPreview {
+.ai-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+}
+
+.ai-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.ai-message {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    max-width: 90%;
+}
+
+.ai-message.bot {
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid var(--secondary-color);
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.ai-message.user {
+    background: rgba(139, 0, 0, 0.15);
+    border: 1px solid var(--primary-color);
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.ai-message .message-content {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.ai-message .message-content ul {
+    margin: var(--spacing-sm) 0;
+    padding-left: var(--spacing-lg);
+}
+
+.ai-message .message-content li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.ai-input-container {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.ai-input-container input {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--surface-light);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.ai-input-container input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
+}
+
+.ai-input-container button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--secondary-color);
+    color: var(--accent-color);
+    border-radius: var(--border-radius-md);
+}
+
+.ai-input-container button:hover {
+    background: var(--secondary-dark);
+}
+
+/* ============================================
+   LOADING OVERLAY
+   ============================================ */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 300px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    display: none;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
 }
 
-#photoCanvas {
-    display: none;
-}
-
-#bottlePhotoPreview {
-    display: block;
-    margin: 10px auto;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-/* Boutons de la camera */
-#takePhotoButton, #uploadPhotoButton {
-    margin: 5px;
-    padding: 8px 15px;
-    background-color: #4285F4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#takePhotoButton:hover, #uploadPhotoButton:hover {
-    background-color: #3367D6;
-}
-
-/* Surlignage des bouteilles */
-.cave-cell.highlight {
-    background-color: #d4edda; /* Vert clair */
-    border: 2px solid #28a745;
-}
-
-/* Style pour les détails de la bouteille */
-.bottle-details {
+.loading-spinner {
     text-align: center;
+    color: white;
 }
 
-.bottle-details img {
-    margin-bottom: 15px;
-    border-radius: 5px;
+.loading-spinner i {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--secondary-color);
 }
 
-.bottle-details p {
-    margin: 8px 0;
+.loading-spinner p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablettes */
+@media (max-width: 1024px) {
     .cave-container {
-        grid-template-columns: repeat(auto-fill, 60px);
-        gap: 5px;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: var(--spacing-xs);
     }
     
     .cave-cell {
-        width: 60px;
-        height: 60px;
+        aspect-ratio: 1;
+    }
+    
+    .cave-cell .bottle-name {
+        font-size: 0.6rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .bottle-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-item.full-width {
+        grid-column: span 1;
+    }
+    
+    .drink-period-bar {
+        grid-column: span 1;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+    
+    .header {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .logo-container h1 {
+        font-size: 1.4rem;
+    }
+    
+    .search-bar {
+        flex-direction: column;
     }
     
     .search-bar input {
-        width: 200px;
+        width: 100%;
     }
+    
+    .header-buttons {
+        flex-wrap: wrap;
+    }
+    
+    .cave-container {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: var(--spacing-xs);
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .cave-cell {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .cave-cell .bottle-icon {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .cave-cell .bottle-name {
+        font-size: 0.55rem;
+        max-width: 45px;
+    }
+    
+    .popup-content {
+        padding: var(--spacing-md);
+        margin: var(--spacing-sm);
+    }
+    
+    .popup h2 {
+        font-size: 1.2rem;
+    }
+    
+    .camera-buttons {
+        flex-direction: column;
+    }
+    
+    .camera-buttons button {
+        width: 100%;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group button {
+        width: 100%;
+    }
+    
+    .ai-popup {
+        max-width: 95%;
+        height: 80vh;
+    }
+    
+    .ai-chat-container {
+        height: 100%;
+    }
+    
+    .ai-messages {
+        padding: var(--spacing-sm);
+    }
+    
+    .ai-message {
+        padding: var(--spacing-sm);
+        font-size: 0.85rem;
+    }
+    
+    /* Masquer le bouton Ajouter dans le header sur mobile */
+    #addBottleButton {
+        display: none;
+    }
+    
+    /* Afficher le bouton flottant */
+    .mobile-fab {
+        display: flex;
+    }
+}
+
+/* Très petits écrans */
+@media (max-width: 480px) {
+    .cave-container {
+        grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    }
+    
+    .cave-cell {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .cave-cell .bottle-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .cave-cell .bottle-name {
+        font-size: 0.5rem;
+        max-width: 40px;
+    }
+    
+    .header-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-buttons button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .search-bar {
+        margin-bottom: var(--spacing-sm);
+    }
+}
+
+/* Animations supplémentaires */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.cave-cell.empty::after {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-light);
+}
+
+/* Focus visible pour l'accessibilité */
+:focus-visible {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
+}
+
+/* Sélection de texte */
+::selection {
+    background: var(--primary-color);
+    color: white;
 }
