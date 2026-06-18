@@ -253,3 +253,32 @@ window.cave = {
     setCaveGrid: (grid) => { caveGrid = grid; },
     updateDrinkPeriodBar
 };
+
+// Calculer le statut de maturité d'une bouteille
+function getMaturityStatus(drinkFrom, drinkTo) {
+    if (!drinkFrom || !drinkTo) return null;
+
+    const currentYear = new Date().getFullYear();
+
+    if (currentYear < drinkFrom) {
+        return 'waiting';
+    } else if (currentYear >= drinkFrom && currentYear <= drinkTo) {
+        return 'ready';
+    } else {
+        return 'past';
+    }
+}
+
+// Retourner l'icône de maturité
+function getMaturityIcon(status) {
+    switch(status) {
+        case 'waiting':
+            return '<i class="fas fa-hourglass-half"></i>';
+        case 'ready':
+            return '<i class="fas fa-check"></i>';
+        case 'past':
+            return '<i class="fas fa-exclamation-triangle"></i>';
+        default:
+            return '';
+    }
+}
