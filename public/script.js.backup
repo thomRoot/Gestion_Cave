@@ -367,7 +367,7 @@ async function analyzeWithAI() {
 
         try {
             showLoading("Analyse du texte en cours...");
-            const response = await fetch('/api/bottles/analyze', {
+            const response = await fetch('/api/bottles/analyze-text', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, year, grapes, region })
