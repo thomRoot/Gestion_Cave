@@ -18,13 +18,20 @@ function initCave() {
                 caveCols = config.cols;
                 loadCaveGrid();
             } else {
-                // Afficher la popup de configuration
-                document.getElementById('caveConfigPopup').style.display = 'flex';
+                // Afficher la popup de configuration UNIQUEMENT si on est sur la page principale
+                // et que la cave n'est pas encore configurée
+                const caveConfigPopup = document.getElementById('caveConfigPopup');
+                if (caveConfigPopup && caveConfigPopup.style.display !== 'flex') {
+                    caveConfigPopup.style.display = 'flex';
+                }
             }
         })
         .catch(error => {
             console.error("Erreur lors du chargement de la configuration :", error);
-            document.getElementById('caveConfigPopup').style.display = 'flex';
+            // Ne pas afficher la popup de config en cas d'erreur, juste charger une grille par défaut
+            caveRows = 5;
+            caveCols = 10;
+            loadCaveGrid();
         });
 }
 
@@ -96,7 +103,8 @@ function renderCaveGrid() {
             }
 
             // Gestion du clic sur une cellule
-            cell.addEventListener('click', () => {
+            cell.addEventListener('click', (e) => {
+                e.stopPropagation(); // Empêcher la propagation du clic
                 if (!caveGrid[row][col]) {
                     // Cellule vide : ouvrir le formulaire d'ajout
                     selectedCell = { row, col };

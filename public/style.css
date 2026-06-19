@@ -95,6 +95,8 @@ p {
     z-index: 1000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
 }
 
 .logo-container {
@@ -142,6 +144,7 @@ p {
     font-size: 1rem;
     transition: var(--transition);
     outline: none;
+    min-width: 150px;
 }
 
 .search-bar input:focus {
@@ -162,6 +165,7 @@ p {
     cursor: pointer;
     transition: var(--transition);
     flex-shrink: 0;
+    min-height: 40px;
 }
 
 .search-bar button:hover {
@@ -170,6 +174,10 @@ p {
 
 .search-bar button:active {
     transform: scale(0.98);
+}
+
+.search-bar button i {
+    font-size: 1rem;
 }
 
 /* ==================== BOUTONS ==================== */
@@ -187,6 +195,7 @@ p {
     transition: var(--transition);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    min-height: 44px; /* Meilleure taille tactile pour mobile */
 }
 
 .btn-primary {
@@ -235,6 +244,87 @@ p {
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
 }
 
+/* Boutons du header */
+.header-buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-shrink: 0;
+}
+
+.header-buttons .btn {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    min-height: 40px;
+    border-radius: var(--radius-md);
+}
+
+#addBottleButton {
+    background: var(--primary);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#addBottleButton:hover {
+    background: var(--primary-light);
+}
+
+#addBottleButton i {
+    font-size: 1rem;
+}
+
+#resetDbButton {
+    background: var(--error);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#aiChatButton {
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+    color: var(--bg-dark);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+#aiChatButton:hover {
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+/* Boutons dans les popups */
+.popup-content .btn {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    justify-content: flex-end;
+}
+
+.form-actions .btn {
+    min-width: 120px;
+}
+
+/* Boutons de la popup de détails */
+.button-group {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    justify-content: center;
+}
+
+.button-group .btn {
+    min-width: 140px;
+}
+
 /* ==================== STATUT MISTRAL ==================== */
 .mistral-status {
     display: flex;
@@ -263,11 +353,23 @@ p {
     color: var(--error);
 }
 
+/* Style pour le bouton Vider la cave */
+#resetDbButton {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+}
+
+#resetDbButton i {
+    margin-right: 4px;
+}
+
 /* ==================== GRILLE DE LA CAVE ==================== */
 .cave-container {
     padding: var(--spacing-lg);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    /* Empêcher la propagation des clics sur le container */
+    pointer-events: none;
 }
 
 .cave-grid {
@@ -275,6 +377,8 @@ p {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: var(--spacing-md);
     justify-content: center;
+    /* Réactiver les pointer-events pour les enfants */
+    pointer-events: auto;
 }
 
 .cave-cell {
@@ -291,6 +395,8 @@ p {
     transition: var(--transition);
     min-width: 70px;
     touch-action: manipulation;
+    /* Réactiver les pointer-events */
+    pointer-events: auto;
 }
 
 .cave-cell:hover {
@@ -412,6 +518,11 @@ p {
     color: var(--text-secondary);
 }
 
+.form-group label i {
+    color: var(--secondary);
+    margin-right: var(--spacing-sm);
+}
+
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -441,10 +552,23 @@ p {
 .form-row {
     display: flex;
     gap: var(--spacing-md);
+    flex-wrap: wrap;
 }
 
 .form-row .form-group {
     flex: 1;
+    min-width: 150px;
+}
+
+/* Style pour les inputs de type number */
+.form-group input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.form-group input[type="number"]::-webkit-outer-spin-button,
+.form-group input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 /* ==================== APERÇU PHOTO ==================== */
@@ -459,6 +583,7 @@ p {
     justify-content: center;
     overflow: hidden;
     border: 1px dashed rgba(255, 255, 255, 0.2);
+    min-height: 200px;
 }
 
 #bottlePhotoPreview {
@@ -466,6 +591,28 @@ p {
     max-height: 100%;
     object-fit: contain;
     display: none;
+}
+
+/* Style pour le bouton Analyser avec IA */
+#analyzeWithAI {
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+    color: var(--bg-dark);
+    font-weight: 600;
+    min-width: 140px;
+}
+
+#analyzeWithAI:hover {
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+#saveBottleButton {
+    background: var(--primary);
+    color: white;
+    min-width: 140px;
+}
+
+#saveBottleButton:hover {
+    background: var(--primary-light);
 }
 
 /* ==================== DÉTAILS DE LA BOUTEILLE ==================== */
@@ -573,10 +720,25 @@ p {
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: var(--transition);
+    min-width: 50px;
 }
 
 .ai-send-btn:hover {
     background: var(--primary-light);
+}
+
+.ai-send-btn i {
+    font-size: 1rem;
+}
+
+/* Style pour le bouton Chat IA dans le header */
+#aiChatButton {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+}
+
+#aiChatButton i {
+    margin-right: 6px;
 }
 
 /* ==================== CONFIGURATION DE LA CAVE ==================== */
@@ -611,6 +773,7 @@ p {
     box-shadow: var(--shadow-lg);
     z-index: 1000;
     transition: var(--transition);
+    border: none;
 }
 
 .mobile-fab i {
@@ -620,10 +783,32 @@ p {
 
 .mobile-fab:hover {
     transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(108, 27, 27, 0.5);
 }
 
 .mobile-fab:active {
     transform: scale(0.95);
+}
+
+/* Boutons de caméra */
+.camera-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    justify-content: center;
+}
+
+.camera-buttons .btn {
+    min-width: 140px;
+}
+
+#uploadPhotoButton {
+    background: var(--primary);
+    color: white;
+}
+
+#uploadPhotoButton:hover {
+    background: var(--primary-light);
 }
 
 /* ==================== RESPONSIVE ==================== */
@@ -696,12 +881,13 @@ p {
 /* Tablette (portrait) */
 @media (min-width: 481px) and (max-width: 768px) {
     .cave-cell {
-        min-width: 70px;
-        min-height: 100px;
+        min-width: 80px;
+        min-height: 110px;
     }
 
     .popup-content {
-        width: 80%;
+        width: 85%;
+        max-width: 600px;
     }
 
     .form-row {
@@ -710,6 +896,46 @@ p {
 
     .form-row .form-group {
         width: 100%;
+    }
+
+    /* Améliorer l'affichage du header sur tablette */
+    .header {
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+    }
+
+    .search-bar {
+        order: 3;
+        width: 100%;
+        max-width: 100%;
+        margin-top: var(--spacing-md);
+    }
+
+    .header-buttons {
+        order: 2;
+        width: 100%;
+        justify-content: flex-end;
+        gap: var(--spacing-sm);
+    }
+
+    .header-buttons .btn {
+        flex: 1;
+        max-width: calc(33% - 8px);
+    }
+
+    /* Améliorer la grille sur tablette */
+    .cave-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    /* Améliorer les popups sur tablette */
+    .photo-preview-container {
+        height: 250px;
+    }
+
+    .bottle-info-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -725,21 +951,33 @@ p {
         min-width: 250px;
     }
 
-    .header-actions {
+    .header-buttons {
         order: 3;
     }
 
     .cave-cell {
-        min-width: 80px;
-        min-height: 120px;
+        min-width: 90px;
+        min-height: 130px;
     }
 
     .popup-content {
         width: 600px;
+        max-width: 90vw;
     }
 
     .bottle-info-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Améliorer les boutons du header sur desktop */
+    .header-buttons {
+        gap: var(--spacing-md);
+    }
+
+    .header-buttons .btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+        min-height: 40px;
     }
 }
 

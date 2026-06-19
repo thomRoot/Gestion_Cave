@@ -60,6 +60,11 @@ async function checkMistralStatus() {
 
 // Initialiser l'application au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
+    // Masquer toutes les popups au chargement
+    document.querySelectorAll('.popup').forEach(popup => {
+        popup.style.display = 'none';
+    });
+    
     window.cave.initCave();
     
     // Vérifier le statut de Mistral et Google Vision au chargement
@@ -468,10 +473,10 @@ async function analyzeWithAI() {
     // Vérifier qu'une image est disponible
     if (!window.camera.hasImage()) {
         // Si pas d'image, utiliser le texte saisi
-        const name = document.getElementById('bottleName').value;
-        const year = document.getElementById('bottleYear').value;
-        const grapes = document.getElementById('bottleGrapes').value;
-        const region = document.getElementById('bottleRegion').value;
+        const name = document.getElementById('bottleName').value.trim();
+        const year = document.getElementById('bottleYear').value.trim();
+        const grapes = document.getElementById('bottleGrapes').value.trim();
+        const region = document.getElementById('bottleRegion').value.trim();
 
         if (!name && !year && !grapes && !region) {
             alert("Veuillez remplir au moins un champ (nom, année, cépage ou région) ou sélectionner une image pour que je puisse vous aider.");
@@ -493,12 +498,16 @@ async function analyzeWithAI() {
                 fillBottleFormWithAIResult(result.bottleInfo);
                 alert("Analyse terminée ! Les champs ont été complétés automatiquement.");
             } else {
-                alert("Je n'ai pas pu compléter les informations. Vérifiez les champs saisis.");
+                let errorMsg = "Je n'ai pas pu compléter les informations.";
+                if (result.error) {
+                    errorMsg += "\n" + result.error;
+                }
+                alert(errorMsg);
             }
         } catch (error) {
             hideLoading();
             console.error("Erreur analyse IA texte :", error);
-            alert("Erreur de connexion. Vérifiez que le serveur est lancé.");
+            alert("Erreur de connexion. Vérifiez que le serveur est lancé : " + error.message);
         }
         return;
     }

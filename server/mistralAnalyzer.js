@@ -5,6 +5,15 @@ const mistralConfig = require("./mistralConfig");
 const googleVision = require("./googleVision");
 const mistralAI = require("./mistralAI");
 
+// Importer callMistral depuis mistralAI
+const { callMistral } = mistralAI;
+
+// Vérifier que callMistral est bien défini
+if (typeof callMistral !== 'function') {
+    console.error('[MistralAnalyzer] callMistral is not defined!');
+    console.error('[MistralAnalyzer] Available functions in mistralAI:', Object.keys(mistralAI));
+}
+
 /**
  * Retourne des informations par défaut pour une bouteille en cas d'erreur
  * @param {string} errorMessage - Message d'erreur
