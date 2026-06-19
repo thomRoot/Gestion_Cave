@@ -1274,3 +1274,309 @@ form {
 /* ==================== PREVENT DOUBLE TAP ZOOM ==================== */
 /* Empêcher le zoom sur double-tap sur les éléments interactifs */
 touch-action: manipulation;
+
+
+/* ============================================
+   OPTIMISATIONS MOBILE ET TABLETTE - v6.0.2
+   ============================================ */
+
+/* Header responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .header-buttons {
+        order: 3;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .search-bar {
+        order: 2;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .logo-container {
+        order: 1;
+        text-align: center;
+    }
+}
+
+/* Grille de la cave responsive */
+@media (max-width: 1024px) {
+    .cave-container {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    }
+    .cave-cell {
+        min-height: 120px;
+    }
+    .bottle-thumbnail {
+        width: 65px;
+        height: 95px;
+        object-fit: contain;
+    }
+}
+
+@media (max-width: 768px) {
+    .cave-container {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 8px;
+    }
+    .cave-cell {
+        min-height: 110px;
+    }
+    .bottle-thumbnail {
+        width: 60px;
+        height: 90px;
+    }
+    .bottle-name {
+        font-size: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .bottle-period {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .cave-container {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 6px;
+        padding: 5px;
+    }
+    .cave-cell {
+        min-height: 100px;
+    }
+    .bottle-thumbnail {
+        width: 50px;
+        height: 75px;
+    }
+    .bottle-name {
+        font-size: 0.7rem;
+    }
+}
+
+/* Popups adaptées au mobile */
+@media (max-width: 768px) {
+    .popup-content {
+        width: 95vw;
+        max-width: 95vw;
+        max-height: 90vh;
+        overflow-y: auto;
+        margin: 10px;
+    }
+    
+    .popup {
+        padding: 10px;
+        align-items: center;
+    }
+    
+    .ai-chat-popup {
+        width: 95vw;
+        height: 85vh;
+        max-height: 85vh;
+    }
+    
+    .ai-messages {
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 10px;
+    }
+}
+
+/* Formulaires optimisés mobile */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .form-row .form-group {
+        width: 100%;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .camera-container {
+        margin-bottom: 15px;
+    }
+    
+    .photo-preview-container {
+        height: 200px;
+    }
+}
+
+/* Boutons optimisés pour le touch */
+button,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-ai {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 480px) {
+    button,
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-ai {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Feedback tactile amélioré */
+@media (hover: none) and (pointer: coarse) {
+    button:active,
+    .btn-primary:active,
+    .btn-secondary:active,
+    .btn-danger:active,
+    .btn-ai:active {
+        transform: scale(0.98);
+        opacity: 0.8;
+    }
+    
+    .cave-cell:active {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 2px var(--secondary) inset;
+    }
+    
+    .mobile-fab:active {
+        transform: scale(0.9);
+    }
+}
+
+/* Désactiver le zoom automatique sur les inputs */
+input[type="text"],
+input[type="number"],
+input[type="file"],
+textarea,
+select {
+    font-size: 16px;
+}
+
+/* Barre de recherche mobile */
+@media (max-width: 768px) {
+    .search-bar input {
+        font-size: 1rem;
+        padding: 10px 14px;
+    }
+    
+    .search-bar button {
+        padding: 10px 16px;
+    }
+}
+
+/* Details popup mobile */
+@media (max-width: 768px) {
+    .bottle-details {
+        padding: 10px;
+    }
+    
+    .bottle-info-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .info-item {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .info-item.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .bottle-image-container img {
+        max-height: 150px;
+    }
+}
+
+/* Chat IA mobile */
+@media (max-width: 768px) {
+    .ai-input-container {
+        padding: 10px 12px;
+    }
+    
+    .ai-input-container input {
+        font-size: 0.95rem;
+        padding: 10px 12px;
+    }
+    
+    .ai-send-btn {
+        padding: 10px 14px;
+    }
+    
+    .chat-subtitle {
+        font-size: 0.9rem;
+    }
+}
+
+/* Configuration cave mobile */
+@media (max-width: 480px) {
+    #caveConfigPopup .popup-content {
+        width: 90vw;
+    }
+    
+    #caveConfigForm .form-group {
+        margin-bottom: 15px;
+    }
+    
+    #caveConfigForm input {
+        font-size: 1.1rem;
+        padding: 10px;
+    }
+}
+
+/* Mobile FAB */
+@media (max-width: 768px) {
+    .mobile-fab {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-fab {
+        display: none;
+    }
+}
+
+/* Optimisation des images */
+.bottle-thumbnail,
+#detailsPhoto,
+#bottlePhotoPreview {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimizeQuality;
+}
+
+/* Scroll fluide sur iOS */
+.cave-container,
+.ai-messages,
+.popup-content {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Prévention du zoom accidentel */
+html {
+    touch-action: manipulation;
+}
