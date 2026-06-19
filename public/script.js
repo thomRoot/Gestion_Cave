@@ -14,14 +14,14 @@ function showLoading(message = "Analyse en cours...") {
         if (messageElement) {
             messageElement.textContent = message;
         }
-        loadingOverlay.style.display = 'flex';
+        loadingOverlay.classList.add('active');
     }
 }
 
 function hideLoading() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
-        loadingOverlay.style.display = 'none';
+        loadingOverlay.classList.remove('active');
     }
 }
 
@@ -35,16 +35,16 @@ async function checkMistralStatus() {
         const statusTextElement = document.getElementById('mistralStatusText');
         
         if (statusElement && statusTextElement) {
-            statusElement.style.display = 'flex';
+            statusElement.classList.add('active');
             
             if (data.mistralAvailable && data.googleVisionAvailable) {
-                statusElement.className = 'mistral-status connected';
+                statusElement.className = 'mistral-status connected active';
                 statusTextElement.textContent = `Connecté (${data.model}) + OCR`;
             } else if (data.mistralAvailable) {
-                statusElement.className = 'mistral-status connected';
+                statusElement.className = 'mistral-status connected active';
                 statusTextElement.textContent = `Connecté (${data.model})`;
             } else {
-                statusElement.className = 'mistral-status disconnected';
+                statusElement.className = 'mistral-status disconnected active';
                 statusTextElement.textContent = 'Non configuré';
                 // Remplacer l'icône
                 const icon = statusElement.querySelector('i');
@@ -62,7 +62,7 @@ async function checkMistralStatus() {
 document.addEventListener('DOMContentLoaded', () => {
     // Masquer toutes les popups au chargement
     document.querySelectorAll('.popup').forEach(popup => {
-        popup.style.display = 'none';
+        popup.classList.remove('active');
     });
     
     window.cave.initCave();
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gestion des boutons de fermeture des popups
     document.querySelectorAll('.popup .close').forEach(closeButton => {
         closeButton.addEventListener('click', () => {
-            closeButton.closest('.popup').style.display = 'none';
+            closeButton.closest('.popup').classList.remove('active');
             window.camera.resetImage();
         });
     });
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fermer les popups en cliquant à l'extérieur
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('popup')) {
-            e.target.style.display = 'none';
+            e.target.classList.remove('active');
             window.camera.resetImage();
         }
     });
@@ -208,13 +208,13 @@ async function checkGoogleVisionStatus() {
         const statusTextElement = document.getElementById('googleVisionStatusText');
         
         if (statusElement && statusTextElement) {
-            statusElement.style.display = 'flex';
+            statusElement.classList.add('active');
             
             if (data.googleVisionAvailable) {
-                statusElement.className = 'mistral-status connected';
+                statusElement.className = 'mistral-status connected active';
                 statusTextElement.textContent = 'Connecté';
             } else {
-                statusElement.className = 'mistral-status disconnected';
+                statusElement.className = 'mistral-status disconnected active';
                 statusTextElement.textContent = 'Non configuré';
                 // Remplacer l'icône
                 const icon = statusElement.querySelector('i');
@@ -234,7 +234,7 @@ async function checkGoogleVisionStatus() {
 function openAIChatPopup() {
     const popup = document.getElementById('aiChatPopup');
     if (popup) {
-        popup.style.display = 'flex';
+        popup.classList.add('active');
         
         const messagesContainer = document.getElementById('aiMessages');
         if (messagesContainer) {
@@ -687,7 +687,7 @@ function openEditBottlePopup(bottle) {
 
     // Démarrer la sélection de fichier pour permettre de changer la photo
     window.camera.startCamera(false); // false = ne pas réinitialiser
-    document.getElementById('bottlePopup').style.display = 'flex';
+    document.getElementById('bottlePopup').classList.add('active');
 }
 
 // Supprimer une bouteille

@@ -1,155 +1,86 @@
-/* MA CAVE A VIN - Styles CSS - Version 6.0.3 - Design Épuré et Moderne */
+/* MA CAVE A VIN - Design Ultra-Épuré v7.0 */
+/* Palette : Noir profond + Rouge vin + Or élégant */
+
 :root {
-    /* Couleurs principales */
-    --primary: #6C1B1B;          /* Rouge vin profond */
-    --primary-light: #8B2626;    /* Rouge vin clair */
-    --primary-dark: #4A1212;     /* Rouge vin foncé */
-    --secondary: #D4AF37;        /* Or */
-    --secondary-light: #E8C87A;  /* Or clair */
-    --accent: #FFD700;           /* Or brillant */
-
-    /* Couleurs de fond */
-    --bg-dark: #0F0F0F;          /* Noir profond */
-    --bg-darker: #1A1A1A;        /* Noir légèrement plus clair */
-    --bg-light: #252525;         /* Gris foncé */
-    --bg-lighter: #2E2E2E;       /* Gris légèrement plus clair */
-
-    /* Couleurs de texte */
-    --text: #F5F5F5;             /* Blanc cassé */
-    --text-secondary: #A0A0A0;   /* Gris clair */
-    --text-muted: #757575;        /* Gris foncé */
-
-    /* Couleurs de statut */
-    --success: #2E7D32;          /* Vert */
-    --warning: #FF8F00;          /* Orange */
-    --error: #C62828;            /* Rouge */
-
-    /* Espacements et bordures */
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-
-    /* Ombres et transitions */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --bg: #121212;
+    --bg-card: #1a1a1a;
+    --bg-hover: #1e1e1e;
+    --primary: #722f37;
+    --primary-light: #8b3a42;
+    --accent: #c9a86c;
+    --accent-light: #d4b87a;
+    --text: #e8e8e8;
+    --text-muted: #999;
+    --border: rgba(255,255,255,0.1);
+    --shadow: 0 4px 20px rgba(0,0,0,0.3);
+    --radius: 12px;
+    --transition: all 0.2s ease;
 }
 
-/* ==================== RESET ET BASE ==================== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html {
-    font-size: 16px;
-    -webkit-text-size-adjust: 100%; /* Empêche le redimensionnement du texte sur iOS */
-    touch-action: manipulation;     /* Désactive le zoom par double-tap */
-    scroll-behavior: smooth;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg-dark);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     line-height: 1.5;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* ==================== TYPOGRAPHIE ==================== */
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--text);
-}
-
-h1 { font-size: 1.8rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.3rem; }
-h4 { font-size: 1.1rem; }
-
-p {
-    font-size: 1rem;
-    color: var(--text-secondary);
 }
 
 /* ==================== HEADER ==================== */
 .header {
     position: sticky;
     top: 0;
-    background: rgba(15, 15, 15, 0.98);
-    backdrop-filter: blur(20px);
-    padding: var(--spacing-md) var(--spacing-lg);
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 16px 24px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    z-index: 1000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: var(--shadow-sm);
+    gap: 20px;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
-    gap: var(--spacing-md);
 }
 
 .logo-container {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    flex-shrink: 0;
+    gap: 12px;
 }
 
 .logo-container i {
     font-size: 1.8rem;
-    color: var(--secondary);
+    color: var(--accent);
 }
 
 .logo-container h1 {
     font-size: 1.4rem;
+    font-weight: 600;
     letter-spacing: 0.5px;
-    white-space: nowrap;
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    flex-shrink: 0;
-}
-
-/* ==================== BARRE DE RECHERCHE ==================== */
 .search-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
     flex: 1;
-    max-width: 500px;
     min-width: 200px;
+    max-width: 400px;
+    display: flex;
+    gap: 8px;
 }
 
 .search-bar input {
     flex: 1;
-    padding: 10px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-md);
-    background: var(--bg-light);
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     color: var(--text);
-    font-size: 1rem;
-    transition: var(--transition);
+    font-size: 0.95rem;
     outline: none;
-    min-width: 150px;
+    transition: var(--transition);
 }
 
 .search-bar input:focus {
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    border-color: var(--accent);
 }
 
 .search-bar input::placeholder {
@@ -157,262 +88,109 @@ p {
 }
 
 .search-bar button {
-    padding: 10px 16px;
+    padding: 12px 16px;
     background: var(--primary);
-    color: white;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius);
+    color: white;
     cursor: pointer;
     transition: var(--transition);
-    flex-shrink: 0;
-    min-height: 40px;
 }
 
 .search-bar button:hover {
     background: var(--primary-light);
 }
 
-.search-bar button:active {
-    transform: scale(0.98);
+.header-buttons {
+    display: flex;
+    gap: 12px;
 }
 
-.search-bar button i {
-    font-size: 1rem;
-}
-
-/* ==================== BOUTONS ==================== */
+/* ==================== BUTTONS ==================== */
 .btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    padding: 12px 24px;
+    gap: 8px;
+    padding: 12px 20px;
     border: none;
-    border-radius: var(--radius-md);
-    font-size: 1rem;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    min-height: 44px; /* Meilleure taille tactile pour mobile */
+    min-height: 44px;
 }
 
 .btn-primary {
     background: var(--primary);
     color: white;
-    box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
     background: var(--primary-light);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-primary:active {
-    transform: translateY(0);
 }
 
 .btn-secondary {
-    background: var(--bg-light);
+    background: var(--bg-card);
     color: var(--text);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--secondary);
+    background: var(--bg-hover);
+}
+
+.btn-ai {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    color: #121212;
+    font-weight: 600;
 }
 
 .btn-danger {
-    background: var(--error);
+    background: #b04a4a;
     color: white;
 }
 
 .btn-danger:hover {
-    background: #d32f2f;
+    background: #c05a5a;
 }
 
-.btn-ai {
-    background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
-    color: var(--bg-dark);
-    font-weight: 600;
-}
-
-.btn-ai:hover {
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-}
-
-/* Boutons du header */
-.header-buttons {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    flex-shrink: 0;
-}
-
-.header-buttons .btn {
-    padding: 10px 16px;
-    font-size: 0.9rem;
-    min-height: 40px;
-    border-radius: var(--radius-md);
-}
-
-#addBottleButton {
-    background: var(--primary);
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-#addBottleButton:hover {
-    background: var(--primary-light);
-}
-
-#addBottleButton i {
-    font-size: 1rem;
-}
-
-#resetDbButton {
-    background: var(--error);
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-#aiChatButton {
-    background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
-    color: var(--bg-dark);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 500;
-}
-
-#aiChatButton:hover {
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
-}
-
-/* Boutons dans les popups */
-.popup-content .btn {
-    padding: 12px 20px;
-    font-size: 0.95rem;
-}
-
-.form-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-lg);
-    justify-content: flex-end;
-}
-
-.form-actions .btn {
-    min-width: 120px;
-}
-
-/* Boutons de la popup de détails */
-.button-group {
-    display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-lg);
-    justify-content: center;
-}
-
-.button-group .btn {
-    min-width: 140px;
-}
-
-/* ==================== STATUT MISTRAL ==================== */
-.mistral-status {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: 8px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    background: var(--bg-light);
-    margin-left: auto;
-}
-
-.mistral-status i {
-    font-size: 1em;
-}
-
-.mistral-status.connected {
-    background: rgba(46, 125, 50, 0.1);
-    border: 1px solid var(--success);
-    color: var(--success);
-}
-
-.mistral-status.disconnected {
-    background: rgba(198, 40, 40, 0.1);
-    border: 1px solid var(--error);
-    color: var(--error);
-}
-
-/* Style pour le bouton Vider la cave */
-#resetDbButton {
-    font-size: 0.85rem;
-    padding: 8px 12px;
-}
-
-#resetDbButton i {
-    margin-right: 4px;
-}
-
-/* ==================== GRILLE DE LA CAVE ==================== */
+/* ==================== CAVE GRID ==================== */
 .cave-container {
-    padding: var(--spacing-lg);
+    padding: 24px;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    /* Empêcher la propagation des clics sur le container */
-    pointer-events: none;
 }
 
 .cave-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 16px;
     justify-content: center;
-    /* Réactiver les pointer-events pour les enfants */
-    pointer-events: auto;
 }
 
 .cave-cell {
-    aspect-ratio: 0.7;
-    background: var(--bg-light);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-md);
+    aspect-ratio: 0.75;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-sm);
+    padding: 12px;
     cursor: pointer;
     transition: var(--transition);
-    min-width: 70px;
-    touch-action: manipulation;
-    /* Réactiver les pointer-events */
-    pointer-events: auto;
+    min-width: 80px;
 }
 
 .cave-cell:hover {
-    background: rgba(212, 175, 55, 0.1);
-    border-color: var(--secondary);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-}
-
-.cave-cell:active {
-    transform: scale(0.98);
-    box-shadow: none;
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    transform: translateY(-2px);
 }
 
 .cave-cell.has-bottle {
-    background: rgba(108, 27, 27, 0.1);
+    background: rgba(114, 47, 55, 0.15);
     border-color: var(--primary);
 }
 
@@ -420,19 +198,18 @@ p {
     width: 100%;
     height: 70%;
     object-fit: contain;
-    border-radius: var(--radius-sm);
+    border-radius: 6px;
 }
 
 .cave-cell .bottle-name {
     font-size: 0.75rem;
     text-align: center;
-    color: var(--text);
-    margin-top: var(--spacing-sm);
+    margin-top: 8px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
-    font-weight: 500;
+    color: var(--text);
 }
 
 /* ==================== POPUPS ==================== */
@@ -443,84 +220,80 @@ p {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.8);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
-    padding: var(--spacing-lg);
-    -webkit-backdrop-filter: blur(5px);
+    z-index: 1000;
+    padding: 20px;
     backdrop-filter: blur(5px);
 }
 
+.popup.active {
+    display: flex;
+}
+
 .popup-content {
-    background: var(--bg-darker);
-    border-radius: var(--radius-lg);
-    max-width: 90%;
-    width: 500px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    position: relative;
 }
 
-.popup-header {
-    padding: var(--spacing-lg) var(--spacing-lg);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.popup-header h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin: 0;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.popup-header h2 i {
-    color: var(--secondary);
-}
-
-.popup-close {
+.popup-content .close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     font-size: 1.5rem;
     cursor: pointer;
-    padding: var(--spacing-sm);
+    padding: 8px;
     line-height: 1;
     transition: var(--transition);
 }
 
-.popup-close:hover {
+.popup-content .close:hover {
     color: var(--text);
-    transform: scale(1.1);
+}
+
+.popup-content h2 {
+    padding: 20px 20px 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.popup-content h2 i {
+    color: var(--accent);
 }
 
 .popup-body {
-    padding: var(--spacing-lg);
+    padding: 20px;
 }
 
-/* ==================== FORMULAIRE ==================== */
+/* ==================== FORM ==================== */
 .form-group {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
     font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
     font-weight: 500;
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-secondary);
 }
 
 .form-group label i {
-    color: var(--secondary);
-    margin-right: var(--spacing-sm);
+    color: var(--accent);
+    margin-right: 6px;
 }
 
 .form-group input,
@@ -528,20 +301,19 @@ p {
 .form-group textarea {
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-md);
-    background: var(--bg-light);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     color: var(--text);
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: var(--transition);
+    outline: none;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    outline: none;
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    border-color: var(--accent);
 }
 
 .form-group input::placeholder,
@@ -551,7 +323,7 @@ p {
 
 .form-row {
     display: flex;
-    gap: var(--spacing-md);
+    gap: 16px;
     flex-wrap: wrap;
 }
 
@@ -560,30 +332,29 @@ p {
     min-width: 150px;
 }
 
-/* Style pour les inputs de type number */
-.form-group input[type="number"] {
-    -moz-appearance: textfield;
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
 }
 
-.form-group input[type="number"]::-webkit-outer-spin-button,
-.form-group input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+.form-actions .btn {
+    min-width: 120px;
 }
 
-/* ==================== APERÇU PHOTO ==================== */
+/* ==================== PHOTO PREVIEW ==================== */
 .photo-preview-container {
     width: 100%;
-    height: 200px;
-    background: var(--bg-light);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-lg);
+    height: 220px;
+    background: var(--bg);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    border: 1px dashed rgba(255, 255, 255, 0.2);
-    min-height: 200px;
+    border: 1px dashed var(--border);
 }
 
 #bottlePhotoPreview {
@@ -593,123 +364,134 @@ p {
     display: none;
 }
 
-/* Style pour le bouton Analyser avec IA */
-#analyzeWithAI {
-    background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
-    color: var(--bg-dark);
-    font-weight: 600;
+.camera-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.camera-buttons .btn {
     min-width: 140px;
 }
 
-#analyzeWithAI:hover {
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-}
-
-#saveBottleButton {
-    background: var(--primary);
-    color: white;
-    min-width: 140px;
-}
-
-#saveBottleButton:hover {
-    background: var(--primary-light);
-}
-
-/* ==================== DÉTAILS DE LA BOUTEILLE ==================== */
+/* ==================== BOTTLE DETAILS ==================== */
 .bottle-details {
-    padding: var(--spacing-md);
+    padding: 16px;
 }
 
 .bottle-image-container {
     text-align: center;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 20px;
 }
 
 .bottle-image-container img {
     max-width: 100%;
-    max-height: 300px;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
+    max-height: 250px;
+    border-radius: var(--radius);
 }
 
 .bottle-info-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
+    gap: 12px;
 }
 
 .info-item {
-    padding: var(--spacing-md);
-    background: var(--bg-light);
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
 }
 
 .info-item.full-width {
     grid-column: 1 / -1;
 }
 
-.info-item strong {
+.info-label {
     display: block;
-    color: var(--text-secondary);
     font-size: 0.85rem;
+    color: var(--text-muted);
     margin-bottom: 4px;
 }
 
-.info-item span {
+.info-label i {
+    color: var(--accent);
+    margin-right: 6px;
+}
+
+.info-value {
     color: var(--text);
-    font-size: 1rem;
+    font-size: 0.95rem;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    justify-content: center;
+}
+
+.button-group .btn {
+    min-width: 140px;
 }
 
 /* ==================== CHAT IA ==================== */
-.ai-container {
-    padding: var(--spacing-lg);
+.ai-chat-popup {
+    max-width: 500px;
 }
 
-.ai-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-lg);
+.ai-send-btn {
+    padding: 12px 20px;
+    min-height: auto;
+}
+
+.ai-send-btn i {
+    font-size: 1rem;
 }
 
 .ai-messages {
-    max-height: 400px;
+    max-height: 350px;
     overflow-y: auto;
-    padding: var(--spacing-md);
-    background: var(--bg-light);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-lg);
+    padding: 16px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin-bottom: 16px;
 }
 
 .ai-message {
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-    border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.05);
-    border-left: 3px solid var(--secondary);
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid var(--accent);
 }
 
 .ai-message.user {
-    background: rgba(108, 27, 27, 0.1);
+    background: rgba(114, 47, 55, 0.1);
     border-left-color: var(--primary);
-    margin-left: var(--spacing-lg);
+    margin-left: 20px;
 }
 
 .ai-input-container {
     display: flex;
-    gap: var(--spacing-md);
+    gap: 12px;
     align-items: center;
 }
 
 .ai-input-container input {
     flex: 1;
     padding: 12px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-md);
-    background: var(--bg-light);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     color: var(--text);
-    font-size: 1rem;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.ai-input-container input:focus {
+    border-color: var(--accent);
 }
 
 .ai-send-btn {
@@ -717,317 +499,212 @@ p {
     background: var(--primary);
     color: white;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius);
     cursor: pointer;
     transition: var(--transition);
-    min-width: 50px;
 }
 
 .ai-send-btn:hover {
     background: var(--primary-light);
 }
 
-.ai-send-btn i {
-    font-size: 1rem;
+.chat-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
 }
 
-/* Style pour le bouton Chat IA dans le header */
-#aiChatButton {
-    font-size: 0.9rem;
-    padding: 10px 14px;
+/* ==================== LOADING ==================== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
 }
 
-#aiChatButton i {
-    margin-right: 6px;
+.loading-overlay.active {
+    display: flex;
 }
 
-/* ==================== CONFIGURATION DE LA CAVE ==================== */
-#caveConfigPopup .popup-content {
-    width: 90%;
-    max-width: 500px;
-}
-
-#caveConfigForm .form-group {
-    margin-bottom: var(--spacing-lg);
-}
-
-#caveConfigForm input {
-    font-size: 1.1rem;
-    padding: 12px;
+.loading-spinner {
     text-align: center;
 }
 
-/* ==================== BOUTON FAB MOBILE ==================== */
+.loading-spinner i {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+}
+
+.loading-spinner p {
+    color: var(--text);
+    font-size: 1rem;
+}
+
+/* ==================== MOBILE FAB ==================== */
 .mobile-fab {
     position: fixed;
-    bottom: var(--spacing-lg);
-    right: var(--spacing-lg);
-    width: 60px;
-    height: 60px;
-    background: var(--primary);
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: var(--shadow-lg);
-    z-index: 1000;
+    box-shadow: var(--shadow);
+    z-index: 100;
     transition: var(--transition);
     border: none;
+    padding: 0;
+    min-height: auto;
+}
+
+.mobile-fab i {
+    font-size: 1.3rem;
 }
 
 .mobile-fab i {
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 
 .mobile-fab:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(108, 27, 27, 0.5);
 }
 
 .mobile-fab:active {
     transform: scale(0.95);
 }
 
-/* Boutons de caméra */
-.camera-buttons {
+/* ==================== STATUS ==================== */
+.mistral-status {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    background: var(--bg-card);
+    margin-left: 12px;
+}
+
+.mistral-status.active {
     display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-md);
-    justify-content: center;
 }
 
-.camera-buttons .btn {
-    min-width: 140px;
+.mistral-status i {
+    font-size: 0.9rem;
 }
 
-#uploadPhotoButton {
-    background: var(--primary);
-    color: white;
+.mistral-status.connected {
+    background: rgba(46, 125, 50, 0.15);
+    border: 1px solid #2E7D32;
+    color: #2E7D32;
 }
 
-#uploadPhotoButton:hover {
-    background: var(--primary-light);
+.mistral-status.disconnected {
+    background: rgba(198, 40, 40, 0.15);
+    border: 1px solid #C62828;
+    color: #C62828;
 }
 
 /* ==================== RESPONSIVE ==================== */
-/* Mobile (portrait) */
-@media (max-width: 480px) {
-    :root {
-        --spacing-md: 12px;
-        --spacing-lg: 16px;
-    }
-
-    body {
-        font-size: 15px;
-    }
-
+@media (max-width: 768px) {
     .header {
-        padding: 10px 12px;
+        padding: 12px 16px;
     }
-
+    
     .logo-container h1 {
         font-size: 1.2rem;
     }
-
-    .search-bar {
-        min-width: 150px;
-    }
-
-    .search-bar input {
-        padding: 8px 12px;
-        font-size: 0.9rem;
-    }
-
-    .cave-grid {
-        gap: 8px;
-    }
-
-    .cave-cell {
-        min-width: 60px;
-        min-height: 85px;
-    }
-
-    .popup-content {
-        width: 95%;
-        padding: 12px;
-    }
-
-    .popup-header h2 {
-        font-size: 1.2rem;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        padding: 10px 12px;
-        font-size: 0.95rem;
-    }
-
-    .photo-preview-container {
-        height: 150px;
-    }
-
-    .bottle-info-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .ai-input-container input {
-        padding: 10px 12px;
-    }
-}
-
-/* Tablette (portrait) */
-@media (min-width: 481px) and (max-width: 768px) {
-    .cave-cell {
-        min-width: 80px;
-        min-height: 110px;
-    }
-
-    .popup-content {
-        width: 85%;
-        max-width: 600px;
-    }
-
-    .form-row {
-        flex-direction: column;
-    }
-
-    .form-row .form-group {
-        width: 100%;
-    }
-
-    /* Améliorer l'affichage du header sur tablette */
-    .header {
-        flex-wrap: wrap;
-        gap: var(--spacing-md);
-    }
-
+    
     .search-bar {
         order: 3;
         width: 100%;
         max-width: 100%;
-        margin-top: var(--spacing-md);
+        margin-top: 12px;
     }
-
+    
     .header-buttons {
         order: 2;
         width: 100%;
         justify-content: flex-end;
-        gap: var(--spacing-sm);
     }
-
+    
     .header-buttons .btn {
         flex: 1;
         max-width: calc(33% - 8px);
+        justify-content: center;
     }
-
-    /* Améliorer la grille sur tablette */
+    
+    .cave-cell {
+        min-width: 70px;
+        min-height: 95px;
+    }
+    
     .cave-grid {
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: var(--spacing-md);
+        grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+        gap: 10px;
     }
-
-    /* Améliorer les popups sur tablette */
-    .photo-preview-container {
-        height: 250px;
+    
+    .popup-content {
+        width: 95%;
+        padding: 12px;
     }
-
+    
+    .form-row {
+        flex-direction: column;
+    }
+    
     .bottle-info-grid {
         grid-template-columns: 1fr;
     }
+    
+    .photo-preview-container {
+        height: 180px;
+    }
 }
 
-/* Tablette (paysage) et Desktop */
-@media (min-width: 769px) {
-    .header {
-        padding: 16px 24px;
+@media (min-width: 769px) and (max-width: 1024px) {
+    .cave-cell {
+        min-width: 80px;
+        min-height: 110px;
     }
-
-    .search-bar {
-        order: 2;
-        max-width: 500px;
-        min-width: 250px;
+    
+    .cave-grid {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
     }
+}
 
-    .header-buttons {
-        order: 3;
-    }
-
+@media (min-width: 1025px) {
     .cave-cell {
         min-width: 90px;
-        min-height: 130px;
+        min-height: 125px;
     }
-
+    
     .popup-content {
         width: 600px;
-        max-width: 90vw;
-    }
-
-    .bottle-info-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    /* Améliorer les boutons du header sur desktop */
-    .header-buttons {
-        gap: var(--spacing-md);
-    }
-
-    .header-buttons .btn {
-        padding: 10px 18px;
-        font-size: 0.9rem;
-        min-height: 40px;
     }
 }
 
-/* Grand écran */
-@media (min-width: 1024px) {
-    .cave-cell {
-        min-width: 90px;
-        min-height: 130px;
-    }
-
-    .popup-content {
-        width: 700px;
-    }
-
-    .form-row {
-        flex-direction: row;
-    }
+/* Fix for input number spinners */
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 
-/* Effets tactiles pour mobile */
-@media (hover: none) and (pointer: coarse) {
-    .btn:active,
-    .btn-primary:active,
-    .btn-secondary:active,
-    .btn-danger:active,
-    .btn-ai:active {
-        transform: scale(0.98);
-    }
-
-    .cave-cell:active {
-        transform: scale(0.95);
-    }
-
-    .mobile-fab:active {
-        transform: scale(0.9);
-    }
-}
-
-/* Désactiver le zoom automatique sur les inputs */
-input[type="text"],
-input[type="number"],
-input[type="file"],
-textarea,
-select {
-    font-size: 16px !important; /* Empêche le zoom sur iOS/Android */
-}
-
-/* Scroll fluide sur iOS */
-.cave-container,
-.ai-messages,
-.popup-content {
-    -webkit-overflow-scrolling: touch;
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }

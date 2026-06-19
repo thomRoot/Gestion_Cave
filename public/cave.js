@@ -21,8 +21,8 @@ function initCave() {
                 // Afficher la popup de configuration UNIQUEMENT si on est sur la page principale
                 // et que la cave n'est pas encore configurée
                 const caveConfigPopup = document.getElementById('caveConfigPopup');
-                if (caveConfigPopup && caveConfigPopup.style.display !== 'flex') {
-                    caveConfigPopup.style.display = 'flex';
+                if (caveConfigPopup && !caveConfigPopup.classList.contains('active')) {
+                    caveConfigPopup.classList.add('active');
                 }
             }
         })
@@ -167,7 +167,7 @@ function openAddBottlePopup() {
     document.getElementById('popupTitle').innerHTML = '<i class="fas fa-wine-bottle"></i> Ajouter une bouteille';
     document.getElementById('bottleForm').reset();
     document.getElementById('bottlePhotoPreview').style.display = 'none';
-    document.getElementById('bottlePopup').style.display = 'flex';
+    document.getElementById('bottlePopup').classList.add('active');
 
     // Démarrer la sélection de fichier (galerie uniquement)
     window.camera.startCamera();
@@ -191,7 +191,7 @@ function openBottleDetailsPopup(bottle) {
     // Mettre à jour la barre de période
     updateDrinkPeriodBar(bottle.drinkFrom, bottle.drinkTo);
 
-    document.getElementById('bottleDetailsPopup').style.display = 'flex';
+    document.getElementById('bottleDetailsPopup').classList.add('active');
 }
 
 // Mettre à jour la barre de période de consommation
