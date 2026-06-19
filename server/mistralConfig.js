@@ -1,7 +1,8 @@
-// Configuration pour l'API Mistral
-// Créez un fichier .env dans le dossier racine avec : MISTRAL_API_KEY=votre_clé_api
+// Configuration pour l'API Mistral et Google Vision
+// Créez un fichier .env dans le dossier racine avec :
+// MISTRAL_API_KEY=votre_clé_api_mistral
+// GOOGLE_VISION_API_KEY=votre_clé_api_google_vision
 
-// Charger les variables d'environnement depuis le fichier .env
 const fs = require('fs');
 const path = require('path');
 
@@ -24,7 +25,7 @@ function loadEnvFile() {
             }
         }
     } catch (error) {
-        console.warn('⚠️  Impossible de charger le fichier .env:', error.message);
+        console.warn('⚠️ Impossible de charger le fichier .env:', error.message);
     }
 }
 
@@ -52,23 +53,32 @@ Utilise des emojis vinicoles (🍷, 🍇) avec modération.`,
     
     // Prompt système pour l'analyse d'image
     analysisSystemPrompt: `Tu es un expert en reconnaissance d'étiquettes de vin. 
-On va te donner une image d'une étiquette de vin à analyser.
-Ton rôle est d'analyser cette image et d'extraire les informations suivantes :
+On va te donner du texte extrait d'une étiquette de vin à analyser.
+Ton rôle est d'analyser ce texte et d'extraire les informations suivantes :
 - Nom du vin (ou du domaine/château)
 - Année/millésime (si présente)
 - Cépage(s) principal(aux)
 - Région/appellation
 - Producteur (si identifiable)
+- Pays d'origine
+- Degré d'alcool
 
-Format de réponse : UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, producer.
+Format de réponse : UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, appellation, producer, country, alcohol.
 Si une information n'est pas trouvée, mets null.
 Ne réponds JAMAIS autre chose que le JSON.`
 };
 
-// Vérifier que la clé API est configurée
+// Vérifier que les clés API sont configurées
 if (!MISTRAL_CONFIG.apiKey) {
-    console.warn('⚠️  Attention : MISTRAL_API_KEY non configurée. L\'IA Mistral ne fonctionnera pas.');
+    console.warn('⚠️ Attention : MISTRAL_API_KEY non configurée. L\'IA Mistral ne fonctionnera pas.');
     console.warn('   Ajoutez MISTRAL_API_KEY=votre_clé dans le fichier .env');
+}
+
+if (!process.env.GOOGLE_VISION_API_KEY) {
+    console.warn('⚠️ Attention : GOOGLE_VISION_API_KEY non configurée. L\'OCR ne fonctionnera pas.');
+    console.warn('   Ajoutez GOOGLE_VISION_API_KEY=votre_clé dans le fichier .env');
+    console.warn('   Vous pouvez obtenir une clé gratuite (1000 requêtes/mois) sur :');
+    console.warn('   https://console.cloud.google.com/apis/credentials');
 }
 
 module.exports = MISTRAL_CONFIG;

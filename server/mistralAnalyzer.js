@@ -1,14 +1,17 @@
-// mistralAnalyzer.js - Analyseur de bouteilles de vin EXCLUSIVEMENT avec Mistral AI
-// Aucune trace d'OCR local - on envoie directement l'image à Mistral pour analyse
+// mistralAnalyzer.js - Analyseur de bouteilles de vin avec Google Vision + Mistral AI
+// Version 5.0.0 - VRAIE analyse IA avec OCR + LLM
 
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 const mistralConfig = require('./mistralConfig');
+const googleVision = require('./googleVision');
+const mistralAI = require('./mistralAI');
 
 /**
- * Analyser une bouteille avec Mistral AI uniquement
- * On envoie l'image en base64 à Mistral et on demande une analyse complète
+ * Analyser une bouteille avec VRAIE IA : Google Vision pour OCR + Mistral pour interprétation
+ * @param {string} imagePathOrBase64 - Chemin du fichier ou image en base64
+ * @param {boolean} isBase64 - Si true, imagePathOrBase64 est déjà en base64
+ * @returns {Promise<Object>} - Informations de la bouteille
  */
 async function analyzeBottleWithMistralOnly(imagePathOrBase64, isBase64 = false) {
     // Vérifier que Mistral est configuré
@@ -17,19 +20,62 @@ async function analyzeBottleWithMistralOnly(imagePathOrBase64, isBase64 = false)
     }
     
     try {
-        // Convertir l'image en base64 si ce n'est pas déjà le cas
-        let base64Image;
-        if (isBase64) {
-            base64Image = imagePathOrBase64;
-        } else {
-            // Lire le fichier et le convertir en base64
-            const imageBuffer = fs.readFileSync(imagePathOrBase64);
-            base64Image = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
+        let labelText = null;
+        
+        // Étape 1 : Extraire le texte de l'image avec Google Vision
+        if (imagePathOrBase64) {
+            try {
+                labelText = await googleVision.getCleanedLabelText(imagePathOrBase64, isBase64);
+                console.log("Texte extrait de l'étiquette :", labelText);
+            } catch (visionError) {
+                console.warn("Google Vision non disponible ou erreur :", visionError.message);
+                // Continuer sans OCR - on utilisera seulement le texte fourni
+            }
         }
         
-        // Construire le prompt pour Mistral
-        const prompt = `Tu es un expert en vin français. J'ai une photo d'une étiquette de bouteille de vin.
-Analyse cette image et extrais UNIQUEMENT les informations suivantes dans un JSON valide :
+        // Étape 2 : Analyser le texte avec Mistral
+        let bottleInfo;
+        
+        if (labelText && labelText.trim()) {
+            // On a du texte extrait de l'image
+            bottleInfo = await analyzeLabelTextWithMistral(labelText);
+        } else {
+            // Pas de texte extrait, utiliser une analyse générique
+            bottleInfo = await analyzeGenericWithMistral();
+        }
+        
+        if (!bottleInfo) {
+            return getFallbackBottleInfo("Réponse Mistral invalide");
+        }
+        
+        // Étape 3 : Compléter avec les informations dérivées
+        const completeInfo = completeBottleInfo(bottleInfo);
+        
+        return {
+            ...completeInfo,
+            analysisMethod: labelText ? 'Google Vision + Mistral AI' : 'Mistral AI (texte)',
+            extractedText: labelText
+        };
+        
+    } catch (error) {
+        console.error("Erreur analyse complète :", error.message);
+        return getFallbackBottleInfo(`Erreur: ${error.message}`);
+    }
+}
+
+/**
+ * Analyser du texte d'étiquette avec Mistral
+ * @param {string} labelText - Texte extrait de l'étiquette
+ * @returns {Promise<Object>} - Informations de la bouteille
+ */
+async function analyzeLabelTextWithMistral(labelText) {
+    const prompt = `Tu es un expert en vin français. J'ai extrait le texte suivant d'une étiquette de bouteille de vin :
+
+"""
+${labelText}
+"""
+
+Analyse ce texte et extrais UNIQUEMENT les informations suivantes dans un JSON valide :
 
 {
   "name": "nom complet du vin tel qu'il apparaît sur l'étiquette",
@@ -44,67 +90,107 @@ Analyse cette image et extrais UNIQUEMENT les informations suivantes dans un JSO
 
 Règles STRICTES :
 - Réponds UNIQUEMENT avec le JSON, sans texte supplémentaire avant ou après
-- Si une information n'est PAS clairement visible sur l'étiquette, mets null
-- Ne fais PAS de suppositions, seulement ce qui est écrit sur l'étiquette
+- Si une information n'est PAS clairement visible dans le texte, mets null
+- Ne fais PAS de suppositions, seulement ce qui est écrit dans le texte
 - Pour les années, utilise un nombre entier ou null
 - Pour les pourcentages, utilise un nombre décimal ou null
-- Si l'image est floue ou illisible, retourne {"name": null, "year": null, "grapes": null, "region": null, "appellation": null, "producer": null, "country": null, "alcohol": null}
+- Si le texte est vide ou illisible, retourne {"name": null, "year": null, "grapes": null, "region": null, "appellation": null, "producer": null, "country": null, "alcohol": null}
 
 JSON:`;
-        
-        // Appeler Mistral avec l'image
-        const response = await callMistralVisionAPI(base64Image, prompt);
+
+    try {
+        const response = await mistralAI.callMistral(prompt, mistralConfig.analysisSystemPrompt);
         
         if (!response) {
-            return getFallbackBottleInfo("Aucune réponse de Mistral AI");
+            return null;
         }
         
         // Parser la réponse pour extraire le JSON
         const bottleInfo = parseMistralResponse(response);
         
-        if (!bottleInfo) {
-            return getFallbackBottleInfo("Réponse Mistral invalide");
-        }
-        
-        // Compléter avec les informations dérivées (accords, température, période)
-        const completeInfo = completeBottleInfo(bottleInfo);
-        
-        return {
-            ...completeInfo,
-            analysisMethod: 'Mistral AI Vision'
-        };
-        
+        return bottleInfo;
     } catch (error) {
-        console.error("Erreur analyse Mistral :", error.message);
-        return getFallbackBottleInfo(`Erreur: ${error.message}`);
+        console.error("Erreur analyse texte avec Mistral :", error.message);
+        return null;
     }
 }
 
 /**
- * Appeler l'API Vision de Mistral (pour analyser les images)
- * Note: Mistral n'a pas encore d'API Vision officielle, donc on utilise l'API Chat
- * en envoyant l'image en base64 dans le prompt
+ * Analyse générique sans texte d'étiquette
+ * @returns {Promise<Object>}
  */
-async function callMistralVisionAPI(base64Image, prompt) {
-    if (!mistralConfig.apiKey) {
-        return null;
+async function analyzeGenericWithMistral() {
+    const prompt = `Tu es un expert en vin. Je n'ai pas pu extraire de texte de l'étiquette.
+Retourne des informations par défaut pour une bouteille inconnue.
+
+Retourne UNIQUEMENT un JSON avec les champs : name, year, grapes, region, appellation, producer, country, alcohol.
+Tous les champs doivent être null.
+
+JSON:`;
+
+    try {
+        const response = await mistralAI.callMistral(prompt);
+        return parseMistralResponse(response) || {
+            name: null,
+            year: null,
+            grapes: null,
+            region: null,
+            appellation: null,
+            producer: null,
+            country: null,
+            alcohol: null
+        };
+    } catch (error) {
+        return {
+            name: null,
+            year: null,
+            grapes: null,
+            region: null,
+            appellation: null,
+            producer: null,
+            country: null,
+            alcohol: null
+        };
+    }
+}
+
+/**
+ * Analyser une bouteille avec du texte fourni manuellement
+ * @param {Object} manualData - Données saisies manuellement
+ * @returns {Promise<Object>}
+ */
+async function analyzeWithManualText(manualData) {
+    const { name, year, grapes, region } = manualData;
+    
+    // Construire un texte à partir des données manuelles
+    const textParts = [];
+    if (name) textParts.push(`Nom: ${name}`);
+    if (year) textParts.push(`Année: ${year}`);
+    if (grapes) textParts.push(`Cépage: ${grapes}`);
+    if (region) textParts.push(`Région: ${region}`);
+    
+    const text = textParts.join('\n');
+    
+    if (!text) {
+        return getFallbackBottleInfo("Aucune donnée fournie");
     }
     
     try {
-        // Pour l'instant, Mistral n'a pas d'API Vision, donc on utilise l'API Chat
-        // avec une description de l'image
-        // Dans le futur, on utilisera l'API Vision quand elle sera disponible
+        const bottleInfo = await analyzeLabelTextWithMistral(text);
+        if (!bottleInfo) {
+            return getFallbackBottleInfo("Analyse échouée");
+        }
         
-        const mistralAI = require('./mistralAI');
+        // Compléter avec les informations dérivées
+        const completeInfo = completeBottleInfo(bottleInfo);
         
-        // Appeler Mistral avec le prompt
-        const response = await mistralAI.analyzeWineLabel(prompt);
-        
-        return response;
-        
+        return {
+            ...completeInfo,
+            analysisMethod: 'Mistral AI (texte manuel)'
+        };
     } catch (error) {
-        console.error("Erreur appel API Mistral :", error);
-        return null;
+        console.error("Erreur analyse texte manuel :", error.message);
+        return getFallbackBottleInfo(`Erreur: ${error.message}`);
     }
 }
 
@@ -122,10 +208,31 @@ function parseMistralResponse(response) {
         
         // Si c'est une chaîne, essayer d'extraire le JSON
         if (typeof response === 'string') {
+            // Nettoyer la réponse
+            let cleanedResponse = response.trim();
+            
+            // Supprimer les marqueurs de code markdown
+            cleanedResponse = cleanedResponse.replace(/^```json\s*/, '');
+            cleanedResponse = cleanedResponse.replace(/```\s*$/, '');
+            cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
+            
             // Chercher le premier objet JSON dans la réponse
-            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);
+            }
+            
+            // Essayer de parser directement
+            try {
+                return JSON.parse(cleanedResponse);
+            } catch (e) {
+                // Dernière tentative : extraire entre accolades
+                const start = cleanedResponse.indexOf('{');
+                const end = cleanedResponse.lastIndexOf('}');
+                if (start !== -1 && end !== -1 && end > start) {
+                    const jsonStr = cleanedResponse.substring(start, end + 1);
+                    return JSON.parse(jsonStr);
+                }
             }
         }
         
@@ -138,8 +245,6 @@ function parseMistralResponse(response) {
 
 /**
  * Compléter les informations de la bouteille avec des valeurs dérivées
- * (accords mets-vins, température, période de consommation)
- * Ces infos viennent de la base de connaissances Mistral
  */
 function completeBottleInfo(bottleInfo) {
     const currentYear = new Date().getFullYear();
@@ -157,13 +262,13 @@ function completeBottleInfo(bottleInfo) {
         }
     }
     
-    // Calculer la période de consommation (basée sur l'année et le type de vin)
+    // Calculer la période de consommation
     const { drinkFrom, drinkTo } = calculateDrinkPeriod(year, bottleInfo.grapes);
     
-    // Déterminer les accords mets-vins (basé sur le cépage ou la région)
+    // Déterminer les accords mets-vins
     const foodPairing = getFoodPairing(bottleInfo.grapes, bottleInfo.region);
     
-    // Déterminer la température de service (basée sur le cépage)
+    // Déterminer la température de service
     const temperature = getTemperature(bottleInfo.grapes, bottleInfo.region);
     
     return {
@@ -179,14 +284,11 @@ function completeBottleInfo(bottleInfo) {
 
 /**
  * Calculer la période de consommation
- * Plus de dates fixes comme 2026-2031 !
  */
 function calculateDrinkPeriod(year, grapes) {
     const currentYear = new Date().getFullYear();
     
-    // Si on a une année, calculer la période basée sur le type de vin
     if (year) {
-        // Période par défaut selon le type de vin
         const agingPotential = getAgingPotential(grapes);
         
         let drinkFrom = year + agingPotential.min;
@@ -198,7 +300,6 @@ function calculateDrinkPeriod(year, grapes) {
             drinkTo = currentYear + (agingPotential.max - agingPotential.min);
         }
         
-        // Si drinkTo < drinkFrom, corriger
         if (drinkTo < drinkFrom) {
             drinkTo = drinkFrom + 5;
         }
@@ -206,7 +307,6 @@ function calculateDrinkPeriod(year, grapes) {
         return { drinkFrom, drinkTo };
     }
     
-    // Si pas d'année, période par défaut
     return {
         drinkFrom: currentYear,
         drinkTo: currentYear + 5
@@ -218,7 +318,6 @@ function calculateDrinkPeriod(year, grapes) {
  */
 function getAgingPotential(grapes) {
     if (!grapes) {
-        // Période par défaut pour un vin inconnu
         return { min: 2, max: 8 };
     }
     
@@ -264,7 +363,6 @@ function getAgingPotential(grapes) {
         return { min: 0, max: 3 };
     }
     
-    // Période par défaut
     return { min: 2, max: 8 };
 }
 
@@ -287,7 +385,7 @@ function getFoodPairing(grapes, region) {
         return "Canard, Agneau, Viandes rouges, Fromages affinés, Plats en sauce, Charcuterie";
     }
     if (grapesLower.includes('pinot noir')) {
-        return "Canard, Poulet, Champignons, Fromages doux, Gibier à plumes, Salmon grillé";
+        return "Canard, Poulet, Champignons, Fromages doux, Gibier à plumes, Saumon grillé";
     }
     if (grapesLower.includes('syrah')) {
         return "Viandes grillées, Gibier, Fromages forts, Plats épicés, Agneau, Côtes d'agneau";
@@ -413,5 +511,12 @@ function getFallbackBottleInfo(reason) {
 
 module.exports = {
     analyzeBottleWithMistralOnly,
-    getFallbackBottleInfo
+    analyzeWithManualText,
+    getFallbackBottleInfo,
+    parseMistralResponse,
+    completeBottleInfo,
+    calculateDrinkPeriod,
+    getAgingPotential,
+    getFoodPairing,
+    getTemperature
 };

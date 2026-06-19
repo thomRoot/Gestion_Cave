@@ -25,7 +25,7 @@ function hideLoading() {
     }
 }
 
-// Vérifier le statut de Mistral AI
+// Vérifier le statut de Mistral AI et Google Vision
 async function checkMistralStatus() {
     try {
         const response = await fetch('/api/bottles/mistral-status');
@@ -37,7 +37,10 @@ async function checkMistralStatus() {
         if (statusElement && statusTextElement) {
             statusElement.style.display = 'flex';
             
-            if (data.mistralAvailable) {
+            if (data.mistralAvailable && data.googleVisionAvailable) {
+                statusElement.className = 'mistral-status connected';
+                statusTextElement.textContent = `Connecté (${data.model}) + OCR`;
+            } else if (data.mistralAvailable) {
                 statusElement.className = 'mistral-status connected';
                 statusTextElement.textContent = `Connecté (${data.model})`;
             } else {
@@ -428,7 +431,7 @@ function suggestPrompt(prompt) {
 
 // ==================== FONCTIONS D'ANALYSE IA ====================
 
-// Analyser avec IA (avec image compressée)
+// Analyser avec IA (avec image compressée ou texte)
 async function analyzeWithAI() {
     // Vérifier qu'une image est disponible
     if (!window.camera.hasImage()) {
@@ -444,8 +447,8 @@ async function analyzeWithAI() {
         }
 
         try {
-            showLoading("Analyse du texte en cours...");
-            const response = await fetch('/api/bottles/analyze', {
+            showLoading("Analyse du texte avec IA en cours...");
+            const response = await fetch('/api/bottles/analyze-text', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, year, grapes, region })
@@ -462,7 +465,7 @@ async function analyzeWithAI() {
             }
         } catch (error) {
             hideLoading();
-            console.error("Erreur analyse IA :", error);
+            console.error("Erreur analyse IA texte :", error);
             alert("Erreur de connexion. Vérifiez que le serveur est lancé.");
         }
         return;
@@ -470,7 +473,7 @@ async function analyzeWithAI() {
 
     // Si une image est disponible, l'envoyer au serveur
     try {
-        showLoading("Analyse de l'image en cours...");
+        showLoading("Analyse de l'image avec IA en cours...");
         const imageDataUrl = window.camera.getCurrentImage();
         
         // Créer un FormData pour envoyer l'image
@@ -498,14 +501,30 @@ async function analyzeWithAI() {
 
         if (result.success && result.bottleInfo) {
             fillBottleFormWithAIResult(result.bottleInfo);
-            alert("Analyse terminée ! Les champs ont été complétés automatiquement.");
+            
+            // Afficher un message plus informatif
+            let message = "Analyse terminée ! Les champs ont été complétés automatiquement.";
+            if (result.extractedText) {
+                message += "\n\nTexte extrait de l'étiquette :\n" + result.extractedText.substring(0, 200) + "...";
+            }
+            if (result.analysisMethod) {
+                message = `[${result.analysisMethod}] ` + message;
+            }
+            alert(message);
         } else {
-            alert("Je n'ai pas pu identifier cette bouteille. Vérifiez la qualité de l'image ou remplissez manuellement les informations.");
+            let errorMsg = "Je n'ai pas pu identifier cette bouteille.";
+            if (result.error) {
+                errorMsg += "\n" + result.error;
+            }
+            if (!result.googleVisionAvailable) {
+                errorMsg += "\n\nNote : Google Vision n'est pas configuré. Ajoutez GOOGLE_VISION_API_KEY dans .env pour une meilleure reconnaissance.";
+            }
+            alert(errorMsg);
         }
     } catch (error) {
         hideLoading();
-        console.error("Erreur analyse IA :", error);
-        alert("Erreur lors de l'analyse. Veuillez réessayer.");
+        console.error("Erreur analyse IA image :", error);
+        alert("Erreur lors de l'analyse. Vérifiez la connexion et que les API sont configurées.");
     }
 }
 

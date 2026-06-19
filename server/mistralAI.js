@@ -1,5 +1,5 @@
 // mistralAI.js - Intégration de l'API Mistral pour une VRAIE IA
-// Utilise le module https natif pour éviter les dépendances supplémentaires
+// Version 5.0.0 - Corrigée et optimisée
 
 const https = require('https');
 const mistralConfig = require('./mistralConfig');
@@ -132,8 +132,9 @@ async function analyzeWineLabel(text) {
         const prompt = `Analyse ce texte d'étiquette de vin et extrais les informations dans un objet JSON.
 Texte de l'étiquette : """${text}"""
 
-Retourne UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, producer.
-Si une information n'est pas trouvée, utilise null.`;
+Retourne UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, appellation, producer, country, alcohol.
+Si une information n'est pas trouvée, utilise null.
+Ne réponds JAMAIS autre chose que le JSON.`;
         
         const response = await callMistral(
             prompt,
@@ -143,11 +144,33 @@ Si une information n'est pas trouvée, utilise null.`;
         // Essayer de parser la réponse JSON
         try {
             // Nettoyer la réponse pour extraire le JSON
-            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            let cleanedResponse = response.trim();
+            
+            // Supprimer les marqueurs de code markdown
+            cleanedResponse = cleanedResponse.replace(/^```json\s*/, '');
+            cleanedResponse = cleanedResponse.replace(/```\s*$/, '');
+            cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
+            
+            // Chercher le premier objet JSON dans la réponse
+            const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);
             }
-            // Si pas de JSON trouvé, retourner null pour indiquer l'échec
+            
+            // Essayer de parser directement
+            try {
+                return JSON.parse(cleanedResponse);
+            } catch (e) {
+                // Dernière tentative : extraire entre accolades
+                const start = cleanedResponse.indexOf('{');
+                const end = cleanedResponse.lastIndexOf('}');
+                if (start !== -1 && end !== -1 && end > start) {
+                    const jsonStr = cleanedResponse.substring(start, end + 1);
+                    return JSON.parse(jsonStr);
+                }
+            }
+            
+            // Si rien ne fonctionne, retourner null
             return null;
         } catch (parseError) {
             console.error('Erreur de parsing JSON:', parseError);
@@ -159,7 +182,14 @@ Si une information n'est pas trouvée, utilise null.`;
     }
 }
 
-
+/**
+ * Extraire les informations d'une bouteille à partir de texte
+ * @param {string} text - Texte à analyser
+ * @returns {Promise<Object>}
+ */
+async function extractBottleInfoFromText(text) {
+    return analyzeWineLabel(text);
+}
 
 /**
  * Générer une réponse de fallback (si Mistral n'est pas disponible)
@@ -226,11 +256,61 @@ Inclus : cépage, région, température de service, accords mets-vins, période 
     return askChatQuestion(prompt);
 }
 
+/**
+ * Recommander un vin pour une occasion
+ * @param {string} occasion - L'occasion
+ * @param {string} food - Le plat
+ * @param {string} budget - Le budget
+ * @returns {Promise<string>}
+ */
+async function recommendWineForOccasion(occasion, food, budget) {
+    const prompt = `Recommande-moi un vin pour l'occasion suivante : ${occasion || 'non spécifiée'}, avec le plat : ${food || 'non spécifié'}, et un budget de : ${budget || 'non spécifié'}.
+Donne-moi 3 suggestions avec des explications.`;
+    
+    return askChatQuestion(prompt);
+}
+
+/**
+ * Chercher un vin par nom
+ * @param {string} name - Le nom du vin
+ * @returns {Promise<Object|null>}
+ */
+async function searchWineByName(name) {
+    try {
+        const prompt = `Donne-moi des informations détaillées sur le vin appelé : ${name}.
+Retourne UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, appellation, producer, country, alcohol, drinkFrom, drinkTo, foodPairing, temperature.
+Si tu ne connais pas ce vin, retourne null.`;
+        
+        const response = await callMistral(prompt);
+        
+        try {
+            // Parser la réponse
+            let cleanedResponse = response.trim();
+            cleanedResponse = cleanedResponse.replace(/^```json\s*/, '');
+            cleanedResponse = cleanedResponse.replace(/```\s*$/, '');
+            
+            const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            }
+            return null;
+        } catch (e) {
+            return null;
+        }
+    } catch (error) {
+        console.error('Erreur recherche vin par nom:', error.message);
+        return null;
+    }
+}
+
 module.exports = {
     callMistral,
     askChatQuestion,
     analyzeWineLabel,
+    extractBottleInfoFromText,
     getWinePairingAdvice,
     getWineInfo,
+    recommendWineForOccasion,
+    searchWineByName,
     generateFallbackResponse
 };

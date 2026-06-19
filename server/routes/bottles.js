@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
     });
 });
 
-// Analyser une bouteille avec l'IA - UNIQUEMENT Mistral AI, AUCUN OCR LOCAL
+// Analyser une bouteille avec l'IA - Google Vision + Mistral AI
 router.post('/analyze', upload.single('image'), async (req, res) => {
     try {
         let imagePath = null;
@@ -49,23 +49,48 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
             imagePath = path.join(__dirname, '../../public/uploads', req.file.filename);
         }
         
-        // Utiliser UNIQUEMENT Mistral AI pour l'analyse
+        // Utiliser Google Vision + Mistral AI pour l'analyse
         const result = await mistralAnalyzer.analyzeBottleWithMistralOnly(imagePath, false);
         
         res.json({
             success: true,
             bottleInfo: result,
             mistralAvailable: !!mistralConfig.apiKey,
-            analysisMethod: result.analysisMethod
+            googleVisionAvailable: !!process.env.GOOGLE_VISION_API_KEY,
+            analysisMethod: result.analysisMethod,
+            extractedText: result.extractedText
         });
         
     } catch (error) {
-        console.error("Erreur analyse Mistral AI :", error);
+        console.error("Erreur analyse IA :", error);
         res.status(500).json({
             success: false,
             error: "Erreur serveur lors de l'analyse",
             mistralAvailable: !!mistralConfig.apiKey,
+            googleVisionAvailable: !!process.env.GOOGLE_VISION_API_KEY,
             bottleInfo: mistralAnalyzer.getFallbackBottleInfo(error.message)
+        });
+    }
+});
+
+// Analyser avec texte manuel
+router.post('/analyze-text', async (req, res) => {
+    try {
+        const { name, year, grapes, region } = req.body;
+        
+        const manualData = { name, year, grapes, region };
+        const result = await mistralAnalyzer.analyzeWithManualText(manualData);
+        
+        res.json({
+            success: true,
+            bottleInfo: result,
+            analysisMethod: result.analysisMethod
+        });
+    } catch (error) {
+        console.error("Erreur analyse texte :", error);
+        res.status(500).json({
+            success: false,
+            error: "Erreur serveur lors de l'analyse texte"
         });
     }
 });
@@ -309,16 +334,22 @@ router.post('/wine-info', async (req, res) => {
     }
 });
 
-// Vérifier le statut de l'API Mistral
+// Vérifier le statut de l'API Mistral et Google Vision
 router.get('/mistral-status', (req, res) => {
-    const hasApiKey = !!mistralConfig.apiKey;
+    const hasMistralApiKey = !!mistralConfig.apiKey;
+    const hasGoogleVisionApiKey = !!process.env.GOOGLE_VISION_API_KEY;
     const model = mistralConfig.model || 'mistral-tiny';
     
     res.json({
         success: true,
-        mistralAvailable: hasApiKey,
+        mistralAvailable: hasMistralApiKey,
+        googleVisionAvailable: hasGoogleVisionApiKey,
         model: model,
-        message: hasApiKey ? "Mistral AI est configuré et prêt à être utilisé" : "Mistral AI n'est pas configuré (clé API manquante)"
+        message: hasMistralApiKey && hasGoogleVisionApiKey ? 
+            "Mistral AI et Google Vision sont configurés - Analyse complète disponible" :
+            hasMistralApiKey ? 
+                "Mistral AI configuré, mais Google Vision non configuré (OCR limité)" :
+                "Mistral AI n'est pas configuré (clé API manquante)"
     });
 });
 

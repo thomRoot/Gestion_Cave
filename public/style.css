@@ -1,4 +1,4 @@
-/* MA CAVE A VIN - Styles CSS - Version 5.0.0 */
+/* MA CAVE A VIN - Styles CSS - Version 5.0.0 - Optimisé Mobile */
 
 :root {
     --primary: #8B0000;
@@ -26,6 +26,7 @@
 html {
     font-size: 16px;
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%; /* Empêcher le redimensionnement du texte sur iOS */
 }
 
 body {
@@ -35,20 +36,22 @@ body {
     min-height: 100vh;
     line-height: 1.6;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* ==================== HEADER ==================== */
+/* ==================== HEADER - OPTIMISÉ MOBILE ==================== */
 .header {
     position: sticky;
     top: 0;
     background: rgba(30, 30, 30, 0.95);
     backdrop-filter: blur(10px);
-    padding: 16px 24px;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
     z-index: 1000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -58,18 +61,20 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .logo-container i {
-    font-size: 2rem;
+    font-size: 1.8rem;
     color: var(--secondary);
 }
 
 .logo-container h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: var(--text);
     letter-spacing: 1px;
+    white-space: nowrap;
 }
 
 .search-bar {
@@ -78,18 +83,28 @@ body {
     gap: 8px;
     flex: 1;
     max-width: 500px;
-    min-width: 250px;
+    min-width: 200px;
+    order: 3;
+}
+
+@media (min-width: 769px) {
+    .search-bar {
+        order: 2;
+        max-width: 500px;
+        min-width: 250px;
+    }
 }
 
 .search-bar input {
     flex: 1;
-    padding: 8px 16px;
+    padding: 8px 14px;
     background: var(--bg-light);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius);
     color: var(--text);
     font-size: 0.95rem;
     transition: var(--transition);
+    min-width: 0; /* Permet le rétrécissement */
 }
 
 .search-bar input:focus {
@@ -103,13 +118,14 @@ body {
 }
 
 .search-bar button {
-    padding: 8px 16px;
+    padding: 8px 14px;
     background: var(--primary);
     color: white;
     border: none;
     border-radius: var(--radius);
     cursor: pointer;
     transition: var(--transition);
+    flex-shrink: 0;
 }
 
 .search-bar button:hover {
@@ -121,18 +137,29 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    order: 2;
+}
+
+@media (min-width: 769px) {
+    .header-buttons {
+        order: 3;
+        justify-content: flex-start;
+    }
 }
 
 .header-buttons button {
-    padding: 8px 16px;
+    padding: 6px 12px;
     background: var(--bg-light);
     color: var(--text);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
+    white-space: nowrap;
 }
 
 .header-buttons button:hover {
@@ -235,18 +262,19 @@ body {
     color: var(--error);
 }
 
-/* ==================== CAVE CONTAINER ==================== */
+/* ==================== CAVE CONTAINER - RESPONSIVE ==================== */
 .cave-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 16px;
-    padding: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 12px;
+    padding: 16px;
     max-width: 1600px;
     margin: 0 auto;
     min-height: calc(100vh - 150px);
+    touch-action: manipulation; /* Désactiver le double-tap zoom sur iOS */
 }
 
-/* ==================== CAVE CELL ==================== */
+/* ==================== CAVE CELL - OPTIMISÉ TOUCH ==================== */
 .cave-cell {
     position: relative;
     aspect-ratio: 1;
@@ -260,13 +288,20 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 8px;
+    padding: 6px;
+    user-select: none; /* Empêcher la sélection de texte */
+    -webkit-tap-highlight-color: transparent; /* Supprimer le surlignage au tap sur iOS */
 }
 
 .cave-cell:hover {
     border-color: var(--secondary);
     transform: translateY(-2px);
     box-shadow: var(--shadow);
+}
+
+.cave-cell:active {
+    transform: scale(0.98);
+    border-color: var(--secondary);
 }
 
 .cave-cell.empty {
@@ -279,15 +314,15 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    border: 2px dashed rgba(255, 255, 255, 0.2);
+    width: 30px;
+    height: 30px;
+    border: 1.5px dashed rgba(255, 255, 255, 0.2);
     border-radius: 50%;
 }
 
 .cave-cell.empty .bottle-icon {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     background: linear-gradient(135deg, var(--primary), #6B0000);
     border-radius: 50%;
     display: flex;
@@ -301,7 +336,7 @@ body {
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     color: white;
-    font-size: 1.2rem;
+    font-size: 1rem;
 }
 
 .cave-cell.highlight {
@@ -312,19 +347,19 @@ body {
 
 @keyframes pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
-    50% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+    50% { box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
 }
 
 .bottle-thumbnail {
-    width: 60%;
-    height: 60%;
+    width: 65%;
+    height: 65%;
     object-fit: contain;
     border-radius: 4px;
     margin-bottom: 4px;
 }
 
 .bottle-name {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 500;
     color: var(--text);
     text-align: center;
@@ -338,10 +373,10 @@ body {
     position: absolute;
     top: 4px;
     right: 4px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -370,7 +405,7 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 3px;
     background: rgba(0, 0, 0, 0.5);
     border-radius: 0 0 12px 12px;
     overflow: hidden;
@@ -386,13 +421,13 @@ body {
 
 .bottle-period {
     position: absolute;
-    bottom: 24px;
+    bottom: 20px;
     left: 0;
     right: 0;
     padding: 2px 4px;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 4px;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--secondary);
     text-align: center;
     font-weight: 600;
@@ -401,13 +436,13 @@ body {
 
 .bottle-period .period-text {
     display: inline-block;
-    padding: 1px 4px;
+    padding: 1px 3px;
     background: rgba(212, 175, 55, 0.2);
     border-radius: 3px;
     border: 1px solid var(--secondary);
 }
 
-/* ==================== POPUPS ==================== */
+/* ==================== POPUPS - OPTIMISÉ MOBILE ==================== */
 .popup {
     display: none;
     position: fixed;
@@ -415,13 +450,14 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     z-index: 2000;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 10px;
     overflow-y: auto;
     backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .popup-content {
@@ -435,6 +471,7 @@ body {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
     animation: popupSlideIn 0.3s ease;
+    -webkit-overflow-scrolling: touch; /* Scroll fluide sur iOS */
 }
 
 @keyframes popupSlideIn {
@@ -451,17 +488,18 @@ body {
 .popup .close {
     position: absolute;
     top: 12px;
-    right: 16px;
+    right: 12px;
     font-size: 1.5rem;
     color: var(--text-secondary);
     cursor: pointer;
     transition: var(--transition);
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    z-index: 10;
 }
 
 .popup .close:hover {
@@ -471,10 +509,10 @@ body {
 
 .popup h2 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--text);
-    margin-bottom: 20px;
-    padding: 0 20px;
+    margin-bottom: 16px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -484,17 +522,17 @@ body {
     color: var(--secondary);
 }
 
-/* ==================== AI CHAT POPUP ==================== */
+/* ==================== AI CHAT POPUP - MOBILE FRIENDLY ==================== */
 .ai-chat-popup {
     max-width: 700px;
-    max-height: 80vh;
+    max-height: 85vh;
 }
 
 .chat-subtitle {
     color: var(--text-secondary);
     font-size: 0.9rem;
-    margin-bottom: 16px;
-    padding: 0 20px;
+    margin-bottom: 12px;
+    padding: 0 16px;
 }
 
 .ai-chat-container {
@@ -506,16 +544,17 @@ body {
 .ai-messages {
     flex: 1;
     overflow-y: auto;
-    padding: 0 20px 16px;
+    padding: 0 16px 12px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     max-height: 50vh;
+    -webkit-overflow-scrolling: touch;
 }
 
 .ai-message {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     max-width: 90%;
     animation: messageSlideIn 0.3s ease;
 }
@@ -541,8 +580,8 @@ body {
 }
 
 .message-avatar {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: var(--bg-light);
     display: flex;
@@ -550,7 +589,7 @@ body {
     justify-content: center;
     flex-shrink: 0;
     color: var(--secondary);
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .ai-message.user .message-avatar {
@@ -560,11 +599,11 @@ body {
 
 .message-content {
     background: var(--bg-light);
-    padding: 12px 16px;
-    border-radius: 18px;
+    padding: 10px 14px;
+    border-radius: 16px;
     max-width: 100%;
     word-wrap: break-word;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1.5;
     color: var(--text);
 }
@@ -572,11 +611,11 @@ body {
 .ai-message.user .message-content {
     background: var(--primary);
     color: white;
-    border-radius: 18px 18px 0 18px;
+    border-radius: 16px 16px 0 16px;
 }
 
 .ai-message.bot .message-content {
-    border-radius: 18px 18px 18px 0;
+    border-radius: 16px 16px 16px 0;
 }
 
 .ai-message.bot.welcome-message .message-content {
@@ -594,22 +633,28 @@ body {
 .suggestions-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 12px;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+@media (max-width: 480px) {
+    .suggestions-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .suggestion-btn {
     background: rgba(212, 175, 55, 0.15);
     border: 1px solid var(--secondary);
     color: var(--secondary);
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
 .suggestion-btn:hover {
@@ -620,19 +665,19 @@ body {
 .ai-input-container {
     display: flex;
     gap: 8px;
-    padding: 16px 20px;
+    padding: 12px 16px;
     background: var(--bg-light);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .ai-input-container input {
     flex: 1;
-    padding: 10px 16px;
+    padding: 10px 14px;
     background: var(--bg-darker);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius);
     color: var(--text);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .ai-input-container input:focus {
@@ -645,8 +690,8 @@ body {
 }
 
 .ai-send-btn {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: var(--secondary);
     color: white;
@@ -656,6 +701,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .ai-send-btn:hover {
@@ -672,19 +718,19 @@ body {
 .chat-info {
     display: flex;
     justify-content: space-between;
-    padding: 8px 20px;
-    font-size: 0.8rem;
+    padding: 8px 16px;
+    font-size: 0.75rem;
     color: var(--text-secondary);
 }
 
 .typing-indicator {
     display: flex;
-    gap: 4px;
+    gap: 3px;
 }
 
 .typing-indicator span {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: var(--secondary);
     border-radius: 50%;
     animation: typingBounce 1.4s infinite ease-in-out;
@@ -698,19 +744,19 @@ body {
     40% { transform: scale(1); }
 }
 
-/* ==================== BOTTLE FORM POPUP ==================== */
+/* ==================== BOTTLE FORM POPUP - MOBILE OPTIMIZED ==================== */
 form {
-    padding: 0 20px 20px;
+    padding: 0 16px 16px;
 }
 
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 6px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
     font-weight: 500;
 }
@@ -724,12 +770,12 @@ form {
 .form-group textarea,
 .form-group select {
     width: 100%;
-    padding: 10px 14px;
+    padding: 10px 12px;
     background: var(--bg-light);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius);
     color: var(--text);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: var(--transition);
 }
 
@@ -748,13 +794,13 @@ form {
 
 .form-group textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 70px;
 }
 
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 12px;
 }
 
 @media (max-width: 500px) {
@@ -773,9 +819,9 @@ form {
     margin: 0;
 }
 
-/* Camera Container */
+/* Camera Container - Mobile Optimized */
 .camera-container {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .photo-preview-container {
@@ -785,11 +831,12 @@ form {
     background: var(--bg-light);
     border-radius: var(--radius);
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     border: 2px dashed rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 200px;
 }
 
 .photo-preview-container video,
@@ -803,13 +850,15 @@ form {
     display: flex;
     gap: 8px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .camera-buttons button {
-    padding: 8px 16px;
+    padding: 8px 14px;
     border-radius: var(--radius);
     cursor: pointer;
     transition: var(--transition);
+    font-size: 0.85rem;
 }
 
 #uploadPhotoButton {
@@ -824,9 +873,9 @@ form {
 
 .form-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 24px;
-    padding-top: 16px;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 14px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -836,24 +885,24 @@ form {
 
 /* ==================== BOTTLE DETAILS POPUP ==================== */
 .bottle-details {
-    padding: 0 20px 20px;
+    padding: 0 16px 16px;
 }
 
 .bottle-image-container {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .bottle-image-container img {
-    max-width: 200px;
-    max-height: 300px;
+    max-width: 180px;
+    max-height: 250px;
     border-radius: var(--radius);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .bottle-info-grid {
     display: grid;
-    gap: 12px;
+    gap: 10px;
 }
 
 .info-item {
@@ -867,7 +916,7 @@ form {
 }
 
 .info-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     font-weight: 500;
 }
@@ -878,7 +927,7 @@ form {
 }
 
 .info-value {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--text);
     background: var(--bg-light);
     padding: 8px 12px;
@@ -887,23 +936,23 @@ form {
 }
 
 .drink-period-bar {
-    margin-top: 16px;
-    padding-top: 16px;
+    margin-top: 14px;
+    padding-top: 14px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .drink-period-bar .bar-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .period-range {
-    height: 8px;
+    height: 6px;
     background: var(--bg-light);
     border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .period-fill {
@@ -914,16 +963,16 @@ form {
 }
 
 .period-text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     text-align: center;
 }
 
 .button-group {
     display: flex;
-    gap: 12px;
-    margin-top: 24px;
-    padding-top: 16px;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 14px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -937,11 +986,11 @@ form {
 }
 
 #caveConfigForm {
-    padding: 0 20px 20px;
+    padding: 0 16px 16px;
 }
 
 #caveConfigForm .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 #caveConfigForm button {
@@ -957,7 +1006,7 @@ form {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     z-index: 3000;
     align-items: center;
     justify-content: center;
@@ -970,13 +1019,13 @@ form {
 }
 
 .loading-spinner i {
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: var(--secondary);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .loading-spinner p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--text-secondary);
 }
 
@@ -984,8 +1033,8 @@ form {
 .mobile-fab {
     display: none;
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    bottom: 20px;
+    right: 20px;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -1008,16 +1057,16 @@ form {
     transform: scale(0.95);
 }
 
-/* ==================== RESPONSIVE ==================== */
+/* ==================== RESPONSIVE DESIGN ==================== */
 @media (max-width: 768px) {
     .header {
         flex-direction: column;
-        padding: 12px 16px;
-        gap: 12px;
+        padding: 10px 12px;
+        gap: 10px;
     }
 
     .logo-container h1 {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
 
     .search-bar {
@@ -1030,17 +1079,18 @@ form {
         order: 2;
         flex-wrap: wrap;
         justify-content: center;
+        width: 100%;
     }
 
     .header-buttons button {
-        padding: 6px 12px;
+        padding: 6px 10px;
         font-size: 0.8rem;
     }
 
     .cave-container {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 12px;
-        padding: 16px;
+        gap: 10px;
+        padding: 12px;
     }
 
     .cave-cell {
@@ -1054,7 +1104,7 @@ form {
     }
 
     .popup-content {
-        margin: 10px;
+        margin: 8px;
         max-height: 95vh;
     }
 
@@ -1069,7 +1119,7 @@ form {
 
 @media (max-width: 480px) {
     .logo-container h1 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
 
     .cave-container {
@@ -1082,19 +1132,59 @@ form {
     }
 
     .bottle-period {
-        font-size: 0.6rem;
-        bottom: 20px;
+        font-size: 0.55rem;
+        bottom: 18px;
     }
 
     .ai-message {
         max-width: 95%;
     }
+
+    .message-content {
+        font-size: 0.85rem;
+    }
+
+    .popup h2 {
+        font-size: 1.2rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .cave-container {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 6px;
+    }
+
+    .bottle-thumbnail {
+        width: 70%;
+        height: 70%;
+    }
+
+    .bottle-name {
+        font-size: 0.6rem;
+    }
+
+    .bottle-period {
+        display: none; /* Masquer sur très petits écrans */
+    }
+
+    .bottle-maturity {
+        width: 16px;
+        height: 16px;
+        font-size: 0.5rem;
+    }
 }
 
 /* ==================== SCROLLBAR STYLING ==================== */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -1103,7 +1193,7 @@ form {
 
 ::-webkit-scrollbar-thumb {
     background: var(--bg-light);
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -1120,9 +1210,9 @@ form {
 }
 
 .mt-1 { margin-top: 8px; }
-.mt-2 { margin-top: 16px; }
+.mt-2 { margin-top: 12px; }
 .mb-1 { margin-bottom: 8px; }
-.mb-2 { margin-bottom: 16px; }
+.mb-2 { margin-bottom: 12px; }
 
 /* ==================== ANIMATIONS ==================== */
 @keyframes fadeIn {
@@ -1148,3 +1238,23 @@ form {
 .slide-up {
     animation: slideUp 0.3s ease;
 }
+
+/* ==================== TOUCH FEEDBACK ==================== */
+/* Améliorer le feedback tactile sur mobile */
+@media (hover: none) and (pointer: coarse) {
+    .cave-cell:active,
+    .btn-primary:active,
+    .btn-secondary:active,
+    .btn-ai:active,
+    .btn-danger:active {
+        transform: scale(0.98);
+    }
+    
+    .ai-send-btn:active {
+        transform: scale(0.95);
+    }
+}
+
+/* ==================== PREVENT DOUBLE TAP ZOOM ==================== */
+/* Empêcher le zoom sur double-tap sur les éléments interactifs */
+touch-action: manipulation;
