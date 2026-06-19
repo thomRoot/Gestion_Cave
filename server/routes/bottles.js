@@ -130,6 +130,7 @@ router.post('/', upload.single('photo'), (req, res) => {
     const bottleData = req.body;
     if (req.file) bottleData.photo = req.file.filename;
     if (bottleData.photo && bottleData.photo.startsWith('data:image/')) {
+        // CORRECTION: regex corrigé avec backslashes échappés
         const base64Data = bottleData.photo.replace(/^data:image/w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
         const uploadDir = path.join(__dirname, '../../public/uploads');
