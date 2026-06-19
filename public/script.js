@@ -62,8 +62,9 @@ async function checkMistralStatus() {
 document.addEventListener('DOMContentLoaded', () => {
     window.cave.initCave();
     
-    // Vérifier le statut de Mistral au chargement
+    // Vérifier le statut de Mistral et Google Vision au chargement
     checkMistralStatus();
+    checkGoogleVisionStatus();
 
     // Gestion de la configuration de la cave
     const caveConfigForm = document.getElementById('caveConfigForm');
@@ -190,6 +191,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+// Vérifier le statut de Google Vision
+async function checkGoogleVisionStatus() {
+    try {
+        const response = await fetch('/api/bottles/mistral-status');
+        const data = await response.json();
+        
+        const statusElement = document.getElementById('googleVisionStatus');
+        const statusTextElement = document.getElementById('googleVisionStatusText');
+        
+        if (statusElement && statusTextElement) {
+            statusElement.style.display = 'flex';
+            
+            if (data.googleVisionAvailable) {
+                statusElement.className = 'mistral-status connected';
+                statusTextElement.textContent = 'Connecté';
+            } else {
+                statusElement.className = 'mistral-status disconnected';
+                statusTextElement.textContent = 'Non configuré';
+                // Remplacer l'icône
+                const icon = statusElement.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-exclamation-circle';
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Erreur vérification Google Vision :", error);
+    }
+}
 
 // ==================== FONCTIONS DE CHAT IA ====================
 
