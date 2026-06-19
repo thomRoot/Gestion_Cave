@@ -313,7 +313,7 @@ body {
     display: none;
 }
 
-.cave-cell.empty .bottle-icon {
+.cave-cell.empty {
     width: 30px;
     height: 30px;
     background: linear-gradient(135deg, var(--primary), #6B0000);
@@ -324,13 +324,20 @@ body {
     opacity: 0.7;
 }
 
-.cave-cell.empty .bottle-icon::before {
-    content: '\f731';
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 1.5rem;
-    opacity: 0.8;
+.cave-cell.empty::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 60px;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMjAwIj48cGF0aCBkPSJNNTAgMjAgTDAgNDAgTDAgMTYwIEw0MCAxNjAgTDQwIDQwIFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiLz48cmVjdCB4PSIzNSIgeT0iMTYwIiB3aWR0aD0iMzAiIGhlaWdodD0iMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.6;
+    filter: brightness(0.7);
 }
 
 .cave-cell.highlight {
