@@ -89,7 +89,7 @@ router.post('/', upload.single('photo'), (req, res) => {
     if (req.file) bottleData.photo = req.file.filename;
     if (bottleData.photo && bottleData.photo.startsWith('data:image/')) {
         // CORRECTION: regex avec backslashes correctement échappés
-        const base64Data = bottleData.photo.replace(/^data:image\\/\\w+;base64,/, '');
+        const base64Data = bottleData.photo.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
         const uploadDir = path.join(__dirname, '../../public/uploads');
         if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });

@@ -95,14 +95,30 @@ Gestion_Cave/
 ├── .env.example
 └── README.md
 
-## Corrections v6.0.0
+## Corrections v6.0.1
 
 ### Problèmes corrigés
-- Les valeurs par défaut génériques ont été supprimées
-- Google Vision est maintenant OBLIGATOIRE pour l'analyse d'image
-- Chaque bouteille est analysée individuellement avec son image
-- Le chat IA fait de vraies requêtes vers Mistral
-- Meilleure gestion des erreurs avec messages clairs
+- **Correction critique** : Erreur de syntaxe dans la regex pour le traitement des images base64 (`bottles.js:92`).
+- **Amélioration** : Meilleure gestion des data URLs dans `googleVision.js` pour une extraction plus robuste du texte base64.
+- **Optimisation** : `mistralAnalyzer.js` permet désormais une analyse avec Mistral AI **même si Google Vision n'est pas configuré** (sans OCR).
+- Les valeurs par défaut génériques ont été supprimées.
+- Chaque bouteille est analysée individuellement avec son image.
+- Le chat IA fait de vraies requêtes vers Mistral.
+- Meilleure gestion des erreurs avec messages clairs.
+
+### Corrections techniques détaillées
+1. **`server/routes/bottles.js`** :
+   - Correction de la regex `/^data:image\/\w+;base64,/` en `/^data:image\/\w+;base64,/` pour éviter l'erreur `SyntaxError: Invalid regular expression flags`.
+
+2. **`server/googleVision.js`** :
+   - Amélioration de l'extraction des données base64 depuis les data URLs avec une regex plus robuste.
+
+3. **`server/mistralAnalyzer.js`** :
+   - Permet désormais une analyse avec Mistral AI uniquement si Google Vision n'est pas configuré.
+   - Retourne des informations plus claires sur la disponibilité des API.
+
+4. **Dépendances** :
+   - Ajout de `multer` pour la gestion des uploads de fichiers.
 
 ### Améliorations mobile
 - Grille responsive adaptée aux petits écrans
@@ -128,6 +144,6 @@ MIT
 
 ---
 
-Version : 6.0.0  
+Version : 6.0.1  
 Dernière mise à jour : 19 juin 2026  
 Auteur : thomRoot

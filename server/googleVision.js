@@ -117,7 +117,9 @@ async function extractTextFromWineLabel(imagePathOrBase64, isBase64 = false) {
         if (isBase64) {
             // Si c'est déjà une data URL, extraire la partie base64
             if (imagePathOrBase64.startsWith('data:image/')) {
-                base64Image = imagePathOrBase64.split(',')[1];
+                // CORRIGÉ: Utiliser une regex pour extraire la partie base64 après la virgule
+                const match = imagePathOrBase64.match(/^data:image\/\w+;base64,(.+)$/);
+                base64Image = match ? match[1] : imagePathOrBase64.split(',')[1];
             } else {
                 base64Image = imagePathOrBase64;
             }

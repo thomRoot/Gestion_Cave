@@ -105,8 +105,10 @@ async function analyzeBottleWithMistralOnly(imagePathOrBase64, isBase64 = false)
         return getFallbackBottleInfo("Mistral AI non configurée - Ajoutez MISTRAL_API_KEY dans .env");
     }
     
-    if (imagePathOrBase64 && !googleVision.isGoogleVisionConfigured()) {
-        return getFallbackBottleInfo("Google Vision non configurée - Ajoutez GOOGLE_VISION_API_KEY dans .env");
+    // CORRIGÉ: Permettre l'analyse avec Mistral uniquement si Google Vision n'est pas configuré
+    const googleVisionAvailable = googleVision.isGoogleVisionConfigured();
+    if (imagePathOrBase64 && !googleVisionAvailable) {
+        console.warn("Google Vision non configuré, analyse avec Mistral uniquement (sans OCR)");
     }
     
     try {
@@ -124,15 +126,30 @@ async function analyzeBottleWithMistralOnly(imagePathOrBase64, isBase64 = false)
             bottleInfo = await analyzeLabelTextWithMistral(labelText);
         }
         
+        // CORRIGÉ: Si pas de texte détecté mais que Mistral est disponible, essayer une analyse basique
         if (!bottleInfo) {
+            if (!imagePathOrBase64) {
+                return getFallbackBottleInfo("Aucune image ou texte fourni");
+            }
+            // Si Google Vision n'est pas disponible, retourner un fallback avec Mistral disponible
+            if (!googleVisionAvailable) {
+                return {
+                    ...getFallbackBottleInfo("Google Vision non configuré - OCR non disponible"),
+                    mistralAvailable: true,
+                    googleVisionAvailable: false,
+                    analysisMethod: "Mistral AI (sans OCR)"
+                };
+            }
             return getFallbackBottleInfo("Aucun texte détecté ou analysé");
         }
         
         const completeInfo = completeBottleInfo(bottleInfo);
         return {
             ...completeInfo,
-            analysisMethod: labelText ? "Google Vision + Mistral AI" : "Mistral AI",
-            extractedText: labelText
+            analysisMethod: labelText ? "Google Vision + Mistral AI" : "Mistral AI (sans OCR)",
+            extractedText: labelText,
+            mistralAvailable: true,
+            googleVisionAvailable: googleVisionAvailable
         };
     } catch (error) {
         return getFallbackBottleInfo(`Erreur: ${error.message}`);
