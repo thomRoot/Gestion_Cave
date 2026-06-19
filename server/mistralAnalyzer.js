@@ -38,34 +38,3 @@ async function analyzeBottleWithMistralOnly(imagePathOrBase64, isBase64 = false)
         return getFallbackBottleInfo("Erreur: " + error.message);
     }
 }
-
-async function analyzeLabelTextWithMistral(labelText) {
-    const prompt = "Tu es un expert en vin. Analyse ce texte: """" + labelText + """" et extrais UNIQUEMENT un JSON avec: name, year, grapes, region, appellation, producer, country, alcohol. Tous null si non visible. JSON:";
-    try {
-        const response = await mistralAI.callMistral(prompt, mistralConfig.analysisSystemPrompt);
-        if (!response) return null;
-        return parseMistralResponse(response);
-    } catch (error) {
-        return null;
-    }
-}
-
-async function analyzeWithManualText(manualData) {
-    const { name, year, grapes, region } = manualData;
-    const textParts = [];
-    if (name) textParts.push("Nom: " + name);
-    if (year) textParts.push("Annee: " + year);
-    if (grapes) textParts.push("Cepage: " + grapes);
-    if (region) textParts.push("Region: " + region);
-    const text = textParts.join("
-");
-    if (!text) return getFallbackBottleInfo("Aucune donnee");
-    try {
-        const bottleInfo = await analyzeLabelTextWithMistral(text);
-        if (!bottleInfo) return getFallbackBottleInfo("Analyse echouee");
-        const completeInfo = completeBottleInfo(bottleInfo);
-        return { ...completeInfo, analysisMethod: "Mistral AI (texte manuel)" };
-    } catch (error) {
-        return getFallbackBottleInfo("Erreur: " + error.message);
-    }
-}
