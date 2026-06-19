@@ -8,6 +8,9 @@ const mistralAnalyzer = require('../mistralAnalyzer');
 const mistralAI = require('../mistralAI');
 const mistralConfig = require('../mistralConfig');
 
+// Alias pour compatibilité avec l'ancien code
+const ai = mistralAI;
+
 // Configuration de Multer pour l'upload des photos
 const upload = multer({
     storage: multer.diskStorage({
@@ -23,7 +26,7 @@ const upload = multer({
             cb(null, uniqueSuffix + path.extname(file.originalname));
         },
         limits: {
-            fileSize: 5 * 1024 * 1024 // 5Mo max pour le fichier source
+            fileSize: 5 * 1024 * 1024
         }
     })
 });
@@ -43,15 +46,10 @@ router.get('/', (req, res) => {
 router.post('/analyze', upload.single('image'), async (req, res) => {
     try {
         let imagePath = null;
-        
-        // Si une image a été uploadée
         if (req.file) {
             imagePath = path.join(__dirname, '../../public/uploads', req.file.filename);
         }
-        
-        // Utiliser Google Vision + Mistral AI pour l'analyse
         const result = await mistralAnalyzer.analyzeBottleWithMistralOnly(imagePath, false);
-        
         res.json({
             success: true,
             bottleInfo: result,
@@ -60,7 +58,6 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
             analysisMethod: result.analysisMethod,
             extractedText: result.extractedText
         });
-        
     } catch (error) {
         console.error("Erreur analyse IA :", error);
         res.status(500).json({
@@ -73,50 +70,50 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
     }
 });
 
-// Analyser avec texte manuel
+// Analyser avec texte manuel - ROUTE UNIQUE
 router.post('/analyze-text', async (req, res) => {
     try {
         const { name, year, grapes, region } = req.body;
-        
+        if (!name && !year && !grapes && !region) {
+            return res.status(400).json({
+                success: false,
+                error: "Au moins un champ est requis (nom, année, cépage ou région)"
+            });
+        }
         const manualData = { name, year, grapes, region };
         const result = await mistralAnalyzer.analyzeWithManualText(manualData);
-        
         res.json({
             success: true,
             bottleInfo: result,
-            analysisMethod: result.analysisMethod
+            analysisMethod: result.analysisMethod || "Analyse texte manuel"
         });
     } catch (error) {
         console.error("Erreur analyse texte :", error);
         res.status(500).json({
             success: false,
-            error: "Erreur serveur lors de l'analyse texte"
+            error: "Erreur serveur lors de l'analyse texte",
+            bottleInfo: mistralAnalyzer.getFallbackBottleInfo(error.message)
         });
     }
 });
 
-// Analyser une bouteille avec l'IA (image en base64) - UNIQUEMENT Mistral AI
+// Analyser une bouteille avec l'IA (image en base64)
 router.post('/analyze-base64', async (req, res) => {
     try {
         const { image } = req.body;
-        
         if (!image) {
             return res.status(400).json({
                 success: false,
                 error: "Aucune image fournie"
             });
         }
-        
-        // Utiliser UNIQUEMENT Mistral AI pour l'analyse
         const result = await mistralAnalyzer.analyzeBottleWithMistralOnly(image, true);
-        
         res.json({
             success: true,
             bottleInfo: result,
             mistralAvailable: !!mistralConfig.apiKey,
             analysisMethod: result.analysisMethod
         });
-        
     } catch (error) {
         console.error("Erreur analyse Mistral AI base64 :", error);
         res.status(500).json({
@@ -128,102 +125,39 @@ router.post('/analyze-base64', async (req, res) => {
     }
 });
 
-// Analyser avec texte uniquement (fallback)
-router.post('/analyze-text', async (req, res) => {
-    try {
-        const { name, year, grapes, region } = req.body;
-        
-        if (name || year || grapes || region) {
-            const bottleInfo = ai.extractBottleInfoFromText(
-                `${name || ''} ${year || ''} ${grapes || ''} ${region || ''}`
-            );
-            return res.json({
-                success: true,
-                bottleInfo
-            });
-        }
-        
-        res.json({
-            success: true,
-            bottleInfo: {
-                name: null,
-                year: null,
-                grapes: null,
-                region: null,
-                drinkFrom: null,
-                drinkTo: null,
-                foodPairing: "Viandes, Fromages, Plats variés",
-                temperature: "10-12°C"
-            }
-        });
-    } catch (error) {
-        console.error("Erreur analyse texte :", error);
-        res.status(500).json({
-            success: false,
-            error: "Erreur serveur"
-        });
-    }
-});
-
 // Ajouter ou mettre à jour une bouteille
 router.post('/', upload.single('photo'), (req, res) => {
     const bottleData = req.body;
-    
-    // Si une photo a été uploadée, utiliser son nom de fichier
-    if (req.file) {
-        bottleData.photo = req.file.filename;
-    }
-    
-    // Si on modifie une bouteille existante et qu'aucune nouvelle photo n'est fournie,
-    // conserver l'ancienne photo (le frontend doit envoyer l'ancien nom de fichier)
-    // NE PAS écraser bottleData.photo si c'est une chaîne vide ou undefined
-    if (!req.file && (!bottleData.photo || bottleData.photo === 'undefined' || bottleData.photo === '')) {
-        // Si c'est une modification, le frontend devrait envoyer l'ancien nom de photo
-        // Sinon, on laisse bottleData.photo tel quel (peut être null pour une nouvelle bouteille)
-        // Ne rien faire ici, le frontend gère ça
-    }
-
-    // Si une photo en base64 est fournie (depuis la galerie), la sauvegarder
+    if (req.file) bottleData.photo = req.file.filename;
     if (bottleData.photo && bottleData.photo.startsWith('data:image/')) {
-        const base64Data = bottleData.photo.replace(/^data:image\/\w+;base64,/, '');
+        const base64Data = bottleData.photo.replace(/^data:image/w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
         const uploadDir = path.join(__dirname, '../../public/uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
         const filename = Date.now() + '-camera.jpg';
         const filePath = path.join(uploadDir, filename);
         fs.writeFileSync(filePath, buffer);
         bottleData.photo = filename;
     }
-
     database.saveBottle(bottleData, (err) => {
-        if (err) {
-            console.error("Erreur sauvegarde bouteille :", err);
-            res.status(500).json({ error: "Erreur lors de la sauvegarde de la bouteille" });
-        } else {
-            res.json({ success: true });
-        }
+        if (err) res.status(500).json({ error: "Erreur lors de la sauvegarde de la bouteille" });
+        else res.json({ success: true });
     });
 });
 
 // Supprimer une bouteille
 router.delete('/', (req, res) => {
     const { row, col } = req.query;
-
     database.deleteBottle(row, col, (err) => {
-        if (err) {
-            res.status(500).json({ error: "Erreur lors de la suppression de la bouteille" });
-        } else {
-            res.json({ success: true });
-        }
+        if (err) res.status(500).json({ error: "Erreur lors de la suppression de la bouteille" });
+        else res.json({ success: true });
     });
 });
 
 // Obtenir des recommandations de vin
 router.get('/recommendations', (req, res) => {
     const { occasion, food, budget } = req.query;
-    const recommendations = ai.recommendWineForOccasion(occasion, food, budget);
+    const recommendations = mistralAI.recommendWineForOccasion(occasion, food, budget);
     res.json({ success: true, recommendations });
 });
 
@@ -233,11 +167,11 @@ router.get('/search', (req, res) => {
     if (!name) {
         return res.status(400).json({ success: false, error: "Le nom du vin est requis" });
     }
-    const wineInfo = ai.searchWineByName(name);
+    const wineInfo = mistralAI.searchWineByName(name);
     res.json({ success: wineInfo ? true : false, wine: wineInfo });
 });
 
-// Réinitialiser la base de données (NOUVEAU)
+// Réinitialiser la base de données
 router.post('/reset-db', (req, res) => {
     try {
         const dbPath = path.join(__dirname, '../../data/cave.db');
@@ -251,21 +185,17 @@ router.post('/reset-db', (req, res) => {
     }
 });
 
-// Poser une question au chat IA (avec Mistral)
+// Poser une question au chat IA
 router.post('/chat', async (req, res) => {
     try {
         const { question } = req.body;
-        
         if (!question) {
             return res.status(400).json({
                 success: false,
                 error: "Aucune question fournie"
             });
         }
-        
-        // Utiliser Mistral pour répondre à la question
         const response = await mistralAI.askChatQuestion(question);
-        
         res.json({
             success: true,
             response: response,
@@ -280,20 +210,17 @@ router.post('/chat', async (req, res) => {
     }
 });
 
-// Obtenir des conseils d'accords mets-vins avec Mistral
+// Obtenir des conseils d'accords mets-vins
 router.post('/wine-pairing', async (req, res) => {
     try {
         const { food } = req.body;
-        
         if (!food) {
             return res.status(400).json({
                 success: false,
                 error: "Aucun plat spécifié"
             });
         }
-        
         const advice = await mistralAI.getWinePairingAdvice(food);
-        
         res.json({
             success: true,
             advice: advice
@@ -307,20 +234,17 @@ router.post('/wine-pairing', async (req, res) => {
     }
 });
 
-// Obtenir des informations sur un vin avec Mistral
+// Obtenir des informations sur un vin
 router.post('/wine-info', async (req, res) => {
     try {
         const { wineName } = req.body;
-        
         if (!wineName) {
             return res.status(400).json({
                 success: false,
                 error: "Aucun nom de vin spécifié"
             });
         }
-        
         const info = await mistralAI.getWineInfo(wineName);
-        
         res.json({
             success: true,
             info: info
@@ -339,15 +263,14 @@ router.get('/mistral-status', (req, res) => {
     const hasMistralApiKey = !!mistralConfig.apiKey;
     const hasGoogleVisionApiKey = !!process.env.GOOGLE_VISION_API_KEY;
     const model = mistralConfig.model || 'mistral-tiny';
-    
     res.json({
         success: true,
         mistralAvailable: hasMistralApiKey,
         googleVisionAvailable: hasGoogleVisionApiKey,
         model: model,
-        message: hasMistralApiKey && hasGoogleVisionApiKey ? 
+        message: hasMistralApiKey && hasGoogleVisionApiKey ?
             "Mistral AI et Google Vision sont configurés - Analyse complète disponible" :
-            hasMistralApiKey ? 
+            hasMistralApiKey ?
                 "Mistral AI configuré, mais Google Vision non configuré (OCR limité)" :
                 "Mistral AI n'est pas configuré (clé API manquante)"
     });
