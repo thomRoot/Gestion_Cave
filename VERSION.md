@@ -6,6 +6,15 @@
 
 ## Historique des Versions
 
+### Version 6.0.1 - Image bouteille vide dans les cases
+**Date** : 19 juin 2026
+**Modifications** :
+- Ajout image SVG de bouteille vide dans chaque case vide de la cave
+- Image centree et redimensionnee
+- Suppression du cercle pointille
+
+---
+
 ### Version 6.0.0 - Correction Analyse IA et Optimisation Mobile
 **Date** : 19 juin 2026
 **Modifications** :
