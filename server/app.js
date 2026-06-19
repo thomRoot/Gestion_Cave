@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const bodyParser = require('body-parser');
 const multer = require('multer');
 const fs = require('fs');
 const database = require('./database');
@@ -29,9 +28,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Middleware - Augmenter la limite de taille pour les requêtes JSON
-app.use(bodyParser.json({ limit: '5mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+// Middleware - Utilisation directe d'express au lieu de bodyParser (déprécié)
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
@@ -40,6 +39,16 @@ const caveRoutes = require('./routes/cave');
 
 app.use('/api/bottles', bottleRoutes);
 app.use('/api/cave', caveRoutes);
+
+// Middleware de gestion des erreurs globales
+app.use((err, req, res, next) => {
+    console.error('Erreur serveur:', err);
+    res.status(500).json({
+        success: false,
+        error: 'Une erreur est survenue. Veuillez réessayer.',
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+});
 
 // Démarrer le serveur
 app.listen(PORT, () => {
