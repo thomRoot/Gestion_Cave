@@ -276,6 +276,7 @@ body {
 
 /* ==================== CAVE CELL - OPTIMISÉ TOUCH ==================== */
 .cave-cell {
+    border: 2px solid rgba(255, 255, 255, 0.15);
     position: relative;
     aspect-ratio: 1;
     background: var(--bg-darker);
@@ -294,6 +295,8 @@ body {
 }
 
 .cave-cell:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     border-color: var(--secondary);
     transform: translateY(-2px);
     box-shadow: var(--shadow);
@@ -325,6 +328,18 @@ body {
 }
 
 .cave-cell.empty::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 60px;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMjAwIj48cGF0aCBkPSJNNTAgMjAgTDAgNDAgTDAgMTYwIEw0MCAxNjAgTDQwIDQwIFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0zNSAxNjAgdjEwIEgyNSIgc3Ryb2tlPSIjMzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.8;
     content: '';
     position: absolute;
     top: 50%;
