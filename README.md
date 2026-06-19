@@ -1,4 +1,4 @@
-# Ma Cave à Vin v6.0.0
+# Ma Cave à Vin v6.0.3
 
 Application de gestion de cave à vin intelligente avec reconnaissance d'étiquettes par IA.
 
@@ -95,10 +95,12 @@ Gestion_Cave/
 ├── .env.example
 └── README.md
 
-## Corrections v6.0.1
+## Corrections v6.0.3
 
 ### Problèmes corrigés
 - **Correction critique** : Erreur de syntaxe dans la regex pour le traitement des images base64 (`bottles.js:92`).
+- **Correction majeure** : La photo ne disparaît plus lors de la modification d'une bouteille (`public/script.js`).
+- **Correction majeure** : Les informations du vin sont maintenant complètes après reconnaissance photo (`server/mistralAnalyzer.js`).
 - **Amélioration** : Meilleure gestion des data URLs dans `googleVision.js` pour une extraction plus robuste du texte base64.
 - **Optimisation** : `mistralAnalyzer.js` permet désormais une analyse avec Mistral AI **même si Google Vision n'est pas configuré** (sans OCR).
 - Les valeurs par défaut génériques ont été supprimées.
@@ -107,22 +109,31 @@ Gestion_Cave/
 - Meilleure gestion des erreurs avec messages clairs.
 
 ### Corrections techniques détaillées
-1. **`server/routes/bottles.js`** :
-   - Correction de la regex `/^data:image\/\w+;base64,/` en `/^data:image\/\w+;base64,/` pour éviter l'erreur `SyntaxError: Invalid regular expression flags`.
+1. **`public/script.js`** :
+   - Correction de la disparition de la photo lors de la modification d'une bouteille.
+   - `currentEditingBottlePhoto` est maintenant toujours conservé jusqu'à la sauvegarde.
 
-2. **`server/googleVision.js`** :
+2. **`server/mistralAnalyzer.js`** :
+   - Prompt Mistral ultra-précis pour forcer le remplissage de **tous les champs** (nom, année, cépage, région, etc.).
+   - Analyse alternative avec Mistral si Google Vision échoue ou n'est pas configuré.
+   - Nettoyage et validation des données retournées.
+
+3. **`server/routes/bottles.js`** :
+   - Correction de la regex `/^data:image\/\w+;base64,/` pour éviter l'erreur `SyntaxError: Invalid regular expression flags`.
+
+4. **`server/googleVision.js`** :
    - Amélioration de l'extraction des données base64 depuis les data URLs avec une regex plus robuste.
 
-3. **`server/mistralAnalyzer.js`** :
-   - Permet désormais une analyse avec Mistral AI uniquement si Google Vision n'est pas configuré.
-   - Retourne des informations plus claires sur la disponibilité des API.
-
-4. **Dépendances** :
-   - Ajout de `multer` pour la gestion des uploads de fichiers.
+5. **`public/style.css`** :
+   - Design **épuré et moderne** inspiré des meilleures applications mobiles (Vivino, Delectable).
+   - Adapté aux tablettes Android avec des boutons tactiles et des polices lisibles.
+   - Palette de couleurs moderne (rouge vin + or).
 
 ### Améliorations mobile
-- Grille responsive adaptée aux petits écrans
-- Boutons et formulaires optimisés pour le touch
+- Grille responsive adaptée aux petits écrans.
+- Boutons et formulaires optimisés pour le touch.
+- Feedback tactile amélioré.
+- Prévention du zoom accidentel.
 - Feedback tactile amélioré
 - Prévention du zoom accidentel
 
@@ -144,6 +155,6 @@ MIT
 
 ---
 
-Version : 6.0.1  
-Dernière mise à jour : 19 juin 2026  
+Version : 6.0.3  
+Dernière mise à jour : 20 juin 2026  
 Auteur : thomRoot

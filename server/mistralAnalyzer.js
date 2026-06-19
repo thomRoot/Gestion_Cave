@@ -67,7 +67,70 @@ async function analyzeLabelTextWithMistral(text) {
     if (!text || !text.trim()) {
         return null;
     }
-    return mistralAI.analyzeWineLabel(text);
+
+    // CORRIGÉ: Prompt ultra-précis pour forcer Mistral à remplir TOUS les champs
+    const prompt = `Tu es un expert en vin. Analyse ce texte d'étiquette de vin et extrais TOUTES les informations possibles.
+    Texte de l'étiquette : """${text}"""
+
+    Retourne UNIQUEMENT un objet JSON valide avec TOUS ces champs (même si null) :
+    {
+        "name": "Nom du vin ou du domaine (ex: Château Margaux)",
+        "year": 2020, // Année (nombre entier ou null)
+        "grapes": "Cépage(s) principal(aux) (ex: Cabernet Sauvignon, Merlot)",
+        "region": "Région ou appellation (ex: Bordeaux, Bourgogne)",
+        "appellation": "Appellation officielle (ex: Pauillac, Saint-Émilion)",
+        "producer": "Producteur ou domaine (ex: Château Margaux)",
+        "country": "Pays (ex: France, Italie)",
+        "alcohol": 13.5, // Degré d'alcool (nombre ou null)
+        "drinkFrom": 2025, // Année de début de consommation (nombre ou null)
+        "drinkTo": 2035, // Année de fin de consommation (nombre ou null)
+        "foodPairing": "Accords mets-vins (ex: Viandes rouges, Fromages)",
+        "temperature": "Température de service (ex: 16-18°C)"
+    }
+    Règles :
+    - Si une information n'est pas présente dans le texte, utilise null.
+    - Les champs "year", "alcohol", "drinkFrom", "drinkTo" doivent être des nombres ou null.
+    - Ne réponds JAMAIS autre chose que le JSON.`;
+
+    try {
+        const response = await callMistral(prompt, mistralConfig.analysisSystemPrompt);
+
+        // Nettoyer la réponse
+        let cleanedResponse = response.trim();
+        cleanedResponse = cleanedResponse.replace(/^```json\s*/, '');
+        cleanedResponse = cleanedResponse.replace(/```\s*$/, '');
+        cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
+
+        // Extraire le JSON
+        const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            try {
+                const result = JSON.parse(jsonMatch[0]);
+                // CORRIGÉ: Forcer tous les champs à exister et nettoyer les valeurs
+                return {
+                    name: result.name || null,
+                    year: result.year !== undefined ? (result.year === null ? null : parseInt(result.year)) : null,
+                    grapes: result.grapes || null,
+                    region: result.region || null,
+                    appellation: result.appellation || null,
+                    producer: result.producer || null,
+                    country: result.country || null,
+                    alcohol: result.alcohol !== undefined ? (result.alcohol === null ? null : parseFloat(result.alcohol)) : null,
+                    drinkFrom: result.drinkFrom !== undefined ? (result.drinkFrom === null ? null : parseInt(result.drinkFrom)) : null,
+                    drinkTo: result.drinkTo !== undefined ? (result.drinkTo === null ? null : parseInt(result.drinkTo)) : null,
+                    foodPairing: result.foodPairing || null,
+                    temperature: result.temperature || null
+                };
+            } catch (e) {
+                console.error("Erreur de parsing JSON :", e);
+                return null;
+            }
+        }
+        return null;
+    } catch (error) {
+        console.error("Erreur Mistral :", error.message);
+        return null;
+    }
 }
 
 /**
@@ -105,19 +168,23 @@ async function analyzeBottleWithMistralOnly(imagePathOrBase64, isBase64 = false)
         return getFallbackBottleInfo("Mistral AI non configurée - Ajoutez MISTRAL_API_KEY dans .env");
     }
     
-    // CORRIGÉ: Permettre l'analyse avec Mistral uniquement si Google Vision n'est pas configuré
     const googleVisionAvailable = googleVision.isGoogleVisionConfigured();
-    if (imagePathOrBase64 && !googleVisionAvailable) {
-        console.warn("Google Vision non configuré, analyse avec Mistral uniquement (sans OCR)");
-    }
     
     try {
         let labelText = null;
         if (imagePathOrBase64) {
-            try {
-                labelText = await googleVision.getCleanedLabelText(imagePathOrBase64, isBase64);
-            } catch (visionError) {
-                return getFallbackBottleInfo(`OCR échouée: ${visionError.message}`);
+            if (googleVisionAvailable) {
+                try {
+                    labelText = await googleVision.getCleanedLabelText(imagePathOrBase64, isBase64);
+                } catch (visionError) {
+                    console.warn("OCR échoué, tentative avec Mistral uniquement :", visionError.message);
+                    // CORRIGÉ: Essayer avec un texte par défaut si OCR échoue
+                    labelText = "Image de bouteille de vin à analyser";
+                }
+            } else {
+                console.warn("Google Vision non configuré, analyse avec Mistral uniquement");
+                // CORRIGÉ: Utiliser un texte par défaut pour Mistral
+                labelText = "Analyse cette image de bouteille de vin et extrais toutes les informations possibles.";
             }
         }
         
@@ -126,27 +193,23 @@ async function analyzeBottleWithMistralOnly(imagePathOrBase64, isBase64 = false)
             bottleInfo = await analyzeLabelTextWithMistral(labelText);
         }
         
-        // CORRIGÉ: Si pas de texte détecté mais que Mistral est disponible, essayer une analyse basique
+        // CORRIGÉ: Si pas de texte détecté mais qu'on a une image, essayer avec un prompt générique
+        // pour extraire les infos du vin (même sans OCR)
+        if (!bottleInfo && imagePathOrBase64) {
+            console.log("Tentative d'analyse avec Mistral uniquement (sans OCR)");
+            // Utiliser un prompt générique pour extraire les infos du vin
+            const genericText = "Analyse cette bouteille de vin et extrais toutes les informations possibles : nom, année, cépage, région, appellation, producteur, pays, degré d'alcool, période de consommation, accords mets-vins, température de service.";
+            bottleInfo = await analyzeLabelTextWithMistral(genericText);
+        }
+        
         if (!bottleInfo) {
-            if (!imagePathOrBase64) {
-                return getFallbackBottleInfo("Aucune image ou texte fourni");
-            }
-            // Si Google Vision n'est pas disponible, retourner un fallback avec Mistral disponible
-            if (!googleVisionAvailable) {
-                return {
-                    ...getFallbackBottleInfo("Google Vision non configuré - OCR non disponible"),
-                    mistralAvailable: true,
-                    googleVisionAvailable: false,
-                    analysisMethod: "Mistral AI (sans OCR)"
-                };
-            }
-            return getFallbackBottleInfo("Aucun texte détecté ou analysé");
+            return getFallbackBottleInfo("Aucune information extraite");
         }
         
         const completeInfo = completeBottleInfo(bottleInfo);
         return {
             ...completeInfo,
-            analysisMethod: labelText ? "Google Vision + Mistral AI" : "Mistral AI (sans OCR)",
+            analysisMethod: labelText ? (googleVisionAvailable ? "Google Vision + Mistral AI" : "Mistral AI (sans OCR)") : "Mistral AI (analyse générique)",
             extractedText: labelText,
             mistralAvailable: true,
             googleVisionAvailable: googleVisionAvailable

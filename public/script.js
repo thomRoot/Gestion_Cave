@@ -601,11 +601,15 @@ function saveBottle() {
     // Récupérer les données du formulaire
     let photoValue = window.camera.getCurrentImage();
     
-    // Si on modifie une bouteille et qu'aucune nouvelle photo n'a été sélectionnée,
-    // conserver l'ancienne photo
+    // CORRIGÉ: Toujours conserver l'ancienne photo si aucune nouvelle n'est sélectionnée
+    // et s'assurer que photoValue n'est jamais null/undefined
     if (!photoValue && currentEditingBottlePhoto) {
         photoValue = currentEditingBottlePhoto;
     }
+    
+    // CORRIGÉ: Si photoValue est toujours null/undefined, utiliser une chaîne vide
+    // pour éviter les erreurs côté backend
+    photoValue = photoValue || "";
 
     const bottleData = {
         row: selectedCell.row,
@@ -618,7 +622,7 @@ function saveBottle() {
         drinkTo: document.getElementById('bottleDrinkTo').value,
         foodPairing: document.getElementById('bottleFoodPairing').value,
         temperature: document.getElementById('bottleTemperature').value,
-        photo: photoValue
+        photo: photoValue // photoValue est maintenant toujours une chaîne (vide ou nom de fichier)
     };
 
     // Envoyer les données au serveur
@@ -658,8 +662,8 @@ function openEditBottlePopup(bottle) {
     document.getElementById('bottleFoodPairing').value = bottle.foodPairing || '';
     document.getElementById('bottleTemperature').value = bottle.temperature || '';
 
-    // Stocker l'ancienne photo pour la conserver si aucune nouvelle n'est sélectionnée
-    currentEditingBottlePhoto = bottle.photo || null;
+    // CORRIGÉ: Stocker la photo existante (même si c'est une chaîne vide)
+    currentEditingBottlePhoto = bottle.photo || "";
 
     if (bottle.photo) {
         // Stocker l'image actuelle dans le camera module pour l'édition
