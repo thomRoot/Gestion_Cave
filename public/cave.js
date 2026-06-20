@@ -166,7 +166,7 @@ function calculateMaturityPercentage(drinkFrom, drinkTo) {
         // Plus on est loin de drinkFrom, moins la barre bleue est remplie
         // Plus on approche de drinkFrom, plus la barre bleue est remplie
         const yearsUntilReady = startYear - currentYear;
-        const maxWaitingPeriod = Math.max(totalPeriod, 20); // Utiliser la période totale ou 20 ans max
+        const maxWaitingPeriod = Math.max(totalPeriod, 15); // Utiliser la période totale ou 15 ans max
         // Calculer le pourcentage : 0% si on est très loin, 100% si on est à drinkFrom
         const waitingProgress = 100 - Math.min((yearsUntilReady / maxWaitingPeriod) * 100, 100);
         return Math.max(waitingProgress, 0);
@@ -245,7 +245,7 @@ function updateDrinkPeriodBar(drinkFrom, drinkTo) {
             if (maturityStatus === 'waiting') {
                 // Avant la période : progression de l'année courante vers drinkFrom
                 const yearsUntilReady = startYear - currentYear;
-                const maxWaitingPeriod = 20;
+                const maxWaitingPeriod = Math.max(totalPeriod, 15);
                 percentage = 100 - Math.min((yearsUntilReady / maxWaitingPeriod) * 100, 100);
             } else if (maturityStatus === 'ready') {
                 // Pendant la période : progression de drinkFrom à drinkTo
