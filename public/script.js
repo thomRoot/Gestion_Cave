@@ -39,10 +39,10 @@ async function checkMistralStatus() {
             
             if (data && data.mistralAvailable) {
                 statusElement.className = 'mistral-status connected active';
-                if (icon) icon.className = 'fas fa-check-circle';
+                if (icon) icon.className = 'fa-brands fa-mistral';
             } else {
                 statusElement.className = 'mistral-status disconnected active';
-                if (icon) icon.className = 'fas fa-exclamation-circle';
+                if (icon) icon.className = 'fa-brands fa-mistral';
             }
         }
     } catch (error) {
@@ -52,7 +52,7 @@ async function checkMistralStatus() {
         if (statusElement) {
             statusElement.classList.add('active');
             const icon = statusElement.querySelector('i');
-            if (icon) icon.className = 'fas fa-check-circle';
+            if (icon) icon.className = 'fa-brands fa-mistral';
         }
     }
 }
@@ -211,19 +211,19 @@ async function checkGoogleVisionStatus() {
             
             if (data && data.googleVisionAvailable) {
                 statusElement.className = 'mistral-status connected active';
-                if (icon) icon.className = 'fas fa-check-circle';
+                if (icon) icon.className = 'fab fa-google';
             } else {
                 statusElement.className = 'mistral-status disconnected active';
-                if (icon) icon.className = 'fas fa-exclamation-circle';
+                if (icon) icon.className = 'fab fa-google';
             }
         }
     } catch (error) {
         console.error("Erreur vérification Google Vision :", error);
         // En cas d'erreur, afficher l'icône par défaut
-        const statusElement = document.getElementById('googleVisionStatus');
-        if (statusElement) {
-            statusElement.classList.add('active');
-            const icon = statusElement.querySelector('i');
+        const statusElement2 = document.getElementById('googleVisionStatus');
+        if (statusElement2) {
+            statusElement2.classList.add('active');
+            const icon = statusElement2.querySelector('i');
             if (icon) icon.className = 'fab fa-google';
         }
     }
