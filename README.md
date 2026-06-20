@@ -13,9 +13,10 @@
 6. [Utilisation](#-utilisation)
 7. [Structure du projet](#-structure-du-projet)
 8. [Historique des versions](#-historique-des-versions)
-9. [Technologies utilisées](#-technologies-utilisées)
-10. [Contribution](#-contribution)
-11. [Licence](#-licence)
+9. [Branches disponibles](#-branches-disponibles)
+10. [Technologies utilisées](#-technologies-utilisées)
+11. [Contribution](#-contribution)
+12. [Licence](#-licence)
 
 ---
 
@@ -274,6 +275,8 @@ Gestion_Cave/
 - Analyse complète avec Mistral AI (même sans OCR)
 - Design épuré et moderne pour mobile/tablette
 - Prompt Mistral ultra-précis pour tous les champs
+- Correction de la regex pour le traitement des images base64
+- Meilleure gestion des data URLs dans googleVision.js
 
 ### v6.0.0 (19 juin 2026)
 **Fonctionnalités initiales :**
@@ -281,6 +284,28 @@ Gestion_Cave/
 - Gestion de cave virtuelle
 - Chat IA intégré
 - Interface responsive
+
+---
+
+## 🌿 Branches disponibles
+
+| Branche | Version | État | Description |
+|---------|---------|------|-------------|
+| **main** | v7.0.2 | ✅ Stable | Version principale avec toutes les corrections |
+| **SAVE_V1_0_interface_OK_IA_NOK** | v7.0.2 | ⚠️ Sauvegarde | Interface OK, IA à vérifier (problème de cache possible) |
+| **vibe/fix-bugs-design-28e8e5** | v6.0.3 | ❌ Obsolète | Ancienne version avant les corrections d'interface |
+
+### 🔄 Comment changer de branche ?
+```bash
+# Pour aller sur main (recommandé)
+git checkout main
+
+# Pour aller sur la sauvegarde
+git checkout SAVE_V1_0_interface_OK_IA_NOK
+
+# Pour voir les différences entre branches
+git diff main...SAVE_V1_0_interface_OK_IA_NOK
+```
 
 ---
 
