@@ -301,8 +301,7 @@ body {
 .popup-content .close {
     position: absolute;
     top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 16px;
     background: none;
     border: none;
     color: var(--text-muted);
