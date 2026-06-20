@@ -794,6 +794,7 @@ body {
     border: none;
     padding: 0;
     min-height: auto;
+    margin-left: 10px;
 }
 
 .mobile-fab i {

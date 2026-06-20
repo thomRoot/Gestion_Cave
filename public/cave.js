@@ -5,7 +5,7 @@
 let caveRows = 5;
 let caveCols = 10;
 let caveGrid = []; // Tableau 2D représentant la cave
-let selectedCell = null; // Cellule sélectionnée pour ajouter/modifier une bouteille
+let selectedCell = null; // Cellule sélectionnée pour ajouter une bouteille
 
 // Initialisation de la cave
 function initCave() {

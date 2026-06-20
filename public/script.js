@@ -3,7 +3,6 @@
 
 // Variables globales
 let currentBottleImage = null;
-let currentEditingBottlePhoto = null;
 let conversationHistory = [];
 let currentAnalysisImage = null;
 let currentPartialData = null;
@@ -170,21 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Gestion des boutons de la popup de détails
-    const editBottleButton = document.getElementById('editBottleButton');
     const deleteBottleButton = document.getElementById('deleteBottleButton');
     
-    if (editBottleButton) {
-        editBottleButton.addEventListener('click', () => {
-            const selectedCell = window.cave.getSelectedCell();
-            if (selectedCell) {
-                const bottle = window.cave.getCaveGrid()[selectedCell.row][selectedCell.col];
-                // Fermer la popup de détails avant d'ouvrir celle de modification
-                document.getElementById('bottleDetailsPopup').classList.remove('active');
-                openEditBottlePopup(bottle);
-            }
-        });
-    }
-
     if (deleteBottleButton) {
         deleteBottleButton.addEventListener('click', () => {
             const selectedCell = window.cave.getSelectedCell();
@@ -234,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileAddButton = document.getElementById('mobileAddButton');
     if (mobileAddButton) {
         mobileAddButton.addEventListener('click', () => {
-            window.cave.openAddBottlePopup();
+            alert("Veuillez cliquer sur une case vide de la cave pour ajouter une nouvelle bouteille.");
         });
     }
 
@@ -824,17 +810,7 @@ function saveBottle() {
     }
 
     // Récupérer les données du formulaire
-    let photoValue = window.camera.getCurrentImage();
-    
-    // CORRIGÉ: Toujours conserver l'ancienne photo si aucune nouvelle n'est sélectionnée
-    // et s'assurer que photoValue n'est jamais null/undefined
-    if (!photoValue && currentEditingBottlePhoto) {
-        photoValue = currentEditingBottlePhoto;
-    }
-    
-    // CORRIGÉ: Si photoValue est toujours null/undefined, utiliser une chaîne vide
-    // pour éviter les erreurs côté backend
-    photoValue = photoValue || "";
+    let photoValue = window.camera.getCurrentImage() || "";
 
     const bottleData = {
         row: selectedCell.row,
@@ -863,8 +839,6 @@ function saveBottle() {
             window.cave.loadCaveGrid();
             window.camera.resetImage();
             document.getElementById('bottleForm').reset();
-            // Réinitialiser la variable globale
-            currentEditingBottlePhoto = null;
             // Retirer le focus de tous les champs pour éviter le curseur clignotant
             document.getElementById('bottleName').blur();
         } else {
@@ -875,40 +849,6 @@ function saveBottle() {
         console.error("Erreur sauvegarde :", error);
         alert("Erreur de connexion au serveur. Vérifiez qu'il est lancé.");
     });
-}
-
-// Ouvrir la popup de modification de bouteille
-function openEditBottlePopup(bottle) {
-    document.getElementById('popupTitle').innerHTML = '<i class="fas fa-wine-bottle"></i> Modifier une bouteille';
-    document.getElementById('bottleName').value = bottle.name || '';
-    document.getElementById('bottleYear').value = bottle.year || '';
-    document.getElementById('bottleGrapes').value = bottle.grapes || '';
-    document.getElementById('bottleRegion').value = bottle.region || '';
-    document.getElementById('bottleDrinkFrom').value = bottle.drinkFrom || '';
-    document.getElementById('bottleDrinkTo').value = bottle.drinkTo || '';
-    document.getElementById('bottleFoodPairing').value = bottle.foodPairing || '';
-    document.getElementById('bottleTemperature').value = bottle.temperature || '';
-
-    // CORRIGÉ: Stocker la photo existante (même si c'est une chaîne vide)
-    currentEditingBottlePhoto = bottle.photo || "";
-
-    if (bottle.photo) {
-        // Stocker l'image actuelle dans le camera module pour l'édition
-        window.camera.setCurrentImageFromUrl(`/uploads/${bottle.photo}`);
-        // Afficher l'aperçu de l'image
-        document.getElementById('bottlePhotoPreview').style.display = 'block';
-        document.getElementById('bottlePhotoPreview').src = `/uploads/${bottle.photo}`;
-    } else {
-        window.camera.resetImage();
-        document.getElementById('bottlePhotoPreview').style.display = 'none';
-    }
-
-    // Retirer le focus pour éviter le curseur clignotant
-    document.activeElement.blur();
-    
-    // Démarrer la sélection de fichier pour permettre de changer la photo
-    window.camera.startCamera(false); // false = ne pas réinitialiser
-    document.getElementById('bottlePopup').classList.add('active');
 }
 
 // Supprimer une bouteille
@@ -1097,3 +1037,4 @@ window.fillBottleFormWithAIResult = fillBottleFormWithAIResult;
 window.openAIChatPopup = openAIChatPopup;
 window.suggestPrompt = suggestPrompt;
 window.closeAIChatPopup = closeAIChatPopup;
+window.cave.getSelectedCell = () => selectedCell;
