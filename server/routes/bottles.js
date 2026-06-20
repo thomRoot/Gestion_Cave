@@ -189,4 +189,13 @@ router.get('/mistral-status', (req, res) => {
     });
 });
 
+// Endpoint pour vérifier le statut de Google Vision uniquement
+router.get('/google-status', (req, res) => {
+    const hasGoogleVisionApiKey = !!process.env.GOOGLE_VISION_API_KEY;
+    res.json({
+        success: true,
+        googleVisionAvailable: hasGoogleVisionApiKey
+    });
+});
+
 module.exports = router;

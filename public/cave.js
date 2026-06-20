@@ -63,8 +63,11 @@ function renderCaveGrid() {
     const caveContainer = document.getElementById('caveContainer');
     caveContainer.innerHTML = '';
 
-    // Définir le nombre de colonnes CSS - utiliser minmax pour une grille responsive
-    caveContainer.style.gridTemplateColumns = `repeat(${caveCols}, minmax(70px, 1fr))`;
+    // Créer la grille
+    const grid = document.createElement('div');
+    grid.className = 'cave-grid';
+    grid.style.gridTemplateColumns = `repeat(${caveCols}, minmax(70px, 1fr))`;
+    caveContainer.appendChild(grid);
 
     for (let row = 0; row < caveRows; row++) {
         for (let col = 0; col < caveCols; col++) {
@@ -138,7 +141,7 @@ function renderCaveGrid() {
                 }, { once: true });
             });
 
-            caveContainer.appendChild(cell);
+            grid.appendChild(cell);
         }
     }
 }

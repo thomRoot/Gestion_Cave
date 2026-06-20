@@ -32,13 +32,12 @@ async function checkMistralStatus() {
         const data = await response.json();
         
         const statusElement = document.getElementById('mistralStatus');
-        const statusTextElement = document.getElementById('mistralStatusText');
         
         if (statusElement) {
             statusElement.classList.add('active');
             const icon = statusElement.querySelector('i');
             
-            if (data.mistralAvailable) {
+            if (data && data.mistralAvailable) {
                 statusElement.className = 'mistral-status connected active';
                 if (icon) icon.className = 'fas fa-check-circle';
             } else {
@@ -48,6 +47,13 @@ async function checkMistralStatus() {
         }
     } catch (error) {
         console.error("Erreur vérification Mistral :", error);
+        // En cas d'erreur, afficher l'icône par défaut
+        const statusElement = document.getElementById('mistralStatus');
+        if (statusElement) {
+            statusElement.classList.add('active');
+            const icon = statusElement.querySelector('i');
+            if (icon) icon.className = 'fas fa-check-circle';
+        }
     }
 }
 
@@ -194,19 +200,18 @@ document.addEventListener('DOMContentLoaded', () => {
 // Vérifier le statut de Google Vision
 async function checkGoogleVisionStatus() {
     try {
-        const response = await fetch('/api/bottles/mistral-status');
+        const response = await fetch('/api/bottles/google-status');
         const data = await response.json();
         
         const statusElement = document.getElementById('googleVisionStatus');
-        const statusTextElement = document.getElementById('googleVisionStatusText');
         
         if (statusElement) {
             statusElement.classList.add('active');
             const icon = statusElement.querySelector('i');
             
-            if (data.googleVisionAvailable) {
+            if (data && data.googleVisionAvailable) {
                 statusElement.className = 'mistral-status connected active';
-                if (icon) icon.className = 'fas fa-image';
+                if (icon) icon.className = 'fas fa-check-circle';
             } else {
                 statusElement.className = 'mistral-status disconnected active';
                 if (icon) icon.className = 'fas fa-exclamation-circle';
@@ -214,6 +219,13 @@ async function checkGoogleVisionStatus() {
         }
     } catch (error) {
         console.error("Erreur vérification Google Vision :", error);
+        // En cas d'erreur, afficher l'icône par défaut
+        const statusElement = document.getElementById('googleVisionStatus');
+        if (statusElement) {
+            statusElement.classList.add('active');
+            const icon = statusElement.querySelector('i');
+            if (icon) icon.className = 'fab fa-google';
+        }
     }
 }
 
