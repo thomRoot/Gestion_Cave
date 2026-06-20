@@ -224,7 +224,6 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    padding: 20px;
     backdrop-filter: blur(5px);
 }
 
@@ -236,12 +235,13 @@ body {
     background: var(--bg-card);
     border-radius: var(--radius);
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
     position: relative;
+    padding: 0;
 }
 
 .popup-content .close {
@@ -263,11 +263,13 @@ body {
 }
 
 .popup-content h2 {
-    padding: 20px 20px 0;
+    padding: 20px 24px 0;
     font-size: 1.3rem;
     display: flex;
     align-items: center;
     gap: 10px;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
 }
 
 .popup-content h2 i {
@@ -275,12 +277,17 @@ body {
 }
 
 .popup-body {
-    padding: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* ==================== FORM ==================== */
 .form-group {
     margin-bottom: 20px;
+    width: 100%;
+    max-width: 400px;
 }
 
 .form-group label {
@@ -300,6 +307,7 @@ body {
 .form-group select,
 .form-group textarea {
     width: 100%;
+    max-width: 400px;
     padding: 12px 14px;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -325,31 +333,35 @@ body {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .form-row .form-group {
     flex: 1;
     min-width: 150px;
+    max-width: 300px;
 }
 
 .form-actions {
     display: flex;
     gap: 12px;
-    justify-content: flex-end;
+    justify-content: center;
     margin-top: 24px;
+    flex-wrap: wrap;
 }
 
 .form-actions .btn {
-    min-width: 120px;
+    min-width: 140px;
 }
 
 /* ==================== PHOTO PREVIEW ==================== */
 .photo-preview-container {
     width: 100%;
+    max-width: 400px;
     height: 220px;
     background: var(--bg);
     border-radius: var(--radius);
-    margin-bottom: 20px;
+    margin: 0 auto 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -368,11 +380,14 @@ body {
     display: flex;
     gap: 12px;
     justify-content: center;
-    margin-top: 12px;
+    margin: 12px auto 0;
+    max-width: 400px;
+    flex-wrap: wrap;
 }
 
 .camera-buttons .btn {
     min-width: 140px;
+    flex: 1;
 }
 
 /* ==================== BOTTLE DETAILS ==================== */
@@ -382,7 +397,8 @@ body {
 
 .bottle-image-container {
     text-align: center;
-    margin-bottom: 20px;
+    margin: 0 auto 20px;
+    max-width: 300px;
 }
 
 .bottle-image-container img {
@@ -395,6 +411,8 @@ body {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .info-item {
@@ -428,12 +446,15 @@ body {
 .button-group {
     display: flex;
     gap: 12px;
-    margin-top: 24px;
+    margin: 24px auto 0;
     justify-content: center;
+    max-width: 400px;
+    flex-wrap: wrap;
 }
 
 .button-group .btn {
     min-width: 140px;
+    flex: 1;
 }
 
 /* ==================== CHAT IA ==================== */
@@ -456,7 +477,8 @@ body {
     padding: 16px;
     background: var(--bg);
     border-radius: 8px;
-    margin-bottom: 16px;
+    margin: 0 auto 16px;
+    max-width: 400px;
 }
 
 .ai-message {
@@ -477,6 +499,8 @@ body {
     display: flex;
     gap: 12px;
     align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .ai-input-container input {
@@ -514,6 +538,8 @@ body {
     padding: 12px 0;
     font-size: 0.85rem;
     color: var(--text-muted);
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 /* ==================== LOADING ==================== */
@@ -646,6 +672,9 @@ body {
         flex: 1;
         max-width: calc(33% - 8px);
         justify-content: center;
+        min-height: 40px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
     }
     
     .cave-cell {
@@ -660,11 +689,23 @@ body {
     
     .popup-content {
         width: 95%;
-        padding: 12px;
+        max-width: 450px;
+    }
+    
+    .popup-content h2 {
+        padding: 16px 20px 0;
+    }
+    
+    .popup-body {
+        padding: 20px;
     }
     
     .form-row {
         flex-direction: column;
+    }
+    
+    .form-row .form-group {
+        max-width: 100%;
     }
     
     .bottle-info-grid {
@@ -673,6 +714,26 @@ body {
     
     .photo-preview-container {
         height: 180px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group .btn {
+        width: 100%;
+    }
+    
+    .camera-buttons .btn {
+        width: 100%;
     }
 }
 
@@ -685,6 +746,11 @@ body {
     .cave-grid {
         grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
     }
+    
+    .popup-content {
+        width: 80%;
+        max-width: 550px;
+    }
 }
 
 @media (min-width: 1025px) {
@@ -694,7 +760,8 @@ body {
     }
     
     .popup-content {
-        width: 600px;
+        width: 70%;
+        max-width: 600px;
     }
 }
 
