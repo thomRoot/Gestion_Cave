@@ -147,6 +147,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Gestion du formulaire de saisie manuelle (popup)
+    const manualInputForm = document.getElementById('manualInputForm');
+    if (manualInputForm) {
+        manualInputForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Empêcher la fermeture de la popup
+            submitManualInput();
+        });
+    }
+
     // Gestion de la recherche
     const searchButton = document.getElementById('searchButton');
     const searchInput = document.getElementById('searchInput');
@@ -194,13 +204,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fermer les popups en cliquant à l'extérieur
     window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('popup')) {
-            e.target.classList.remove('active');
-            window.camera.resetImage();
-            // Réinitialiser l'image en cours d'analyse si on ferme la popup manuelle
-            if (e.target.id === 'manualInputPopup') {
-                currentAnalysisImage = null;
-                currentPartialData = null;
+        // Fermer la popup uniquement si on clique sur la zone grise (en dehors du contenu)
+        const popup = e.target.closest('.popup');
+        if (popup) {
+            const popupContent = popup.querySelector('.popup-content');
+            // Si le clic est sur le popup mais PAS sur son contenu ou ses enfants
+            if (e.target === popup || (popupContent && !popupContent.contains(e.target))) {
+                popup.classList.remove('active');
+                window.camera.resetImage();
+                // Réinitialiser l'image en cours d'analyse si on ferme la popup manuelle
+                if (popup.id === 'manualInputPopup') {
+                    currentAnalysisImage = null;
+                    currentPartialData = null;
+                    currentMissingFields = null;
+                }
             }
         }
     });
@@ -724,7 +741,9 @@ async function submitManualInput() {
                 // Adapter la popup
                 updateManualInputPopup(currentMissingFields);
                 
-                // Ne pas fermer la popup, juste mettre à jour
+                // S'assurer que la popup est ouverte
+                document.getElementById('manualInputPopup').classList.add('active');
+                
                 return;
             }
             
@@ -750,6 +769,10 @@ async function submitManualInput() {
                 document.getElementById('manualYear').value = result.partialData?.year || year;
                 
                 updateManualInputPopup(currentMissingFields);
+                
+                // S'assurer que la popup est ouverte
+                document.getElementById('manualInputPopup').classList.add('active');
+                
                 return;
             }
             
