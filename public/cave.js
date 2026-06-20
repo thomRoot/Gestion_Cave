@@ -94,12 +94,15 @@ function renderCaveGrid() {
                 const periodText = bottle.drinkFrom && bottle.drinkTo ?
                     `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
 
+                // Pour les vins en attente (waiting), forcer un minimum de 2% pour que la barre soit visible
+                const displayPercent = maturityStatus === 'waiting' && maturityPercent === 0 ? 2 : maturityPercent;
+                
                 cell.innerHTML = `
                     <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
                     <div class="bottle-name">${escapeHtml(bottleName)}</div>
                     <div class="bottle-period"><span class="period-text">${periodText}</span></div>
                     <div class="bottle-maturity-bar ${maturityStatus || ''}">
-                        <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
+                        <div class="bottle-maturity-fill" style="width: ${displayPercent}%"></div>
                     </div>
                 `;
             }
@@ -230,9 +233,9 @@ function updateDrinkPeriodBar(drinkFrom, drinkTo) {
         if (!isNaN(startYear) && !isNaN(endYear)) {
             const totalPeriod = endYear - startYear;
             
-            // Si on est avant le début de la période, la progression est à 0%
+            // Si on est avant le début de la période, la progression est à 0% mais on affiche 2% pour que la barre soit visible
             if (currentYear <= startYear) {
-                bar.style.width = '0%';
+                bar.style.width = '2%';
             } else {
                 const elapsed = Math.min(currentYear - startYear, totalPeriod);
                 const percentage = (elapsed / totalPeriod) * 100;
