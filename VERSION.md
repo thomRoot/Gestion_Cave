@@ -1,12 +1,12 @@
 # Historique des Versions - Ma Cave à Vin
 
-## Version Actuelle : 6.0.0 (19 juin 2026)
+## Version Actuelle : 1.1 (20 juin 2026)
 
 ---
 
 ## Historique des Versions
 
-### Version 6.0.1 - Image bouteille vide dans les cases
+### Version 1.0.1 - Image bouteille vide dans les cases
 **Date** : 19 juin 2026
 **Modifications** :
 - Ajout image SVG de bouteille vide dans chaque case vide de la cave
@@ -15,7 +15,7 @@
 
 ---
 
-### Version 6.0.0 - Correction Analyse IA et Optimisation Mobile
+### Version 1.0.0 - Correction Analyse IA et Optimisation Mobile
 **Date** : 19 juin 2026
 **Modifications** :
 - CORRECTION CRITIQUE : Suppression des valeurs par defaut generiques dans getFallbackBottleInfo

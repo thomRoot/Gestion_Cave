@@ -248,7 +248,7 @@ Gestion_Cave/
 - Code CSS réduit de 63%
 - Meilleure organisation du code
 
-### v6.0.4 (20 juin 2026)
+### v1.0.4 (20 juin 2026)
 **Corrections bugs majeurs :**
 - FIX: `callMistral is not defined` (import manquant)
 - FIX: Popups qui s'ouvrent toutes au chargement
@@ -256,7 +256,7 @@ Gestion_Cave/
 - FIX: Boutons moches et mal placés
 - FIX: Analyse IA qui ne fonctionne plus
 
-### v6.0.3 (20 juin 2026)
+### v1.0.3 (20 juin 2026)
 **Corrections critiques :**
 - Correction de la disparition de la photo lors de la modification
 - Analyse complète avec Mistral AI (même sans OCR)
@@ -265,7 +265,7 @@ Gestion_Cave/
 - Correction de la regex pour le traitement des images base64
 - Meilleure gestion des data URLs dans googleVision.js
 
-### v6.0.0 (19 juin 2026)
+### v1.0.0 (19 juin 2026)
 **Fonctionnalités initiales :**
 - Reconnaissance d'étiquettes avec Google Vision + Mistral AI
 - Gestion de cave virtuelle

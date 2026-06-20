@@ -1,5 +1,5 @@
 // mistralAnalyzer.js - Analyseur de bouteilles de vin avec Google Vision + Mistral AI
-// Version 6.0.3 - CORRIGÉE : Toutes les fonctions manquantes ajoutées
+// Version 1.1 - CORRIGÉE : Toutes les fonctions manquantes ajoutées
 
 const mistralConfig = require("./mistralConfig");
 const googleVision = require("./googleVision");

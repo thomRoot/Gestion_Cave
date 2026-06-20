@@ -1,6 +1,6 @@
 {
   "name": "ma-cave-a-vin",
-  "version": "6.0.1",
+  "version": "1.1",
   "description": "Application de gestion de cave a vin intelligente avec reconnaissance detiquettes par IA",
   "main": "server/app.js",
   "scripts": {
