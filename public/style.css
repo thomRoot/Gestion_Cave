@@ -346,7 +346,7 @@ body {
 
 /* ==================== FORM ==================== */
 .form-group {
-    margin-bottom: 20px;
+    margin: 0 auto 20px;
     width: 100%;
     max-width: 400px;
     overflow-x: hidden;
@@ -449,6 +449,16 @@ body {
     max-height: 100%;
     object-fit: contain;
     display: none;
+}
+
+.camera-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 400px;
+    width: 100%;
 }
 
 .camera-buttons {
