@@ -27,7 +27,10 @@
 - **Gestion de cave virtuelle** : Organisation visuelle de votre collection avec grille responsive
 - **Chat IA intégré** : Conseiller en vin pour les accords mets-vins, températures de service, conseils de dégustation
 - **Analyse intelligente** : Extraction automatique des informations (nom, année, cépage, région, appellation, producteur, pays, degré d'alcool, période de consommation, accords mets-vins, température de service)
-- **Suivi de maturation** : Barre de progression colorée pour la période optimale de consommation (🔵 Bleu = trop jeune, 🟢 Vert = prêt à boire, 🔴 Rouge = dépassé)
+- **Suivi de maturation** : Barre de progression colorée continue pour la période optimale de consommation
+  - 🔵 **Bleu** = vin trop jeune (progression inverse : 100% si maturation l'année prochaine, 0% si maturation dans 20+ ans)
+  - 🟢 **Vert** = vin prêt à boire (progression linéaire pendant la période de consommation)
+  - 🔴 **Rouge** = vin dépassé (100% après la période)
 - **Recherche avancée** : Filtrez vos bouteilles par nom, année, cépage, région, etc.
 
 ### ✅ Fonctionnalités techniques
@@ -237,11 +240,10 @@ Gestion_Cave/
 
 ### v1.2 (20 juin 2026) - **En développement**
 **Nouvelle fonctionnalité :**
-- ✅ **Barre de progression de maturité** : Remplace les icônes (⏳/✅/⚠️) par une barre de progression colorée
-  - 🔵 **Bleue** : Vin trop jeune (avant la période de consommation)
-  - 🟢 **Verte** : Vin prêt à boire (pendant la période de consommation)
-  - 🔴 **Rouge** : Vin dépassé (après la période de consommation)
-  - La barre est pondérée par rapport à la période de consommation privilégiée
+- ✅ **Barre de progression de maturité continue** : Remplace les icônes (⏳/✅/⚠️) par une barre de progression colorée
+  - 🔵 **Bleue** : Vin trop jeune - progression inverse basée sur le temps restant avant maturation (100% si maturation l'année prochaine, 0% si maturation dans 20+ ans)
+  - 🟢 **Verte** : Vin prêt à boire - progression linéaire pendant la période de consommation
+  - 🔴 **Rouge** : Vin dépassé - 100% après la période de consommation
 
 ### v1.1 (20 juin 2026) - **Dernière version stable**
 **Corrections demandées par l'utilisateur :**
