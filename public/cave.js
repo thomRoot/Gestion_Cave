@@ -172,6 +172,10 @@ function openAddBottlePopup() {
     document.getElementById('bottlePhotoPreview').style.display = 'none';
     document.getElementById('bottlePopup').classList.add('active');
 
+    // Retirer le focus de tous les champs pour éviter le curseur clignotant
+    const inputs = document.querySelectorAll('#bottleForm input, #bottleForm textarea, #bottleForm button');
+    inputs.forEach(input => input.blur());
+
     // Démarrer la sélection de fichier (galerie uniquement)
     window.camera.startCamera();
 }
@@ -179,6 +183,9 @@ function openAddBottlePopup() {
 // Ouvrir la popup de détails d'une bouteille
 function openBottleDetailsPopup(bottle) {
     document.getElementById('detailsTitle').innerHTML = '<i class="fas fa-info-circle"></i> <span>' + (bottle.name || 'Détails de la bouteille') + '</span>';
+    
+    // Retirer le focus pour éviter le curseur clignotant
+    document.activeElement.blur();
     
     const photoSrc = bottle.photo ? `/uploads/${bottle.photo}` : 'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
     document.getElementById('detailsPhoto').src = photoSrc;

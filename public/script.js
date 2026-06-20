@@ -244,6 +244,9 @@ function openAIChatPopup() {
     if (popup) {
         popup.classList.add('active');
         
+        // Retirer le focus pour éviter le curseur clignotant
+        document.activeElement.blur();
+        
         const messagesContainer = document.getElementById('aiMessages');
         if (messagesContainer) {
             // Conserver l'historique si il existe
@@ -781,6 +784,9 @@ function openEditBottlePopup(bottle) {
         document.getElementById('bottlePhotoPreview').style.display = 'none';
     }
 
+    // Retirer le focus pour éviter le curseur clignotant
+    document.activeElement.blur();
+    
     // Démarrer la sélection de fichier pour permettre de changer la photo
     window.camera.startCamera(false); // false = ne pas réinitialiser
     document.getElementById('bottlePopup').classList.add('active');
