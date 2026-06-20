@@ -98,10 +98,9 @@ function renderCaveGrid() {
                     <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
                     <div class="bottle-name">${escapeHtml(bottleName)}</div>
                     <div class="bottle-period"><span class="period-text">${periodText}</span></div>
-                    <div class="bottle-maturity-bar">
+                    <div class="bottle-maturity-bar ${maturityStatus}">
                         <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
                     </div>
-                    ${maturityStatus ? `<div class="bottle-maturity ${maturityStatus}">${getMaturityIcon(maturityStatus)}</div>` : ''}
                 `;
             }
 
@@ -208,10 +207,14 @@ function openBottleDetailsPopup(bottle) {
 function updateDrinkPeriodBar(drinkFrom, drinkTo) {
     const bar = document.getElementById('drinkPeriodFill');
     const text = document.getElementById('drinkPeriodText');
+    const range = document.getElementById('drinkPeriodRange');
     
     if (!bar || !text) return;
     
     const currentYear = new Date().getFullYear();
+    
+    // Calculer le statut de maturité
+    const maturityStatus = getMaturityStatus(drinkFrom, drinkTo);
     
     if (drinkFrom && drinkTo) {
         // Calculer le pourcentage de la période écoulée
@@ -225,13 +228,24 @@ function updateDrinkPeriodBar(drinkFrom, drinkTo) {
             
             bar.style.width = `${Math.min(percentage, 100)}%`;
             text.textContent = `${drinkFrom} - ${drinkTo}`;
+            
+            // Appliquer la classe de statut pour la couleur
+            if (range) {
+                range.className = `period-range ${maturityStatus}`;
+            }
         } else {
             bar.style.width = '0%';
             text.textContent = 'Non spécifié';
+            if (range) {
+                range.className = 'period-range';
+            }
         }
     } else {
         bar.style.width = '0%';
         text.textContent = 'Non spécifié';
+        if (range) {
+            range.className = 'period-range';
+        }
     }
 }
 

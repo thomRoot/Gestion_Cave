@@ -27,7 +27,7 @@
 - **Gestion de cave virtuelle** : Organisation visuelle de votre collection avec grille responsive
 - **Chat IA intégré** : Conseiller en vin pour les accords mets-vins, températures de service, conseils de dégustation
 - **Analyse intelligente** : Extraction automatique des informations (nom, année, cépage, région, appellation, producteur, pays, degré d'alcool, période de consommation, accords mets-vins, température de service)
-- **Suivi de maturation** : Indicateurs visuels (⏳/✅/⚠️) pour la période optimale de consommation
+- **Suivi de maturation** : Barre de progression colorée pour la période optimale de consommation (🔵 Bleu = trop jeune, 🟢 Vert = prêt à boire, 🔴 Rouge = dépassé)
 - **Recherche avancée** : Filtrez vos bouteilles par nom, année, cépage, région, etc.
 
 ### ✅ Fonctionnalités techniques
@@ -235,7 +235,15 @@ Gestion_Cave/
 
 ## 📜 Historique des versions
 
-### v1.1 (20 juin 2026) - **Dernière version**
+### v1.2 (20 juin 2026) - **En développement**
+**Nouvelle fonctionnalité :**
+- ✅ **Barre de progression de maturité** : Remplace les icônes (⏳/✅/⚠️) par une barre de progression colorée
+  - 🔵 **Bleue** : Vin trop jeune (avant la période de consommation)
+  - 🟢 **Verte** : Vin prêt à boire (pendant la période de consommation)
+  - 🔴 **Rouge** : Vin dépassé (après la période de consommation)
+  - La barre est pondérée par rapport à la période de consommation privilégiée
+
+### v1.1 (20 juin 2026) - **Dernière version stable**
 **Corrections demandées par l'utilisateur :**
 - ✅ Cave visible sans scroll (cellules réduites à 60px)
 - ✅ Indicateurs Mistral/Google plus petits (32x32px avec icônes)
@@ -279,6 +287,7 @@ Gestion_Cave/
 | Branche | Version | État | Description |
 |---------|---------|------|-------------|
 | **main** | v1.1 | ✅ Stable | Version principale avec toutes les corrections |
+| **vibe/progress-bar-maturity-50bbd0** | v1.2 | 🟡 En développement | Barre de progression de maturité colorée |
 | **1.1_interface_OK_IA_NOK** | v1.1 | ⚠️ Sauvegarde | Interface OK, IA à vérifier (problème de cache possible) |
 | **vibe/fix-bugs-design-28e8e5** | v1.0 | ❌ Obsolète | Ancienne version avant les corrections d'interface |
 

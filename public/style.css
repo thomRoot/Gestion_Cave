@@ -254,6 +254,105 @@ body {
     color: var(--text);
 }
 
+/* Barre de progression de maturité */
+.bottle-maturity-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+    border: 1px solid var(--border);
+}
+
+.bottle-maturity-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Couleurs selon le statut */
+.bottle-maturity-bar.waiting .bottle-maturity-fill {
+    background: #2196F3; /* Bleu - trop jeune */
+}
+
+.bottle-maturity-bar.ready .bottle-maturity-fill {
+    background: #4CAF50; /* Vert - prêt à boire */
+}
+
+.bottle-maturity-bar.past .bottle-maturity-fill {
+    background: #F44336; /* Rouge - dépassé */
+}
+
+/* Style par défaut si pas de statut */
+.bottle-maturity-bar:not(.waiting):not(.ready):not(.past) .bottle-maturity-fill {
+    background: var(--text-muted);
+}
+
+.bottle-period {
+    font-size: 0.55rem;
+    text-align: center;
+    color: var(--text-muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/* Barre de période dans la popup de détails */
+.drink-period-bar {
+    grid-column: 1 / -1;
+    margin: 12px auto;
+    width: 100%;
+    max-width: 300px;
+}
+
+.bar-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.period-range {
+    height: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.period-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Couleurs pour la barre de période dans les détails */
+.period-range.waiting .period-fill {
+    background: #2196F3; /* Bleu - trop jeune */
+}
+
+.period-range.ready .period-fill {
+    background: #4CAF50; /* Vert - prêt à boire */
+}
+
+.period-range.past .period-fill {
+    background: #F44336; /* Rouge - dépassé */
+}
+
+.period-range:not(.waiting):not(.ready):not(.past) .period-fill {
+    background: var(--text-muted);
+}
+
+.period-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 6px;
+}
+
 /* ==================== POPUPS ==================== */
 .popup {
     position: fixed;
