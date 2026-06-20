@@ -301,13 +301,13 @@ body {
 .popup-content .close {
     position: absolute;
     top: 16px;
-    left: 16px;
+    right: 12px;
     background: none;
     border: none;
     color: var(--text-muted);
     font-size: 1.5rem;
     cursor: pointer;
-    padding: 8px;
+    padding: 6px;
     line-height: 1;
     transition: var(--transition);
 }
