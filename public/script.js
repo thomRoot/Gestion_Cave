@@ -39,10 +39,10 @@ async function checkMistralStatus() {
             
             if (data && data.mistralAvailable) {
                 statusElement.className = 'mistral-status connected active';
-                if (icon) icon.className = 'fa-brands fa-mistral';
+                if (icon) icon.className = 'fas fa-robot';
             } else {
                 statusElement.className = 'mistral-status disconnected active';
-                if (icon) icon.className = 'fa-brands fa-mistral';
+                if (icon) icon.className = 'fas fa-robot';
             }
         }
     } catch (error) {
@@ -52,7 +52,7 @@ async function checkMistralStatus() {
         if (statusElement) {
             statusElement.classList.add('active');
             const icon = statusElement.querySelector('i');
-            if (icon) icon.className = 'fa-brands fa-mistral';
+            if (icon) icon.className = 'fas fa-robot';
         }
     }
 }
