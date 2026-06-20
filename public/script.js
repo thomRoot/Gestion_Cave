@@ -220,7 +220,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileAddButton = document.getElementById('mobileAddButton');
     if (mobileAddButton) {
         mobileAddButton.addEventListener('click', () => {
-            alert("Veuillez cliquer sur une case vide de la cave pour ajouter une nouvelle bouteille.");
+            const selectedCell = window.cave.getSelectedCell();
+            if (!selectedCell) {
+                alert("Veuillez cliquer sur une case vide de la cave pour ajouter une nouvelle bouteille.");
+            } else {
+                const grid = window.cave.getCaveGrid();
+                if (!grid[selectedCell.row][selectedCell.col]) {
+                    window.cave.openAddBottlePopup();
+                } else {
+                    alert("Veuillez cliquer sur une case vide pour ajouter une nouvelle bouteille.");
+                }
+            }
         });
     }
 
