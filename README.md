@@ -1,4 +1,4 @@
-# Ma Cave à Vin v7.0.2
+# Ma Cave à Vin v1.1
 
 **Application de gestion de cave à vin intelligente avec reconnaissance d'étiquettes par IA**
 
@@ -6,7 +6,7 @@
 
 ## 📋 Table des matières
 1. [Fonctionnalités](#-fonctionnalités)
-2. [Nouveautés v7.0.2](#-nouveautés-v702)
+2. [Nouveautés v1.1](#-nouveautés-v11)
 3. [Optimisation Mobile & Tablette](#-optimisation-mobile--tablette)
 4. [Configuration](#-configuration)
 5. [Installation](#-installation)
@@ -38,7 +38,7 @@
 
 ---
 
-## 🆕 Nouveautés v7.0.2
+## 🆕 Nouveautés v1.1
 
 ### 🎨 Design Ultra-Épuré
 - **Palette de couleurs modernisée** :
@@ -208,7 +208,7 @@ Au premier lancement, une popup vous demandera de configurer votre cave :
 Gestion_Cave/
 ├── public/                          # Frontend
 │   ├── index.html                   # Page principale
-│   ├── style.css                    # Styles CSS (v7.0.2 - Ultra-épuré)
+│   ├── style.css                    # Styles CSS (v1.1 - Ultra-épuré)
 │   ├── script.js                    # Logique frontend principale
 │   ├── cave.js                      # Gestion de la grille de cave
 │   ├── camera.js                    # Gestion des images et compression
@@ -235,7 +235,7 @@ Gestion_Cave/
 
 ## 📜 Historique des versions
 
-### v7.0.2 (20 juin 2026) - **Dernière version**
+### v1.1 (20 juin 2026) - **Dernière version**
 **Corrections demandées par l'utilisateur :**
 - ✅ Cave visible sans scroll (cellules réduites à 60px)
 - ✅ Indicateurs Mistral/Google plus petits (32x32px avec icônes)
@@ -247,19 +247,6 @@ Gestion_Cave/
 - Popups compactes et centrées
 - Code CSS réduit de 63%
 - Meilleure organisation du code
-
-### v7.0.1 (20 juin 2026)
-**Corrections :**
-- Popups trop larges → max-width adaptée
-- Formulaires centrés avec max-width: 400px
-- Boutons alignés dans les popups
-
-### v7.0.0 (20 juin 2026)
-**Refonte complète du design :**
-- Nouveau design ultra-épuré
-- Palette : Noir #121212 + Rouge vin #722f37 + Or #c9a86c
-- Boutons uniformes avec classes CSS
-- Gestion des popups avec classes .active
 
 ### v6.0.4 (20 juin 2026)
 **Corrections bugs majeurs :**
@@ -291,9 +278,9 @@ Gestion_Cave/
 
 | Branche | Version | État | Description |
 |---------|---------|------|-------------|
-| **main** | v7.0.2 | ✅ Stable | Version principale avec toutes les corrections |
-| **SAVE_V1_0_interface_OK_IA_NOK** | v7.0.2 | ⚠️ Sauvegarde | Interface OK, IA à vérifier (problème de cache possible) |
-| **vibe/fix-bugs-design-28e8e5** | v6.0.3 | ❌ Obsolète | Ancienne version avant les corrections d'interface |
+| **main** | v1.1 | ✅ Stable | Version principale avec toutes les corrections |
+| **1.1_interface_OK_IA_NOK** | v1.1 | ⚠️ Sauvegarde | Interface OK, IA à vérifier (problème de cache possible) |
+| **vibe/fix-bugs-design-28e8e5** | v1.0 | ❌ Obsolète | Ancienne version avant les corrections d'interface |
 
 ### 🔄 Comment changer de branche ?
 ```bash
@@ -353,7 +340,7 @@ Les avis de copyright ci-dessus et cet avis de permission doivent être inclus d
 
 ---
 
-**Version** : 7.0.2  
+**Version** : 1.1  
 **Dernière mise à jour** : 20 juin 2026  
 **Auteur** : [thomRoot](https://github.com/thomRoot)  
 **Dépôt** : [Gestion_Cave](https://github.com/thomRoot/Gestion_Cave)
