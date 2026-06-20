@@ -335,14 +335,24 @@ async function analyzeBottleWithTwoStepProcess(imagePathOrBase64, isBase64 = fal
         }
         
         const completeInfo = completeBottleInfo(bottleInfo);
+        
+        // Vérifier si l'année est manquante dans les résultats finaux
+        const finalYear = completeInfo.year;
+        const finalName = completeInfo.name;
+        const hasMissingFields = !finalName || !finalYear;
+        
         return {
             ...completeInfo,
             analysisMethod,
             extractedText: rawText,
             mistralAvailable: true,
             googleVisionAvailable,
-            requiresManualInput: false,
-            partialData: null
+            requiresManualInput: hasMissingFields,
+            missingFields: hasMissingFields ? {
+                name: !finalName,
+                year: !finalYear
+            } : null,
+            partialData: hasMissingFields ? { name: finalName, year: finalYear } : null
         };
     } catch (error) {
         return {
