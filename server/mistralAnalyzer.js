@@ -324,6 +324,10 @@ async function analyzeBottleWithTwoStepProcess(imagePathOrBase64, isBase64 = fal
             return {
                 ...getFallbackBottleInfo("Aucune information extraite"),
                 requiresManualInput: !name || !year,
+                missingFields: {
+                    name: !name,
+                    year: !year
+                },
                 partialData: { name, year },
                 analysisMethod,
                 googleVisionAvailable
@@ -344,6 +348,10 @@ async function analyzeBottleWithTwoStepProcess(imagePathOrBase64, isBase64 = fal
         return {
             ...getFallbackBottleInfo(`Erreur: ${error.message}`),
             requiresManualInput: !name || !year,
+            missingFields: {
+                name: !name,
+                year: !year
+            },
             partialData: { name, year },
             analysisMethod,
             googleVisionAvailable

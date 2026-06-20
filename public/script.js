@@ -7,6 +7,7 @@ let currentEditingBottlePhoto = null;
 let conversationHistory = [];
 let currentAnalysisImage = null;
 let currentPartialData = null;
+let currentMissingFields = null;
 
 // Fonctions de gestion du chargement
 function showLoading(message = "Analyse en cours...") {
@@ -24,6 +25,60 @@ function hideLoading() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
         loadingOverlay.classList.remove('active');
+    }
+}
+
+// Adapter la popup de saisie manuelle en fonction des champs manquants
+function updateManualInputPopup(missingFields) {
+    const nameInput = document.getElementById('manualName');
+    const yearInput = document.getElementById('manualYear');
+    const nameLabel = document.querySelector('#manualInputPopup label[for="manualName"]');
+    const yearLabel = document.querySelector('#manualInputPopup label[for="manualYear"]');
+    const popupMessage = document.querySelector('#manualInputPopup p');
+    
+    if (!missingFields) {
+        // Par défaut, tout est requis
+        if (nameInput) nameInput.required = true;
+        if (yearInput) yearInput.required = false; // Année reste optionnelle
+        if (popupMessage) popupMessage.textContent = "Google Vision n'a pas pu identifier le nom ou l'année de la bouteille. Veuillez les saisir manuellement pour que Mistral puisse compléter les autres informations.";
+        return;
+    }
+    
+    // Mettre à jour les champs requis
+    if (nameInput) {
+        nameInput.required = missingFields.name || false;
+    }
+    if (yearInput) {
+        yearInput.required = missingFields.year || false;
+    }
+    
+    // Mettre à jour les libellés
+    if (nameLabel) {
+        if (missingFields.name) {
+            nameLabel.innerHTML = '<i class="fas fa-tag"></i> Nom de la bouteille *';
+        } else {
+            nameLabel.innerHTML = '<i class="fas fa-tag"></i> Nom de la bouteille';
+        }
+    }
+    if (yearLabel) {
+        if (missingFields.year) {
+            yearLabel.innerHTML = '<i class="fas fa-calendar"></i> Année *';
+        } else {
+            yearLabel.innerHTML = '<i class="fas fa-calendar"></i> Année (optionnel)';
+        }
+    }
+    
+    // Mettre à jour le message de la popup
+    if (popupMessage) {
+        if (missingFields.name && missingFields.year) {
+            popupMessage.textContent = "Google Vision n'a pas pu identifier le nom et l'année de la bouteille. Veuillez les saisir manuellement pour que Mistral puisse compléter les autres informations.";
+        } else if (missingFields.name) {
+            popupMessage.textContent = "Google Vision n'a pas pu identifier le nom de la bouteille. Veuillez le saisir manuellement pour que Mistral puisse compléter les autres informations.";
+        } else if (missingFields.year) {
+            popupMessage.textContent = "Google Vision n'a pas pu identifier l'année de la bouteille. Veuillez la saisir manuellement pour que Mistral puisse compléter les autres informations.";
+        } else {
+            popupMessage.textContent = "Veuillez compléter les informations manquantes pour que Mistral puisse analyser la bouteille.";
+        }
     }
 }
 
@@ -558,9 +613,15 @@ async function analyzeWithAI() {
             if (result.bottleInfo.requiresManualInput) {
                 // Stocker les données partielles
                 currentPartialData = result.bottleInfo.partialData;
+                currentMissingFields = result.bottleInfo.missingFields || result.missingFields || { name: true, year: true };
+                
                 // Ouvrir la popup de saisie manuelle
                 document.getElementById('manualName').value = result.bottleInfo.partialData?.name || '';
                 document.getElementById('manualYear').value = result.bottleInfo.partialData?.year || '';
+                
+                // Adapter la popup en fonction des champs manquants
+                updateManualInputPopup(currentMissingFields);
+                
                 document.getElementById('manualInputPopup').classList.add('active');
             } else {
                 // Analyse complète réussie
@@ -588,8 +649,14 @@ async function analyzeWithAI() {
             // Si requiresManualInput est true, ouvrir la popup
             if (result.requiresManualInput) {
                 currentPartialData = result.partialData;
+                currentMissingFields = result.missingFields || { name: true, year: true };
+                
                 document.getElementById('manualName').value = result.partialData?.name || '';
                 document.getElementById('manualYear').value = result.partialData?.year || '';
+                
+                // Adapter la popup en fonction des champs manquants
+                updateManualInputPopup(currentMissingFields);
+                
                 document.getElementById('manualInputPopup').classList.add('active');
             } else {
                 alert(errorMsg);

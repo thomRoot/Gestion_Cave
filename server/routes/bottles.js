@@ -79,6 +79,7 @@ router.post('/analyze-two-step', upload.single('image'), async (req, res) => {
             analysisMethod: result.analysisMethod,
             extractedText: result.extractedText,
             requiresManualInput: result.requiresManualInput || false,
+            missingFields: result.missingFields || null,
             partialData: result.partialData || null
         });
     } catch (error) {
@@ -90,6 +91,7 @@ router.post('/analyze-two-step', upload.single('image'), async (req, res) => {
             googleVisionAvailable: !!process.env.GOOGLE_VISION_API_KEY,
             bottleInfo: mistralAnalyzer.getFallbackBottleInfo(error.message),
             requiresManualInput: true,
+            missingFields: { name: true, year: true },
             partialData: null
         });
     }
