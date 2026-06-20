@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selectedCell) {
                 const bottle = window.cave.getCaveGrid()[selectedCell.row][selectedCell.col];
                 // Fermer la popup de détails avant d'ouvrir celle de modification
-                document.getElementById('bottleDetailsPopup').style.display = 'none';
+                document.getElementById('bottleDetailsPopup').classList.remove('active');
                 openEditBottlePopup(bottle);
             }
         });
@@ -285,7 +285,7 @@ function openAIChatPopup() {
 function closeAIChatPopup() {
     const popup = document.getElementById('aiChatPopup');
     if (popup) {
-        popup.style.display = 'none';
+        popup.classList.remove('active');
     }
 }
 
@@ -737,12 +737,14 @@ function saveBottle() {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            document.getElementById('bottlePopup').style.display = 'none';
+            document.getElementById('bottlePopup').classList.remove('active');
             window.cave.loadCaveGrid();
             window.camera.resetImage();
             document.getElementById('bottleForm').reset();
             // Réinitialiser la variable globale
             currentEditingBottlePhoto = null;
+            // Retirer le focus de tous les champs pour éviter le curseur clignotant
+            document.getElementById('bottleName').blur();
         } else {
             alert("Erreur lors de la sauvegarde : " + (result.error || "Inconnu"));
         }
@@ -796,7 +798,7 @@ function deleteBottle(row, col) {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            document.getElementById('bottleDetailsPopup').style.display = 'none';
+            document.getElementById('bottleDetailsPopup').classList.remove('active');
             window.cave.loadCaveGrid();
         } else {
             alert("Erreur lors de la suppression.");
