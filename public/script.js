@@ -5,6 +5,8 @@
 let currentBottleImage = null;
 let currentEditingBottlePhoto = null;
 let conversationHistory = [];
+let currentAnalysisImage = null;
+let currentPartialData = null;
 
 // Fonctions de gestion du chargement
 function showLoading(message = "Analyse en cours...") {
@@ -140,6 +142,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('popup')) {
             e.target.classList.remove('active');
             window.camera.resetImage();
+            // Réinitialiser l'image en cours d'analyse si on ferme la popup manuelle
+            if (e.target.id === 'manualInputPopup') {
+                currentAnalysisImage = null;
+                currentPartialData = null;
+            }
         }
     });
 
@@ -469,7 +476,7 @@ function suggestPrompt(prompt) {
 
 // ==================== FONCTIONS D'ANALYSE IA ====================
 
-// Analyser avec IA (avec image compressée ou texte)
+// Analyser avec IA (avec image compressée ou texte) - NOUVEAU WORKFLOW
 async function analyzeWithAI() {
     // Vérifier qu'une image est disponible
     if (!window.camera.hasImage()) {
@@ -513,10 +520,11 @@ async function analyzeWithAI() {
         return;
     }
 
-    // Si une image est disponible, l'envoyer au serveur
+    // Si une image est disponible, utiliser le NOUVEAU workflow en 2 étapes
     try {
-        showLoading("Analyse de l'image avec IA en cours...");
+        showLoading("Analyse de l'image avec Google Vision en cours...");
         const imageDataUrl = window.camera.getCurrentImage();
+        currentAnalysisImage = imageDataUrl;
         
         // Créer un FormData pour envoyer l'image
         const formData = new FormData();
@@ -533,7 +541,8 @@ async function analyzeWithAI() {
         
         formData.append('image', blob, 'bottle.jpg');
 
-        const response = await fetch('/api/bottles/analyze', {
+        // NOUVEAU : Utiliser la route /analyze-two-step
+        const response = await fetch('/api/bottles/analyze-two-step', {
             method: 'POST',
             body: formData
         });
@@ -542,17 +551,28 @@ async function analyzeWithAI() {
         hideLoading();
 
         if (result.success && result.bottleInfo) {
-            fillBottleFormWithAIResult(result.bottleInfo);
-            
-            // Afficher un message plus informatif
-            let message = "Analyse terminée ! Les champs ont été complétés automatiquement.";
-            if (result.extractedText) {
-                message += "\n\nTexte extrait de l'étiquette :\n" + result.extractedText.substring(0, 200) + "...";
+            // Si requiresManualInput est true, ouvrir la popup de saisie manuelle
+            if (result.bottleInfo.requiresManualInput) {
+                // Stocker les données partielles
+                currentPartialData = result.bottleInfo.partialData;
+                // Ouvrir la popup de saisie manuelle
+                document.getElementById('manualName').value = result.bottleInfo.partialData?.name || '';
+                document.getElementById('manualYear').value = result.bottleInfo.partialData?.year || '';
+                document.getElementById('manualInputPopup').classList.add('active');
+            } else {
+                // Analyse complète réussie
+                fillBottleFormWithAIResult(result.bottleInfo);
+                
+                // Afficher un message informatif
+                let message = "Analyse terminée ! Les champs ont été complétés automatiquement.";
+                if (result.extractedText) {
+                    message += "\n\nTexte extrait de l'étiquette :\n" + result.extractedText.substring(0, 200) + "...";
+                }
+                if (result.analysisMethod) {
+                    message = `[${result.analysisMethod}] ` + message;
+                }
+                alert(message);
             }
-            if (result.analysisMethod) {
-                message = `[${result.analysisMethod}] ` + message;
-            }
-            alert(message);
         } else {
             let errorMsg = "Je n'ai pas pu identifier cette bouteille.";
             if (result.error) {
@@ -561,12 +581,85 @@ async function analyzeWithAI() {
             if (!result.googleVisionAvailable) {
                 errorMsg += "\n\nNote : Google Vision n'est pas configuré. Ajoutez GOOGLE_VISION_API_KEY dans .env pour une meilleure reconnaissance.";
             }
-            alert(errorMsg);
+            
+            // Si requiresManualInput est true, ouvrir la popup
+            if (result.requiresManualInput) {
+                currentPartialData = result.partialData;
+                document.getElementById('manualName').value = result.partialData?.name || '';
+                document.getElementById('manualYear').value = result.partialData?.year || '';
+                document.getElementById('manualInputPopup').classList.add('active');
+            } else {
+                alert(errorMsg);
+            }
         }
     } catch (error) {
         hideLoading();
         console.error("Erreur analyse IA image :", error);
         alert("Erreur lors de l'analyse. Vérifiez la connexion et que les API sont configurées.");
+    }
+}
+
+// NOUVEAU : Soumettre les informations manuelles pour analyse par Mistral
+async function submitManualInput() {
+    const name = document.getElementById('manualName').value.trim();
+    const year = document.getElementById('manualYear').value.trim();
+    
+    if (!name) {
+        alert("Veuillez saisir au moins le nom de la bouteille.");
+        return;
+    }
+    
+    try {
+        showLoading("Analyse avec Mistral en cours...");
+        
+        // Fermer la popup
+        document.getElementById('manualInputPopup').classList.remove('active');
+        
+        // Envoyer les données manuelles + l'image
+        const formData = new FormData();
+        
+        // Ajouter l'image si disponible
+        if (currentAnalysisImage) {
+            const base64Data = currentAnalysisImage.split(',')[1];
+            const byteCharacters = atob(base64Data);
+            const byteArrays = [];
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteArrays.push(byteCharacters.charCodeAt(i));
+            }
+            const byteArray = new Uint8Array(byteArrays);
+            const blob = new Blob([byteArray], { type: 'image/jpeg' });
+            formData.append('image', blob, 'bottle.jpg');
+        }
+        
+        // Ajouter les données manuelles
+        formData.append('name', name);
+        if (year) {
+            formData.append('year', year);
+        }
+        
+        // Envoyer à la route /analyze-two-step
+        const response = await fetch('/api/bottles/analyze-two-step', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success && result.bottleInfo) {
+            fillBottleFormWithAIResult(result.bottleInfo);
+            alert("Analyse terminée ! Les champs ont été complétés automatiquement par Mistral.");
+        } else {
+            let errorMsg = "Je n'ai pas pu compléter les informations.";
+            if (result.error) {
+                errorMsg += "\n" + result.error;
+            }
+            alert(errorMsg);
+        }
+    } catch (error) {
+        hideLoading();
+        console.error("Erreur soumission manuelle :", error);
+        alert("Erreur lors de l'analyse. Vérifiez la connexion et que Mistral AI est configuré.");
     }
 }
 

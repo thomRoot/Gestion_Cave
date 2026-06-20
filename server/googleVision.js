@@ -177,6 +177,104 @@ async function getCleanedLabelText(imagePathOrBase64, isBase64 = false) {
 }
 
 /**
+ * Extraire le nom et l'année de la bouteille depuis le texte de l'étiquette
+ * @param {string} text - Texte extrait de l'étiquette
+ * @returns {Object} - Objet avec name et year (ou null si non trouvé)
+ */
+function extractBottleNameAndYear(text) {
+    if (!text || !text.trim()) {
+        return { name: null, year: null, rawText: text };
+    }
+
+    // Nettoyer le texte
+    const cleanedText = text
+        .replace(/\n+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    // Extraire l'année (recherche de 4 chiffres entre 1900 et 2099)
+    let year = null;
+    const yearMatch = cleanedText.match(/\b(19|20)\d{2}\b/);
+    if (yearMatch) {
+        const foundYear = parseInt(yearMatch[0]);
+        if (foundYear >= 1900 && foundYear <= 2099) {
+            year = foundYear;
+        }
+    }
+
+    // Extraire le nom : on prend la première ligne ou le texte avant l'année
+    let name = null;
+    if (year) {
+        // Si on a trouvé une année, prendre le texte avant comme nom
+        const yearIndex = cleanedText.indexOf(year.toString());
+        if (yearIndex > 0) {
+            name = cleanedText.substring(0, yearIndex).trim();
+        }
+    }
+
+    // Si pas de nom trouvé, prendre la première ligne ou les premiers mots
+    if (!name || name.length < 2) {
+        // Prendre les 10 premiers mots comme nom par défaut
+        const words = cleanedText.split(' ').filter(word => word.length > 1);
+        if (words.length > 0) {
+            name = words.slice(0, Math.min(10, words.length)).join(' ');
+        }
+    }
+
+    // Nettoyer le nom : supprimer les caractères spéciaux en trop
+    if (name) {
+        name = name
+            .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    return {
+        name: name || null,
+        year: year || null,
+        rawText: cleanedText
+    };
+}
+
+/**
+ * Analyser une image pour extraire le nom et l'année avec Google Vision
+ * @param {string} imagePathOrBase64 - Chemin de l'image ou base64
+ * @param {boolean} isBase64 - Si true, c'est déjà du base64
+ * @returns {Promise<Object>} - Résultat avec name, year, rawText
+ */
+async function analyzeBottleForNameAndYear(imagePathOrBase64, isBase64 = false) {
+    try {
+        const rawText = await getCleanedLabelText(imagePathOrBase64, isBase64);
+        if (!rawText) {
+            return {
+                name: null,
+                year: null,
+                rawText: null,
+                success: false,
+                error: "Aucun texte détecté sur l'étiquette"
+            };
+        }
+
+        const extracted = extractBottleNameAndYear(rawText);
+        return {
+            name: extracted.name,
+            year: extracted.year,
+            rawText: extracted.rawText,
+            success: true
+        };
+    } catch (error) {
+        console.error('Erreur analyse nom/année:', error.message);
+        return {
+            name: null,
+            year: null,
+            rawText: null,
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
  * Vérifier si Google Vision est configuré
  * @returns {boolean}
  */
@@ -188,5 +286,7 @@ module.exports = {
     extractTextFromWineLabel,
     getCleanedLabelText,
     isGoogleVisionConfigured,
-    GOOGLE_CONFIG
+    GOOGLE_CONFIG,
+    analyzeBottleForNameAndYear,
+    extractBottleNameAndYear
 };

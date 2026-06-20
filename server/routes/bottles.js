@@ -57,6 +57,44 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
     }
 });
 
+// NOUVEAU : Route pour l'analyse en 2 étapes (Google Vision → Mistral)
+router.post('/analyze-two-step', upload.single('image'), async (req, res) => {
+    try {
+        let imagePath = null;
+        if (req.file) imagePath = path.join(__dirname, '../../public/uploads', req.file.filename);
+        
+        // Récupérer les données manuelles si fournies
+        const manualData = req.body.name || req.body.year ? {
+            name: req.body.name || null,
+            year: req.body.year ? parseInt(req.body.year) : null
+        } : null;
+        
+        const result = await mistralAnalyzer.analyzeBottleWithTwoStepProcess(imagePath, false, manualData);
+        
+        res.json({
+            success: true,
+            bottleInfo: result,
+            mistralAvailable: !!mistralConfig.apiKey,
+            googleVisionAvailable: !!process.env.GOOGLE_VISION_API_KEY,
+            analysisMethod: result.analysisMethod,
+            extractedText: result.extractedText,
+            requiresManualInput: result.requiresManualInput || false,
+            partialData: result.partialData || null
+        });
+    } catch (error) {
+        console.error("Erreur analyse IA 2 étapes :", error);
+        res.status(500).json({
+            success: false,
+            error: "Erreur serveur lors de l'analyse",
+            mistralAvailable: !!mistralConfig.apiKey,
+            googleVisionAvailable: !!process.env.GOOGLE_VISION_API_KEY,
+            bottleInfo: mistralAnalyzer.getFallbackBottleInfo(error.message),
+            requiresManualInput: true,
+            partialData: null
+        });
+    }
+});
+
 router.post('/analyze-text', async (req, res) => {
     try {
         const { name, year, grapes, region } = req.body;
