@@ -98,7 +98,7 @@ function renderCaveGrid() {
                     <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
                     <div class="bottle-name">${escapeHtml(bottleName)}</div>
                     <div class="bottle-period"><span class="period-text">${periodText}</span></div>
-                    <div class="bottle-maturity-bar ${maturityStatus}">
+                    <div class="bottle-maturity-bar ${maturityStatus || ''}">
                         <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
                     </div>
                 `;
@@ -158,6 +158,12 @@ function calculateMaturityPercentage(drinkFrom, drinkTo) {
     const totalPeriod = endYear - startYear;
     if (totalPeriod <= 0) return 100;
     
+    // Si on est avant le début de la période, la progression est à 0%
+    if (currentYear <= startYear) {
+        return 0;
+    }
+    
+    // Sinon, calculer le pourcentage dans la période
     const elapsed = Math.min(currentYear - startYear, totalPeriod);
     const percentage = (elapsed / totalPeriod) * 100;
     
@@ -223,10 +229,16 @@ function updateDrinkPeriodBar(drinkFrom, drinkTo) {
         
         if (!isNaN(startYear) && !isNaN(endYear)) {
             const totalPeriod = endYear - startYear;
-            const elapsed = Math.min(currentYear - startYear, totalPeriod);
-            const percentage = (elapsed / totalPeriod) * 100;
             
-            bar.style.width = `${Math.min(percentage, 100)}%`;
+            // Si on est avant le début de la période, la progression est à 0%
+            if (currentYear <= startYear) {
+                bar.style.width = '0%';
+            } else {
+                const elapsed = Math.min(currentYear - startYear, totalPeriod);
+                const percentage = (elapsed / totalPeriod) * 100;
+                bar.style.width = `${Math.min(percentage, 100)}%`;
+            }
+            
             text.textContent = `${drinkFrom} - ${drinkTo}`;
             
             // Appliquer la classe de statut pour la couleur
