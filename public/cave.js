@@ -94,15 +94,12 @@ function renderCaveGrid() {
                 const periodText = bottle.drinkFrom && bottle.drinkTo ?
                     `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
 
-                // Pour les vins en attente (waiting), forcer un minimum de 2% pour que la barre soit visible
-                const displayPercent = maturityStatus === 'waiting' && maturityPercent === 0 ? 2 : maturityPercent;
-                
                 cell.innerHTML = `
                     <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
                     <div class="bottle-name">${escapeHtml(bottleName)}</div>
                     <div class="bottle-period"><span class="period-text">${periodText}</span></div>
                     <div class="bottle-maturity-bar ${maturityStatus || ''}">
-                        <div class="bottle-maturity-fill" style="width: ${displayPercent}%"></div>
+                        <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
                     </div>
                 `;
             }
@@ -161,16 +158,27 @@ function calculateMaturityPercentage(drinkFrom, drinkTo) {
     const totalPeriod = endYear - startYear;
     if (totalPeriod <= 0) return 100;
     
-    // Si on est avant le début de la période, la progression est à 0%
-    if (currentYear <= startYear) {
-        return 0;
+    // Calculer le statut pour savoir quelle couleur utiliser
+    const status = getMaturityStatus(drinkFrom, drinkTo);
+    
+    if (status === 'waiting') {
+        // Avant la période : progression de l'année courante vers drinkFrom
+        // Plus on est loin de drinkFrom, moins la barre bleue est remplie
+        // Plus on approche de drinkFrom, plus la barre bleue est remplie
+        const yearsUntilReady = startYear - currentYear;
+        const maxWaitingPeriod = Math.max(totalPeriod, 20); // Utiliser la période totale ou 20 ans max
+        // Calculer le pourcentage : 0% si on est très loin, 100% si on est à drinkFrom
+        const waitingProgress = 100 - Math.min((yearsUntilReady / maxWaitingPeriod) * 100, 100);
+        return Math.max(waitingProgress, 0);
+    } else if (status === 'ready') {
+        // Pendant la période : progression de drinkFrom à drinkTo
+        const elapsed = currentYear - startYear;
+        const percentage = (elapsed / totalPeriod) * 100;
+        return Math.min(Math.max(percentage, 0), 100);
+    } else {
+        // Après la période : 100%
+        return 100;
     }
-    
-    // Sinon, calculer le pourcentage dans la période
-    const elapsed = Math.min(currentYear - startYear, totalPeriod);
-    const percentage = (elapsed / totalPeriod) * 100;
-    
-    return Math.min(Math.max(percentage, 0), 100);
 }
 
 // Ouvrir la popup d'ajout de bouteille
@@ -232,16 +240,23 @@ function updateDrinkPeriodBar(drinkFrom, drinkTo) {
         
         if (!isNaN(startYear) && !isNaN(endYear)) {
             const totalPeriod = endYear - startYear;
+            let percentage = 0;
             
-            // Si on est avant le début de la période, la progression est à 0% mais on affiche 2% pour que la barre soit visible
-            if (currentYear <= startYear) {
-                bar.style.width = '2%';
+            if (maturityStatus === 'waiting') {
+                // Avant la période : progression de l'année courante vers drinkFrom
+                const yearsUntilReady = startYear - currentYear;
+                const maxWaitingPeriod = 20;
+                percentage = 100 - Math.min((yearsUntilReady / maxWaitingPeriod) * 100, 100);
+            } else if (maturityStatus === 'ready') {
+                // Pendant la période : progression de drinkFrom à drinkTo
+                const elapsed = currentYear - startYear;
+                percentage = (elapsed / totalPeriod) * 100;
             } else {
-                const elapsed = Math.min(currentYear - startYear, totalPeriod);
-                const percentage = (elapsed / totalPeriod) * 100;
-                bar.style.width = `${Math.min(percentage, 100)}%`;
+                // Après la période : 100%
+                percentage = 100;
             }
             
+            bar.style.width = `${Math.min(Math.max(percentage, 0), 100)}%`;
             text.textContent = `${drinkFrom} - ${drinkTo}`;
             
             // Appliquer la classe de statut pour la couleur
