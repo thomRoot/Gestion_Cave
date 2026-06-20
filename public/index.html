@@ -13,31 +13,31 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo-container">
-            <i class="fas fa-wine-bottle"></i>
-            <h1>Ma Cave à Vin</h1>
-        </div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Rechercher (ex: bœuf, 2015, Bordeaux)...">
-            <button id="searchButton" class="btn btn-primary"><i class="fas fa-search"></i></button>
-        </div>
-        <div class="header-buttons">
-            <button id="aiChatButton" class="btn btn-ai">
-                <i class="fas fa-comments"></i> Chat IA
-            </button>
-            <button id="addBottleButton" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Ajouter
-            </button>
-            <button id="resetDbButton" class="btn btn-danger">
-                <i class="fas fa-trash"></i> Vider la cave
-            </button>
-            <!-- Indicateur de statut Mistral AI -->
-            <div id="mistralStatus" class="mistral-status">
-                <i class="fas fa-check-circle"></i> Mistral AI : <span id="mistralStatusText">Chargement...</span>
+        <div class="header-main">
+            <div class="logo-container">
+                <i class="fas fa-wine-bottle"></i>
+                <h1>Ma Cave à Vin</h1>
             </div>
-            <!-- Indicateur de statut Google Vision -->
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Rechercher...">
+                <button id="searchButton" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </div>
+            <button id="aiChatButton" class="btn btn-ai" title="Chat IA">
+                <i class="fas fa-comments"></i>
+            </button>
+            <button id="addBottleButton" class="btn btn-primary" title="Ajouter">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <div class="header-status">
+            <button id="resetDbButton" class="btn btn-danger" title="Vider la cave">
+                <i class="fas fa-trash"></i>
+            </button>
+            <div id="mistralStatus" class="mistral-status">
+                <i class="fas fa-check-circle"></i>
+            </div>
             <div id="googleVisionStatus" class="mistral-status">
-                <i class="fas fa-image"></i> Google Vision : <span id="googleVisionStatusText">Chargement...</span>
+                <i class="fab fa-google"></i>
             </div>
         </div>
     </div>

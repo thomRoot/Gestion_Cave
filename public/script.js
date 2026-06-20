@@ -34,23 +34,16 @@ async function checkMistralStatus() {
         const statusElement = document.getElementById('mistralStatus');
         const statusTextElement = document.getElementById('mistralStatusText');
         
-        if (statusElement && statusTextElement) {
+        if (statusElement) {
             statusElement.classList.add('active');
+            const icon = statusElement.querySelector('i');
             
-            if (data.mistralAvailable && data.googleVisionAvailable) {
+            if (data.mistralAvailable) {
                 statusElement.className = 'mistral-status connected active';
-                statusTextElement.textContent = `Connecté (${data.model}) + OCR`;
-            } else if (data.mistralAvailable) {
-                statusElement.className = 'mistral-status connected active';
-                statusTextElement.textContent = `Connecté (${data.model})`;
+                if (icon) icon.className = 'fas fa-check-circle';
             } else {
                 statusElement.className = 'mistral-status disconnected active';
-                statusTextElement.textContent = 'Non configuré';
-                // Remplacer l'icône
-                const icon = statusElement.querySelector('i');
-                if (icon) {
-                    icon.className = 'fas fa-exclamation-circle';
-                }
+                if (icon) icon.className = 'fas fa-exclamation-circle';
             }
         }
     } catch (error) {
@@ -207,20 +200,16 @@ async function checkGoogleVisionStatus() {
         const statusElement = document.getElementById('googleVisionStatus');
         const statusTextElement = document.getElementById('googleVisionStatusText');
         
-        if (statusElement && statusTextElement) {
+        if (statusElement) {
             statusElement.classList.add('active');
+            const icon = statusElement.querySelector('i');
             
             if (data.googleVisionAvailable) {
                 statusElement.className = 'mistral-status connected active';
-                statusTextElement.textContent = 'Connecté';
+                if (icon) icon.className = 'fas fa-image';
             } else {
                 statusElement.className = 'mistral-status disconnected active';
-                statusTextElement.textContent = 'Non configuré';
-                // Remplacer l'icône
-                const icon = statusElement.querySelector('i');
-                if (icon) {
-                    icon.className = 'fas fa-exclamation-circle';
-                }
+                if (icon) icon.className = 'fas fa-exclamation-circle';
             }
         }
     } catch (error) {
