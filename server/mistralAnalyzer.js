@@ -294,9 +294,14 @@ async function analyzeBottleWithTwoStepProcess(imagePathOrBase64, isBase64 = fal
         }
         
         // Si on a des données manuelles, les utiliser
-        if (manualData && manualData.name) {
-            name = manualData.name;
-            year = manualData.year || null;
+        if (manualData) {
+            if (manualData.name) {
+                name = manualData.name;
+            }
+            // TOUJOURS utiliser l'année manuelle si fournie (même si name est vide)
+            if (manualData.year !== undefined && manualData.year !== null && manualData.year !== '') {
+                year = parseInt(manualData.year);
+            }
             if (analysisMethod) {
                 analysisMethod += " + Saisie manuelle";
             } else {

@@ -682,9 +682,6 @@ async function submitManualInput() {
     try {
         showLoading("Analyse avec Mistral en cours...");
         
-        // Fermer la popup
-        document.getElementById('manualInputPopup').classList.remove('active');
-        
         // Envoyer les données manuelles + l'image
         const formData = new FormData();
         
@@ -701,11 +698,9 @@ async function submitManualInput() {
             formData.append('image', blob, 'bottle.jpg');
         }
         
-        // Ajouter les données manuelles
+        // Ajouter les données manuelles (TOUJOURS envoyer l'année, même si vide)
         formData.append('name', name);
-        if (year) {
-            formData.append('year', year);
-        }
+        formData.append('year', year);
         
         // Envoyer à la route /analyze-two-step
         const response = await fetch('/api/bottles/analyze-two-step', {
@@ -717,13 +712,47 @@ async function submitManualInput() {
         hideLoading();
         
         if (result.success && result.bottleInfo) {
+            // Si on a encore besoin de saisie manuelle, rouvrir la popup
+            if (result.bottleInfo.requiresManualInput) {
+                currentPartialData = result.bottleInfo.partialData;
+                currentMissingFields = result.bottleInfo.missingFields || result.missingFields || { name: true, year: true };
+                
+                // Mettre à jour les champs avec les nouvelles valeurs
+                document.getElementById('manualName').value = result.bottleInfo.partialData?.name || name;
+                document.getElementById('manualYear').value = result.bottleInfo.partialData?.year || year;
+                
+                // Adapter la popup
+                updateManualInputPopup(currentMissingFields);
+                
+                // Ne pas fermer la popup, juste mettre à jour
+                return;
+            }
+            
+            // Sinon, remplir le formulaire
             fillBottleFormWithAIResult(result.bottleInfo);
+            
+            // Fermer la popup uniquement si tout est OK
+            document.getElementById('manualInputPopup').classList.remove('active');
+            
             alert("Analyse terminée ! Les champs ont été complétés automatiquement par Mistral.");
         } else {
             let errorMsg = "Je n'ai pas pu compléter les informations.";
             if (result.error) {
                 errorMsg += "\n" + result.error;
             }
+            
+            // Si requiresManualInput est true, rouvrir la popup
+            if (result.requiresManualInput) {
+                currentPartialData = result.partialData;
+                currentMissingFields = result.missingFields || { name: true, year: true };
+                
+                document.getElementById('manualName').value = result.partialData?.name || name;
+                document.getElementById('manualYear').value = result.partialData?.year || year;
+                
+                updateManualInputPopup(currentMissingFields);
+                return;
+            }
+            
             alert(errorMsg);
         }
     } catch (error) {
