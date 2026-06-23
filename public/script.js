@@ -1079,9 +1079,11 @@ function performCaveSearch(searchTerm) {
                 
                 return `
                     <div class="search-result-item" data-row="${bottle.row}" data-col="${bottle.col}">
-                        <img src="${photoUrl}" alt="${bottle.name || 'Bouteille'}" class="bottle-image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3173/3173612.png'">
-                        <div class="bottle-maturity-bar ${maturityStatus || ''}">
-                            <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
+                        <div class="bottle-image-container">
+                            <img src="${photoUrl}" alt="${bottle.name || 'Bouteille'}" class="bottle-image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3173/3173612.png'">
+                            <div class="bottle-maturity-bar ${maturityStatus || ''}">
+                                <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
+                            </div>
                         </div>
                         <div class="bottle-info">
                             <div class="bottle-name">${bottle.name || 'Bouteille inconnue'}</div>
