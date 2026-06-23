@@ -7,6 +7,7 @@ let conversationHistory = [];
 let currentAnalysisImage = null;
 let currentPartialData = null;
 let currentMissingFields = null;
+let searchTimeout = null;
 
 // Fonctions de gestion du chargement
 function showLoading(message = "Analyse en cours...") {
@@ -164,9 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchResultsPopup = document.getElementById('searchResultsPopup');
     const searchResultsContainer = document.getElementById('searchResultsContainer');
     
-    // Variable pour stocker le timeout de la recherche (pour éviter les requêtes trop fréquentes)
-    let searchTimeout = null;
-    
     if (searchButton && searchInput) {
         searchButton.addEventListener('click', performSearch);
         searchInput.addEventListener('keyup', (e) => {
@@ -183,6 +181,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Écouter aussi l'événement input pour une réactivité immédiate
         searchInput.addEventListener('input', () => {
             if (searchModeToggle && !searchModeToggle.checked) {
+                handleCaveSearchInput();
+            }
+        });
+        
+        // Écouter l'événement focus pour ouvrir la popup si il y a déjà du texte
+        searchInput.addEventListener('focus', () => {
+            if (searchModeToggle && !searchModeToggle.checked && searchInput.value.trim()) {
                 handleCaveSearchInput();
             }
         });
@@ -1004,10 +1009,14 @@ function handleCaveSearchInput() {
         return;
     }
     
-    // Attendre 200ms après la dernière touche pour éviter les requêtes trop fréquentes
+    // Attendre 100ms après la dernière touche pour éviter les requêtes trop fréquentes
     searchTimeout = setTimeout(() => {
         performCaveSearch(searchTerm);
-    }, 200);
+        // Ouvrir la popup si elle n'est pas déjà ouverte
+        if (searchResultsPopup && !searchResultsPopup.classList.contains('active')) {
+            searchResultsPopup.classList.add('active');
+        }
+    }, 100);
 }
 
 // Recherche locale dans la cave avec affichage des résultats dans une popup
@@ -1072,7 +1081,9 @@ function performCaveSearch(searchTerm) {
     }
     
     // Ajouter les écouteurs de clic sur les résultats
-    addResultItemClickListeners();
+    setTimeout(() => {
+        addResultItemClickListeners();
+    }, 50);
 }
 
 // Ajouter les écouteurs de clic sur les éléments de résultat
