@@ -139,6 +139,11 @@ async function handleImageFile(file) {
         if (photoUpload) photoUpload.value = '';
         
         console.log(`Image compressée : ${(byteSize / 1024 / 1024).toFixed(2)} Mo`);
+        
+        // Déclencher automatiquement l'analyse avec l'IA après le téléchargement de l'image
+        if (typeof analyzeWithAI === 'function') {
+            setTimeout(analyzeWithAI, 100); // Petit délai pour laisser le temps à l'interface de se mettre à jour
+        }
     } catch (error) {
         console.error("Erreur compression :", error);
         alert("Erreur lors du traitement de l'image. Veuillez réessayer.");

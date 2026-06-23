@@ -1048,3 +1048,4 @@ window.openAIChatPopup = openAIChatPopup;
 window.suggestPrompt = suggestPrompt;
 window.closeAIChatPopup = closeAIChatPopup;
 window.cave.getSelectedCell = () => selectedCell;
+window.analyzeWithAI = analyzeWithAI;

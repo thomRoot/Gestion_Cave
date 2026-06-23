@@ -194,6 +194,12 @@ function openAddBottlePopup() {
 
     // Démarrer la sélection de fichier (galerie uniquement)
     window.camera.startCamera();
+
+    // Ouvrir directement la boîte de dialogue pour sélectionner une image
+    const photoUpload = document.getElementById('photoUpload');
+    if (photoUpload) {
+        photoUpload.click();
+    }
 }
 
 // Ouvrir la popup de détails d'une bouteille
