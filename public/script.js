@@ -1123,15 +1123,22 @@ function addResultItemClickListeners() {
             const row = parseInt(item.dataset.row);
             const col = parseInt(item.dataset.col);
             
-            // Sélectionner la cellule correspondante dans la cave
-            const cell = document.querySelector(`.cave-cell[data-row="${row}"][data-col="${col}"]`);
-            if (cell) {
-                // Désélectionner toutes les cellules
-                document.querySelectorAll('.cave-cell').forEach(c => c.classList.remove('highlight'));
-                // Surligner la cellule sélectionnée
-                cell.classList.add('highlight');
-                // Ouvrir la popup de détails de la bouteille
-                window.cave.openBottleDetailsPopup(row, col);
+            // Récupérer la bouteille depuis la grille
+            const grid = window.cave.getCaveGrid();
+            const bottle = grid[row][col];
+            
+            if (bottle) {
+                // Sélectionner la cellule correspondante dans la cave
+                const cell = document.querySelector(`.cave-cell[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    // Désélectionner toutes les cellules
+                    document.querySelectorAll('.cave-cell').forEach(c => c.classList.remove('highlight'));
+                    // Surligner la cellule sélectionnée
+                    cell.classList.add('highlight');
+                }
+                
+                // Ouvrir la popup de détails de la bouteille avec l'objet bottle
+                window.cave.openBottleDetailsPopup(bottle);
             }
             
             // Fermer la popup de résultats
