@@ -1299,6 +1299,113 @@ function generateAIResponse(prompt) {
     return getRandomResponse('noResults');
 }
 
+// ==================== IMAGE ZOOM FUNCTIONALITY ====================
+
+// Ouvrir la popup de zoom sur une image
+function openImageZoom(imageSrc, bottleName = '') {
+    const zoomPopup = document.getElementById('imageZoomPopup');
+    const zoomImage = document.getElementById('zoomedImage');
+    const zoomName = document.getElementById('zoomedImageName');
+    
+    if (zoomPopup && zoomImage) {
+        zoomImage.src = imageSrc;
+        if (zoomName && bottleName) {
+            zoomName.textContent = bottleName;
+        } else if (zoomName) {
+            zoomName.textContent = '';
+        }
+        zoomPopup.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// Fermer la popup de zoom
+function closeImageZoom() {
+    const zoomPopup = document.getElementById('imageZoomPopup');
+    if (zoomPopup) {
+        zoomPopup.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// Initialiser les événements pour le zoom sur les images
+function initImageZoom() {
+    // Zoom sur l'image dans la popup de détails
+    const detailsPhoto = document.getElementById('detailsPhoto');
+    if (detailsPhoto) {
+        detailsPhoto.addEventListener('click', function() {
+            const bottleName = document.getElementById('detailsName')?.textContent || '';
+            openImageZoom(this.src, bottleName);
+        });
+        detailsPhoto.style.cursor = 'zoom-in';
+    }
+    
+    // Zoom sur l'image dans le formulaire d'ajout/modification
+    const bottlePhotoPreview = document.getElementById('bottlePhotoPreview');
+    if (bottlePhotoPreview) {
+        bottlePhotoPreview.addEventListener('click', function() {
+            const bottleName = document.getElementById('bottleName')?.value || 'Bouteille';
+            if (this.style.display !== 'none' && this.src) {
+                openImageZoom(this.src, bottleName);
+            }
+        });
+        bottlePhotoPreview.style.cursor = 'zoom-in';
+    }
+    
+    // Zoom sur les images dans les résultats de recherche
+    const searchResults = document.getElementById('searchResultsContainer');
+    if (searchResults) {
+        searchResults.addEventListener('click', function(e) {
+            const bottleImage = e.target.closest('.bottle-image');
+            if (bottleImage) {
+                const bottleItem = bottleImage.closest('.search-result-item');
+                const bottleName = bottleItem?.querySelector('.bottle-name')?.textContent || '';
+                openImageZoom(bottleImage.src, bottleName);
+            }
+        });
+    }
+    
+    // Fermer la popup de zoom
+    const zoomClose = document.getElementById('imageZoomClose');
+    const zoomPopup = document.getElementById('imageZoomPopup');
+    
+    if (zoomClose) {
+        zoomClose.addEventListener('click', closeImageZoom);
+    }
+    
+    if (zoomPopup) {
+        zoomPopup.addEventListener('click', function(e) {
+            // Fermer si on clique en dehors de l'image
+            if (e.target === zoomPopup) {
+                closeImageZoom();
+            }
+        });
+        
+        // Fermer avec la touche Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && zoomPopup.classList.contains('active')) {
+                closeImageZoom();
+            }
+        });
+    }
+    
+    // Zoom sur les images dans la grille de la cave
+    const caveContainer = document.getElementById('caveContainer');
+    if (caveContainer) {
+        caveContainer.addEventListener('click', function(e) {
+            const bottleThumbnail = e.target.closest('.bottle-thumbnail');
+            if (bottleThumbnail) {
+                const cell = bottleThumbnail.closest('.cave-cell');
+                const bottleName = cell?.querySelector('.bottle-name')?.textContent || '';
+                openImageZoom(bottleThumbnail.src, bottleName);
+            }
+        });
+    }
+}
+
+// Appeler l'initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', initImageZoom);
+
 // Exporter les fonctions pour les utiliser dans d'autres scripts
 window.openAddBottlePopup = window.cave.openAddBottlePopup;
 window.openBottleDetailsPopup = window.cave.openBottleDetailsPopup;
@@ -1308,3 +1415,5 @@ window.suggestPrompt = suggestPrompt;
 window.closeAIChatPopup = closeAIChatPopup;
 window.cave.getSelectedCell = () => selectedCell;
 window.analyzeWithAI = analyzeWithAI;
+window.openImageZoom = openImageZoom;
+window.closeImageZoom = closeImageZoom;
