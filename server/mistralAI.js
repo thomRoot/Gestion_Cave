@@ -123,6 +123,116 @@ async function askChatQuestion(question) {
 }
 
 /**
+ * Poser une question au chat IA avec accès à la cave de l'utilisateur
+ * @param {string} question - La question de l'utilisateur
+ * @param {Array} bottles - Les bouteilles de la cave de l'utilisateur
+ * @returns {Promise<string>} - La réponse du chat
+ */
+async function askChatQuestionWithCave(question, bottles) {
+    try {
+        // Créer un prompt enrichi avec les bouteilles de la cave
+        const caveContext = generateCaveContext(bottles);
+        const enhancedPrompt = `${caveContext}
+
+Question de l'utilisateur : ${question}`;
+        
+        const systemPrompt = `Tu es un expert en vin et le conseiller personnel de l'utilisateur. 
+Tu as accès à sa cave à vin personnelle. 
+Analyse sa question en tenant compte des bouteilles qu'il possède.
+Si l'utilisateur demande une recommandation, privilégie les vins de sa cave.
+Si l'utilisateur demande "quel vin" ou "recommande moi un vin", propose toujours un vin de sa cave si possible.
+Réponds en français de manière claire et professionnelle.`;
+        
+        const response = await callMistral(
+            enhancedPrompt,
+            systemPrompt
+        );
+        return response;
+    } catch (error) {
+        // Fallback vers une réponse locale si Mistral échoue
+        console.error('Mistral non disponible, utilisation du fallback:', error.message);
+        return generateFallbackResponseWithCave(question, bottles);
+    }
+}
+
+/**
+ * Générer un contexte à partir des bouteilles de la cave
+ * @param {Array} bottles - Les bouteilles de la cave
+ * @returns {string} - Le contexte formaté
+ */
+function generateCaveContext(bottles) {
+    if (!bottles || bottles.length === 0) {
+        return "L'utilisateur n'a pas encore de bouteilles dans sa cave.";
+    }
+    
+    const caveSummary = bottles.map((bottle, index) => {
+        const name = bottle.name || "Inconnu";
+        const year = bottle.year || "N/A";
+        const region = bottle.region || "N/A";
+        const grapes = bottle.grapes || "N/A";
+        const foodPairing = bottle.foodPairing || "N/A";
+        const temperature = bottle.temperature || "N/A";
+        const drinkFrom = bottle.drinkFrom || "N/A";
+        const drinkTo = bottle.drinkTo || "N/A";
+        
+        return `Bouteille ${index + 1}: ${name} (${year}) - Région: ${region}, Cépage: ${grapes}, Accords: ${foodPairing}, Température: ${temperature}, À boire: ${drinkFrom}-${drinkTo}`;
+    }).join('\n');
+    
+    return `Voici les bouteilles dans la cave de l'utilisateur:\n${caveSummary}\n\n`;
+}
+
+/**
+ * Générer une réponse de fallback avec accès à la cave
+ * @param {string} question - La question
+ * @param {Array} bottles - Les bouteilles de la cave
+ * @returns {string} - Réponse basique
+ */
+function generateFallbackResponseWithCave(question, bottles) {
+    const questionLower = question.toLowerCase();
+    
+    // Si l'utilisateur demande une recommandation
+    if (questionLower.includes('quel vin') || questionLower.includes('recommande') || 
+        questionLower.includes('conseil') || questionLower.includes('suggère')) {
+        
+        if (!bottles || bottles.length === 0) {
+            return "Vous n'avez pas encore de bouteilles dans votre cave. Ajoutez-en pour que je puisse vous conseiller !";
+        }
+        
+        // Filtrer les bouteilles prêtes à boire
+        const currentYear = new Date().getFullYear();
+        const readyBottles = bottles.filter(bottle => {
+            if (!bottle.drinkFrom && !bottle.drinkTo) return true;
+            const drinkFrom = bottle.drinkFrom || currentYear;
+            const drinkTo = bottle.drinkTo || currentYear + 10;
+            return currentYear >= drinkFrom && currentYear <= drinkTo;
+        });
+        
+        if (readyBottles.length > 0) {
+            // Choisir une bouteille aléatoire parmi celles prêtes
+            const randomBottle = readyBottles[Math.floor(Math.random() * readyBottles.length)];
+            let response = `Je vous recommande : **${randomBottle.name}** (${randomBottle.year})`;
+            if (randomBottle.region) response += ` de ${randomBottle.region}`;
+            if (randomBottle.grapes) response += `, cépage ${randomBottle.grapes}`;
+            if (randomBottle.foodPairing) response += `.\nParfait avec : ${randomBottle.foodPairing}`;
+            if (randomBottle.temperature) response += `.\nÀ servir à : ${randomBottle.temperature}`;
+            return response;
+        }
+        
+        // Si aucune bouteille n'est prête, proposer la première disponible
+        if (bottles.length > 0) {
+            const firstBottle = bottles[0];
+            let response = `Je vous suggère : **${firstBottle.name}** (${firstBottle.year})`;
+            if (firstBottle.region) response += ` de ${firstBottle.region}`;
+            if (firstBottle.drinkFrom) response += `.\nÀ boire à partir de : ${firstBottle.drinkFrom}`;
+            return response;
+        }
+    }
+    
+    // Sinon, utiliser la réponse standard
+    return generateFallbackResponse(question);
+}
+
+/**
  * Analyser du texte d'étiquette de vin avec Mistral
  * @param {string} text - Le texte à analyser
  * @returns {Promise<Object>} - Les informations extraites (name, year, grapes, region, producer)
@@ -306,11 +416,14 @@ Si tu ne connais pas ce vin, retourne null.`;
 module.exports = {
     callMistral,
     askChatQuestion,
+    askChatQuestionWithCave,
     analyzeWineLabel,
     extractBottleInfoFromText,
     getWinePairingAdvice,
     getWineInfo,
     recommendWineForOccasion,
     searchWineByName,
-    generateFallbackResponse
+    generateFallbackResponse,
+    generateCaveContext,
+    generateFallbackResponseWithCave
 };

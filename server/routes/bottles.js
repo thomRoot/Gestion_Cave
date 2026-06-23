@@ -181,14 +181,26 @@ router.post('/reset-db', (req, res) => {
 
 router.post('/chat', async (req, res) => {
     try {
-        const { question } = req.body;
+        const { question, bottles } = req.body;
         if (!question) return res.status(400).json({ success: false, error: "Aucune question fournie" });
-        const response = await mistralAI.askChatQuestion(question);
+        const response = await mistralAI.askChatQuestionWithCave(question, bottles);
         res.json({ success: true, response: response, model: mistralConfig.model });
     } catch (error) {
         console.error("Erreur chat IA :", error);
         res.status(500).json({ success: false, error: "Erreur serveur lors de la requête IA" });
     }
+});
+
+// Route pour obtenir les bouteilles de la cave (pour le chatbot)
+router.get('/my-bottles', (req, res) => {
+    database.getAllBottles((err, bottles) => {
+        if (err) {
+            console.error("Erreur lors de la récupération des bouteilles pour le chatbot :", err);
+            res.status(500).json({ error: "Erreur lors de la récupération des bouteilles" });
+        } else {
+            res.json({ success: true, bottles });
+        }
+    });
 });
 
 router.post('/wine-pairing', async (req, res) => {

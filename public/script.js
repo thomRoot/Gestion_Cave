@@ -319,11 +319,14 @@ function openAIChatPopup() {
                 addChatMessage(
                     `Bonjour ! 🍷 Je suis votre assistant IA spécialisé en vin. Vous pouvez me demander <strong>n'importe quoi</strong> :
                     <br><br>
-                    - "Quel vin avec du bœuf bourguignon ?"
+                    - "Quel vin avec du bœuf bourguignon ?" <strong>(je vous conseillerai un vin de votre cave !)</strong>
                     - "À quelle température servir un Bordeaux 2018 ?"
                     - "Quels sont les meilleurs cépages pour vieillir 10 ans ?"
                     - "Peux-tu m'expliquer la différence entre AOC et IGP ?"
                     - "Quel vin offrir pour un dîner romantique ?"
+                    - "Recommande-moi un vin pour ce soir"
+                    <br><br>
+                    <strong>✨ NOUVEAU : Je connais tous les vins que vous avez enregistrés dans votre cave !</strong> 🎉
                     <br><br>
                     Je suis là pour vous aider !`,
                     'bot',
@@ -397,12 +400,25 @@ async function sendAIChatMessage() {
     updateChatStatus('Réflexion en cours...');
     
     try {
-        // Appeler l'API Mistral via le serveur
+        // Récupérer les bouteilles de la cave pour les envoyer au chatbot
+        let caveBottles = [];
+        try {
+            const bottlesResponse = await fetch('/api/bottles/my-bottles');
+            const bottlesData = await bottlesResponse.json();
+            if (bottlesData.success && bottlesData.bottles) {
+                caveBottles = bottlesData.bottles;
+            }
+        } catch (error) {
+            console.error("Erreur lors de la récupération des bouteilles :", error);
+        }
+        
+        // Appeler l'API Mistral via le serveur avec les bouteilles de la cave
         const response = await fetch('/api/bottles/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 question: message,
+                bottles: caveBottles,
                 history: conversationHistory
             })
         });
