@@ -260,7 +260,7 @@ Gestion_Cave/
   - 🟢 **Verte** : Vin prêt à boire - progression linéaire pendant la période de consommation
   - 🔴 **Rouge** : Vin dépassé - 100% après la période de consommation
 
-### v2.5 (en développement) - **Barre de recherche améliorée**
+### v2.5 (24 juin 2026) - **Version actuelle**
 **Nouveautés :**
 - ✅ Résultats de recherche superposés sous la barre de recherche (plus de popup plein écran)
 - ✅ L'utilisateur peut continuer à taper tout en voyant les résultats
@@ -273,7 +273,7 @@ Gestion_Cave/
 - Visualisation rapide de l'état de maturation des vins
 - Interface plus intuitive
 
-### v2.4 (23 juin 2026) - **Version actuelle**
+### v2.4 (23 juin 2026) - **Version précédente**
 **Dernière version stable avec :**
 - Toutes les fonctionnalités de la v1.1
 - Chatbot IA connecté à votre cave
@@ -320,9 +320,9 @@ Gestion_Cave/
 
 | Branche | Version | État | Description |
 |---------|---------|------|-------------|
-| **main** | v2.4 | ✅ Stable | Version principale avec chatbot IA connecté à la cave |
+| **main** | v2.5 | ✅ Stable | Version principale avec barre de recherche améliorée |
 | **V2.4_chatbot_plus** | v2.4 | ✅ Stable | Chatbot IA avec accès à la base de données de la cave |
-| **V2.5_barre_recherche** | v2.5 | 🟡 En développement | Barre de recherche avec résultats superposés + barre de maturation |
+| **V2.5_barre_recherche** | v2.5 | ✅ Intégré | Fonctionnalités intégrées dans main |
 | **vibe/progress-bar-maturity-50bbd0** | v1.2 | 🟡 En développement | Barre de progression de maturité colorée |
 | **1.1_interface_OK_IA_NOK** | v1.1 | ⚠️ Sauvegarde | Interface OK, IA à vérifier (problème de cache possible) |
 | **vibe/fix-bugs-design-28e8e5** | v1.0 | ❌ Obsolète | Ancienne version avant les corrections d'interface |
