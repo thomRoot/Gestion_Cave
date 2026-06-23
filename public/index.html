@@ -18,15 +18,25 @@
                 <i class="fas fa-wine-bottle"></i>
                 <h1>Ma Cave à Vin</h1>
             </div>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Rechercher...">
-                <button id="searchButton" class="btn btn-ai"><i class="fas fa-search"></i></button>
-                <div class="search-switch">
-                    <label class="switch">
-                        <input type="checkbox" id="searchModeToggle" checked>
-                        <span class="slider round"></span>
-                    </label>
-                    <span id="searchModeLabel">Cave</span>
+            <div class="search-bar-container">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Rechercher...">
+                    <button id="searchButton" class="btn btn-ai"><i class="fas fa-search"></i></button>
+                    <div class="search-switch">
+                        <label class="switch">
+                            <input type="checkbox" id="searchModeToggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <span id="searchModeLabel">Cave</span>
+                    </div>
+                </div>
+                <!-- Popup pour les résultats de recherche dans la cave -->
+                <div class="search-results-popup" id="searchResultsPopup">
+                    <span class="close">&times;</span>
+                    <h2><i class="fas fa-search"></i> Résultats de recherche</h2>
+                    <div class="search-results-container" id="searchResultsContainer">
+                        <!-- Les résultats seront ajoutés dynamiquement -->
+                    </div>
                 </div>
             </div>
             <button id="aiChatButton" class="btn btn-ai" title="Chat IA">
@@ -48,19 +58,6 @@
 
     <div class="cave-container" id="caveContainer">
         <!-- La grille sera générée dynamiquement ici -->
-    </div>
-
-
-
-    <!-- Popup pour les résultats de recherche dans la cave -->
-    <div class="popup" id="searchResultsPopup">
-        <div class="popup-content search-results-popup">
-            <span class="close">&times;</span>
-            <h2><i class="fas fa-search"></i> Résultats de recherche</h2>
-            <div class="search-results-container" id="searchResultsContainer">
-                <!-- Les résultats seront ajoutés dynamiquement -->
-            </div>
-        </div>
     </div>
 
     <!-- Popup pour le Chat IA - Version Complète -->

@@ -191,6 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleCaveSearchInput();
             }
         });
+        
+        // Empêcher la fermeture de la popup de résultats quand on clique sur la barre de recherche
+        searchInput.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
     }
 
     // Gestion du switch de mode de recherche
@@ -229,6 +234,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 searchResultsPopup.classList.remove('active');
             });
         }
+        
+        // Empêcher la propagation des clics sur la popup de résultats
+        searchResultsPopup.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
     }
 
     // Gestion des boutons de la popup de détails
@@ -269,6 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+        
+        // Ne pas fermer la popup de résultats de recherche si on clique en dehors
+        // car elle est maintenant un dropdown sous la barre de recherche
     });
 
     // Gestion du bouton "Ajouter une bouteille" (header)
