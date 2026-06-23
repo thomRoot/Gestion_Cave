@@ -523,7 +523,6 @@ input:checked + .slider:before {
     margin: 0 auto 20px;
     width: 100%;
     max-width: 500px;
-    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -579,7 +578,6 @@ input:checked + .slider:before {
     justify-content: center;
     max-width: 500px;
     margin: 0 auto;
-    overflow-x: hidden;
 }
 
 .form-row .form-group {
@@ -591,16 +589,15 @@ input:checked + .slider:before {
 
 .form-actions {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     justify-content: center;
     margin: 24px auto 0;
     flex-wrap: wrap;
-    max-width: 400px;
-    overflow-x: hidden;
+    max-width: 500px;
 }
 
 .form-actions .btn {
-    min-width: 140px;
+    min-width: 150px;
     flex: 1;
     text-align: center;
 }
