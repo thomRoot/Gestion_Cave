@@ -68,11 +68,19 @@ body {
     letter-spacing: 0.5px;
 }
 
+.search-bar-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-width: 450px;
+    width: 100%;
+}
+
 .search-bar {
     display: flex;
     gap: 8px;
-    max-width: 400px;
     width: 100%;
+    align-items: center;
 }
 
 .search-bar input {
@@ -107,6 +115,72 @@ body {
 
 .search-bar button:hover {
     background: var(--primary-light);
+}
+
+/* Switch pour le mode de recherche */
+.search-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    transition: var(--transition);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+input:checked + .slider {
+    background-color: var(--accent);
+    border-color: var(--accent-light);
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+    background-color: var(--bg);
+}
+
+#searchModeLabel {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+#searchModeLabel.ai-mode {
+    color: var(--accent);
 }
 
 .header-actions {
@@ -653,6 +727,207 @@ body {
     flex: 1;
 }
 
+/* ==================== POPUP DE RECHERCHE ==================== */
+.search-results-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow: hidden;
+    z-index: 1001;
+    margin-top: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: none;
+}
+
+.search-results-popup.active {
+    display: block;
+}
+
+.search-results-popup .close {
+    position: absolute;
+    top: 16px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 6px;
+    line-height: 1;
+    transition: var(--transition);
+}
+
+.search-results-popup .close:hover {
+    color: var(--text);
+}
+
+.search-results-popup h2 {
+    padding: 16px 20px 16px 40px;
+    font-size: 1.2rem;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.search-results-container {
+    max-height: calc(80vh - 80px);
+    overflow-y: auto;
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-results-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-results-container::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-radius: 3px;
+}
+
+.search-results-container::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.search-results-container::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+.search-result-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.search-result-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    transform: translateX(4px);
+}
+
+.search-result-item .bottle-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+
+.search-result-item .bottle-image {
+    width: 60px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: var(--bg-card);
+}
+
+.search-result-item .bottle-maturity-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+    border: 1px solid var(--border);
+}
+
+.search-result-item .bottle-maturity-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Couleurs selon le statut pour les résultats de recherche */
+.search-result-item .bottle-maturity-bar.waiting .bottle-maturity-fill {
+    background: #2196F3; /* Bleu - trop jeune */
+}
+
+.search-result-item .bottle-maturity-bar.ready .bottle-maturity-fill {
+    background: #4CAF50; /* Vert - prêt à boire */
+}
+
+.search-result-item .bottle-maturity-bar.past .bottle-maturity-fill {
+    background: #F44336; /* Rouge - dépassé */
+}
+
+.search-result-item .bottle-maturity-bar:not(.waiting):not(.ready):not(.past) .bottle-maturity-fill {
+    background: var(--text-muted);
+}
+
+.search-result-item .bottle-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-item .bottle-name {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-size: 1rem;
+}
+
+.search-result-item .bottle-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.search-result-item .bottle-detail {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.search-result-item .bottle-detail i {
+    color: var(--accent);
+    font-size: 0.8rem;
+}
+
+.search-result-item .bottle-position {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: right;
+    display: flex;
+    align-items: flex-end;
+}
+
+.search-result-item .bottle-period {
+    margin-top: 6px;
+    font-size: 0.75rem;
+}
+
+.search-result-item .bottle-period .period-text {
+    color: var(--text-muted);
+}
+
+/* Message "Aucun résultat" */
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.no-results i {
+    font-size: 2rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
 /* ==================== CHAT IA ==================== */
 .ai-chat-popup {
     max-width: 500px;
@@ -874,6 +1149,74 @@ body {
         order: 2;
         width: 100%;
         max-width: 300px;
+    }
+
+    .search-switch {
+        margin-left: 4px;
+    }
+
+    #searchModeLabel {
+        font-size: 0.7rem;
+    }
+
+    /* Popup de résultats en mobile */
+    .search-results-popup {
+        max-width: 95%;
+        max-height: 85vh;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 8px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+
+    .search-result-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .search-result-item .bottle-image-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .search-result-item .bottle-image {
+        width: 80px;
+        height: 100px;
+    }
+
+    .search-result-item .bottle-maturity-bar {
+        width: 80px;
+        height: 6px;
+        background: var(--bg);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 4px;
+        border: 1px solid var(--border);
+    }
+
+    .search-result-item .bottle-info {
+        width: 100%;
+    }
+
+    .search-result-item .bottle-details {
+        justify-content: center;
+    }
+
+    .search-result-item .bottle-position {
+        justify-content: center;
+        margin-top: 8px;
+    }
+
+    .search-result-item .bottle-period {
+        justify-content: center;
+        margin-top: 6px;
     }
     
     .header-actions {
