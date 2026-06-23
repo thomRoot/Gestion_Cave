@@ -159,6 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gestion de la recherche
     const searchButton = document.getElementById('searchButton');
     const searchInput = document.getElementById('searchInput');
+    const searchModeToggle = document.getElementById('searchModeToggle');
+    const searchModeLabel = document.getElementById('searchModeLabel');
+    
     if (searchButton && searchInput) {
         searchButton.addEventListener('click', performSearch);
         searchInput.addEventListener('keyup', (e) => {
@@ -166,6 +169,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 performSearch();
             }
         });
+    }
+
+    // Gestion du switch de mode de recherche
+    if (searchModeToggle && searchModeLabel) {
+        // Mettre à jour l'affichage du label en fonction du mode
+        function updateSearchModeLabel() {
+            if (searchModeToggle.checked) {
+                searchModeLabel.textContent = 'IA';
+                searchModeLabel.classList.add('ai-mode');
+            } else {
+                searchModeLabel.textContent = 'Cave';
+                searchModeLabel.classList.remove('ai-mode');
+            }
+        }
+
+        // Écouter les changements du switch
+        searchModeToggle.addEventListener('change', updateSearchModeLabel);
+
+        // Initialiser le label
+        updateSearchModeLabel();
     }
 
     // Gestion des boutons de la popup de détails
@@ -900,38 +923,79 @@ function deleteBottle(row, col) {
 }
 
 // Effectuer une recherche
-function performSearch() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+async function performSearch() {
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    const searchModeToggle = document.getElementById('searchModeToggle');
+    const isAIMode = searchModeToggle ? searchModeToggle.checked : false;
+
     if (!searchTerm) {
+        // Si la recherche est vide, désélectionner tout
         document.querySelectorAll('.cave-cell').forEach(cell => {
             cell.classList.remove('highlight');
         });
         return;
     }
 
+    if (isAIMode) {
+        // Mode IA : envoyer la requête au chat IA
+        await performAISearch(searchTerm);
+    } else {
+        // Mode Cave : recherche locale dans la base de données
+        performLocalSearch(searchTerm);
+    }
+}
+
+// Recherche locale dans la cave
+function performLocalSearch(searchTerm) {
     const grid = window.cave.getCaveGrid();
     const bottles = grid.flat().filter(bottle => bottle !== null);
 
     const matchingBottles = bottles.filter(bottle => {
+        const term = searchTerm.toLowerCase();
         return (
-            (bottle.name && bottle.name.toLowerCase().includes(searchTerm)) ||
-            (bottle.year && bottle.year.toString().includes(searchTerm)) ||
-            (bottle.grapes && bottle.grapes.toLowerCase().includes(searchTerm)) ||
-            (bottle.region && bottle.region.toLowerCase().includes(searchTerm)) ||
-            (bottle.foodPairing && bottle.foodPairing.toLowerCase().includes(searchTerm))
+            (bottle.name && bottle.name.toLowerCase().includes(term)) ||
+            (bottle.year && bottle.year.toString().includes(term)) ||
+            (bottle.grapes && bottle.grapes.toLowerCase().includes(term)) ||
+            (bottle.region && bottle.region.toLowerCase().includes(term)) ||
+            (bottle.foodPairing && bottle.foodPairing.toLowerCase().includes(term))
         );
     });
 
+    // Désélectionner toutes les cellules
     document.querySelectorAll('.cave-cell').forEach(cell => {
         cell.classList.remove('highlight');
     });
 
+    // Surligner les cellules correspondantes
     matchingBottles.forEach(bottle => {
         const cell = document.querySelector(`.cave-cell[data-row="${bottle.row}"][data-col="${bottle.col}"]`);
         if (cell) {
             cell.classList.add('highlight');
         }
     });
+}
+
+// Recherche IA (comme dans le chat IA)
+async function performAISearch(query) {
+    const aiMessages = document.getElementById('aiMessages');
+    const aiChatPopup = document.getElementById('aiChatPopup');
+    
+    // Ouvrir la popup de chat IA si elle n'est pas déjà ouverte
+    if (aiChatPopup && !aiChatPopup.classList.contains('active')) {
+        openAIChatPopup();
+    }
+
+    // Ajouter la question de l'utilisateur dans le chat
+    if (aiMessages) {
+        addChatMessage(query, 'user', false);
+    }
+
+    // Envoyer la requête au chat IA
+    const input = document.getElementById('aiChatInput');
+    if (input) {
+        input.value = query;
+        await sendAIChatMessage();
+    }
 }
 
 // Réinitialiser la base de données
