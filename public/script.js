@@ -161,12 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     const searchModeToggle = document.getElementById('searchModeToggle');
     const searchModeLabel = document.getElementById('searchModeLabel');
+    const searchResultsPopup = document.getElementById('searchResultsPopup');
+    const searchResultsContainer = document.getElementById('searchResultsContainer');
+    
+    // Variable pour stocker le timeout de la recherche (pour éviter les requêtes trop fréquentes)
+    let searchTimeout = null;
     
     if (searchButton && searchInput) {
         searchButton.addEventListener('click', performSearch);
         searchInput.addEventListener('keyup', (e) => {
             if (e.key === 'Enter') {
                 performSearch();
+            } else {
+                // En mode Cave, mettre à jour les résultats à chaque touche
+                if (searchModeToggle && !searchModeToggle.checked) {
+                    handleCaveSearchInput();
+                }
+            }
+        });
+        
+        // Écouter aussi l'événement input pour une réactivité immédiate
+        searchInput.addEventListener('input', () => {
+            if (searchModeToggle && !searchModeToggle.checked) {
+                handleCaveSearchInput();
             }
         });
     }
@@ -178,9 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (searchModeToggle.checked) {
                 searchModeLabel.textContent = 'IA';
                 searchModeLabel.classList.add('ai-mode');
+                // Fermer la popup de résultats de recherche si elle est ouverte
+                if (searchResultsPopup) {
+                    searchResultsPopup.classList.remove('active');
+                }
             } else {
                 searchModeLabel.textContent = 'Cave';
                 searchModeLabel.classList.remove('ai-mode');
+                // Si on bascule en mode Cave et qu'il y a du texte, ouvrir la popup
+                if (searchInput && searchInput.value.trim()) {
+                    handleCaveSearchInput();
+                }
             }
         }
 
@@ -189,6 +214,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initialiser le label
         updateSearchModeLabel();
+    }
+
+    // Gestion de la fermeture de la popup de résultats
+    if (searchResultsPopup) {
+        const searchCloseButton = searchResultsPopup.querySelector('.close');
+        if (searchCloseButton) {
+            searchCloseButton.addEventListener('click', () => {
+                searchResultsPopup.classList.remove('active');
+            });
+        }
     }
 
     // Gestion des boutons de la popup de détails
@@ -933,6 +968,12 @@ async function performSearch() {
         document.querySelectorAll('.cave-cell').forEach(cell => {
             cell.classList.remove('highlight');
         });
+        
+        // Fermer la popup de résultats si elle est ouverte
+        const searchResultsPopup = document.getElementById('searchResultsPopup');
+        if (searchResultsPopup) {
+            searchResultsPopup.classList.remove('active');
+        }
         return;
     }
 
@@ -940,38 +981,131 @@ async function performSearch() {
         // Mode IA : envoyer la requête au chat IA
         await performAISearch(searchTerm);
     } else {
-        // Mode Cave : recherche locale dans la base de données
-        performLocalSearch(searchTerm);
+        // Mode Cave : ouvrir la popup avec les résultats
+        handleCaveSearchInput();
     }
 }
 
-// Recherche locale dans la cave
-function performLocalSearch(searchTerm) {
+// Gérer la saisie dans la barre de recherche en mode Cave
+function handleCaveSearchInput() {
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    const searchResultsPopup = document.getElementById('searchResultsPopup');
+    
+    // Annuler le timeout précédent si il existe
+    if (searchTimeout) {
+        clearTimeout(searchTimeout);
+    }
+    
+    // Si le terme de recherche est vide, fermer la popup
+    if (!searchTerm) {
+        if (searchResultsPopup) {
+            searchResultsPopup.classList.remove('active');
+        }
+        return;
+    }
+    
+    // Attendre 200ms après la dernière touche pour éviter les requêtes trop fréquentes
+    searchTimeout = setTimeout(() => {
+        performCaveSearch(searchTerm);
+    }, 200);
+}
+
+// Recherche locale dans la cave avec affichage des résultats dans une popup
+function performCaveSearch(searchTerm) {
     const grid = window.cave.getCaveGrid();
     const bottles = grid.flat().filter(bottle => bottle !== null);
+    const searchResultsContainer = document.getElementById('searchResultsContainer');
+    const searchResultsPopup = document.getElementById('searchResultsPopup');
 
+    const term = searchTerm.toLowerCase();
+    
     const matchingBottles = bottles.filter(bottle => {
-        const term = searchTerm.toLowerCase();
         return (
             (bottle.name && bottle.name.toLowerCase().includes(term)) ||
             (bottle.year && bottle.year.toString().includes(term)) ||
             (bottle.grapes && bottle.grapes.toLowerCase().includes(term)) ||
             (bottle.region && bottle.region.toLowerCase().includes(term)) ||
-            (bottle.foodPairing && bottle.foodPairing.toLowerCase().includes(term))
+            (bottle.foodPairing && bottle.foodPairing.toLowerCase().includes(term)) ||
+            (bottle.temperature && bottle.temperature.toLowerCase().includes(term))
         );
     });
 
-    // Désélectionner toutes les cellules
-    document.querySelectorAll('.cave-cell').forEach(cell => {
-        cell.classList.remove('highlight');
-    });
-
-    // Surligner les cellules correspondantes
-    matchingBottles.forEach(bottle => {
-        const cell = document.querySelector(`.cave-cell[data-row="${bottle.row}"][data-col="${bottle.col}"]`);
-        if (cell) {
-            cell.classList.add('highlight');
+    // Mettre à jour la popup de résultats
+    if (searchResultsContainer) {
+        if (matchingBottles.length === 0) {
+            searchResultsContainer.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <p>Aucune bouteille trouvée pour "${searchTerm}"</p>
+                </div>
+            `;
+        } else {
+            searchResultsContainer.innerHTML = matchingBottles.map(bottle => {
+                const photoUrl = bottle.photo ? 
+                    (bottle.photo.startsWith('http') ? bottle.photo : `/uploads/${bottle.photo}`) :
+                    'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
+                
+                return `
+                    <div class="search-result-item" data-row="${bottle.row}" data-col="${bottle.col}">
+                        <img src="${photoUrl}" alt="${bottle.name || 'Bouteille'}" class="bottle-image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3173/3173612.png'">
+                        <div class="bottle-info">
+                            <div class="bottle-name">${bottle.name || 'Bouteille inconnue'}</div>
+                            <div class="bottle-details">
+                                ${bottle.year ? `<span class="bottle-detail"><i class="fas fa-calendar"></i>${bottle.year}</span>` : ''}
+                                ${bottle.grapes ? `<span class="bottle-detail"><i class="fas fa-leaf"></i>${bottle.grapes}</span>` : ''}
+                                ${bottle.region ? `<span class="bottle-detail"><i class="fas fa-map-marker-alt"></i>${bottle.region}</span>` : ''}
+                                ${bottle.temperature ? `<span class="bottle-detail"><i class="fas fa-thermometer-half"></i>${bottle.temperature}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="bottle-position">
+                            <i class="fas fa-th"></i> ${bottle.row + 1},${bottle.col + 1}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
+    }
+
+    // Ouvrir la popup si elle n'est pas déjà ouverte
+    if (searchResultsPopup && !searchResultsPopup.classList.contains('active')) {
+        searchResultsPopup.classList.add('active');
+    }
+    
+    // Ajouter les écouteurs de clic sur les résultats
+    addResultItemClickListeners();
+}
+
+// Ajouter les écouteurs de clic sur les éléments de résultat
+function addResultItemClickListeners() {
+    const resultItems = document.querySelectorAll('.search-result-item');
+    resultItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const row = parseInt(item.dataset.row);
+            const col = parseInt(item.dataset.col);
+            
+            // Sélectionner la cellule correspondante dans la cave
+            const cell = document.querySelector(`.cave-cell[data-row="${row}"][data-col="${col}"]`);
+            if (cell) {
+                // Désélectionner toutes les cellules
+                document.querySelectorAll('.cave-cell').forEach(c => c.classList.remove('highlight'));
+                // Surligner la cellule sélectionnée
+                cell.classList.add('highlight');
+                // Ouvrir la popup de détails de la bouteille
+                window.cave.openBottleDetailsPopup(row, col);
+            }
+            
+            // Fermer la popup de résultats
+            const searchResultsPopup = document.getElementById('searchResultsPopup');
+            if (searchResultsPopup) {
+                searchResultsPopup.classList.remove('active');
+            }
+            
+            // Vider la barre de recherche
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+        });
     });
 }
 
