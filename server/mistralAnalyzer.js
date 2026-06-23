@@ -74,20 +74,25 @@ function completeBottleInfo(bottleInfo) {
  * @param {number|null} year - Année de la bouteille
  * @returns {Promise<Object|null>} - Résultat de l'analyse
  */
-async function analyzeBottleWithMistral(name, year) {
+async function analyzeBottleWithMistral(name, year, correctName = true) {
     if (!name || !name.trim()) {
         return null;
     }
 
-    // NOUVEAU PROMPT : On fournit le nom et l'année, Mistral complète les autres champs
+    // NOUVEAU PROMPT : On fournit le nom et l'année, Mistral complète les autres champs et corrige le nom
+    const correctionInstruction = correctName ? "**Corrige le nom de la bouteille** si nécessaire (supprime les caractères bizarres, les erreurs OCR, ou les formats incorrects)." : "";
+    const nameFieldDescription = correctName ? "Nom corrigé et propre (ex: Château Margaux 2015)" : "Nom du vin ou du domaine (ex: Château Margaux)";
+    const nameRule = correctName ? "- **Corrige toujours le nom** : supprime les caractères spéciaux indésirables, les erreurs de reconnaissance, ou les formats incorrects." : "";
+    
     const prompt = `Tu es un expert en vin. J'ai une bouteille avec les informations suivantes :
     - Nom : "${name}"
     ${year ? `- Année : ${year}` : ''}
 
+    ${correctionInstruction}
     Complète TOUTES les informations manquantes pour cette bouteille avec tes connaissances sur les vins.
     Retourne UNIQUEMENT un objet JSON valide avec TOUS ces champs (même si null) :
     {
-        "name": "${name}",
+        "name": "${nameFieldDescription}",
         "year": ${year || 'null'},
         "grapes": "Cépage(s) principal(aux) (ex: Cabernet Sauvignon, Merlot)",
         "region": "Région ou appellation (ex: Bordeaux, Bourgogne)",
@@ -101,6 +106,7 @@ async function analyzeBottleWithMistral(name, year) {
         "temperature": "Température de service (ex: 16-18°C)"
     }
     Règles strictes :
+    ${nameRule}
     - Si une information n'est pas connue, utilise null.
     - Les champs "year", "alcohol", "drinkFrom", "drinkTo" doivent être des nombres ou null.
     - Pour drinkFrom et drinkTo : estime la période optimale de consommation en fonction de l'année et du type de vin.
@@ -154,18 +160,23 @@ async function analyzeBottleWithMistral(name, year) {
  * @param {string} text - Texte à analyser
  * @returns {Promise<Object|null>} - Résultat de l'analyse
  */
-async function analyzeLabelTextWithMistral(text) {
+async function analyzeLabelTextWithMistral(text, correctName = true) {
     if (!text || !text.trim()) {
         return null;
     }
 
-    // Ancien prompt pour compatibilité
+    // Ancien prompt pour compatibilité - avec correction du nom
+    const correctionInstruction = correctName ? "**Corrige le nom de la bouteille** si nécessaire (supprime les caractères bizarres, les erreurs OCR, ou les formats incorrects)." : "";
+    const nameFieldDescription = correctName ? "Nom du vin ou du domaine corrigé (ex: Château Margaux)" : "Nom du vin ou du domaine (ex: Château Margaux)";
+    const nameRule = correctName ? "- **Corrige toujours le nom** : supprime les caractères spéciaux indésirables, les erreurs de reconnaissance, ou les formats incorrects." : "";
+    
     const prompt = `Tu es un expert en vin. Analyse ce texte d'étiquette de vin et extrais TOUTES les informations possibles.
     Texte de l'étiquette : """${text}"""
 
+    ${correctionInstruction}
     Retourne UNIQUEMENT un objet JSON valide avec TOUS ces champs (même si null) :
     {
-        "name": "Nom du vin ou du domaine (ex: Château Margaux)",
+        "name": "${nameFieldDescription}",
         "year": 2020, // Année (nombre entier ou null)
         "grapes": "Cépage(s) principal(aux) (ex: Cabernet Sauvignon, Merlot)",
         "region": "Région ou appellation (ex: Bordeaux, Bourgogne)",
@@ -179,6 +190,7 @@ async function analyzeLabelTextWithMistral(text) {
         "temperature": "Température de service (ex: 16-18°C)"
     }
     Règles :
+    ${nameRule}
     - Si une information n'est pas présente dans le texte, utilise null.
     - Les champs "year", "alcohol", "drinkFrom", "drinkTo" doivent être des nombres ou null.
     - Ne réponds JAMAIS autre chose que le JSON.`;
@@ -237,7 +249,7 @@ async function analyzeWithManualText(manualData) {
     }
     
     try {
-        const bottleInfo = await analyzeLabelTextWithMistral(text);
+        const bottleInfo = await analyzeLabelTextWithMistral(text, true);
         if (!bottleInfo) {
             return getFallbackBottleInfo("Aucune information extraite du texte");
         }
@@ -256,7 +268,7 @@ async function analyzeWithManualText(manualData) {
  * @param {Object|null} manualData - Données manuelles {name, year} si Google Vision échoue
  * @returns {Promise<Object>} - Résultat complet de l'analyse
  */
-async function analyzeBottleWithTwoStepProcess(imagePathOrBase64, isBase64 = false, manualData = null) {
+async function analyzeBottleWithTwoStepProcess(imagePathOrBase64, isBase64 = false, manualData = null, correctName = true) {
     if (!mistralConfig.apiKey) {
         return {
             ...getFallbackBottleInfo("Mistral AI non configurée - Ajoutez MISTRAL_API_KEY dans .env"),
@@ -312,17 +324,17 @@ async function analyzeBottleWithTwoStepProcess(imagePathOrBase64, isBase64 = fal
         // ÉTAPE 2 : Compléter avec Mistral AI
         let bottleInfo = null;
         if (name) {
-            bottleInfo = await analyzeBottleWithMistral(name, year);
+            bottleInfo = await analyzeBottleWithMistral(name, year, correctName);
         } else if (rawText) {
             // Fallback : analyser le texte brut avec l'ancien système
-            bottleInfo = await analyzeLabelTextWithMistral(rawText);
+            bottleInfo = await analyzeLabelTextWithMistral(rawText, correctName);
         }
         
         // Si on n'a toujours pas d'info, essayer avec un prompt générique
         if (!bottleInfo && imagePathOrBase64) {
             console.log("Tentative d'analyse avec Mistral uniquement (sans OCR)");
             const genericText = "Analyse cette bouteille de vin et extrais toutes les informations possibles : nom, année, cépage, région, appellation, producteur, pays, degré d'alcool, période de consommation, accords mets-vins, température de service.";
-            bottleInfo = await analyzeLabelTextWithMistral(genericText);
+            bottleInfo = await analyzeLabelTextWithMistral(genericText, correctName);
         }
         
         if (!bottleInfo) {
@@ -405,13 +417,13 @@ async function analyzeBottleWithMistralOnly(imagePathOrBase64, isBase64 = false)
         
         let bottleInfo = null;
         if (labelText && labelText.trim()) {
-            bottleInfo = await analyzeLabelTextWithMistral(labelText);
+            bottleInfo = await analyzeLabelTextWithMistral(labelText, true);
         }
         
         if (!bottleInfo && imagePathOrBase64) {
             console.log("Tentative d'analyse avec Mistral uniquement (sans OCR)");
             const genericText = "Analyse cette bouteille de vin et extrais toutes les informations possibles : nom, année, cépage, région, appellation, producteur, pays, degré d'alcool, période de consommation, accords mets-vins, température de service.";
-            bottleInfo = await analyzeLabelTextWithMistral(genericText);
+            bottleInfo = await analyzeLabelTextWithMistral(genericText, true);
         }
         
         if (!bottleInfo) {
