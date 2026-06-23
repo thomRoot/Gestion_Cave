@@ -217,6 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     handleCaveSearchInput();
                 }
             }
+            // Effacer le texte de la barre de recherche à chaque changement de mode
+            if (searchInput) {
+                searchInput.value = '';
+            }
         }
 
         // Écouter les changements du switch
@@ -1067,9 +1071,18 @@ function performCaveSearch(searchTerm) {
                     (bottle.photo.startsWith('http') ? bottle.photo : `/uploads/${bottle.photo}`) :
                     'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
                 
+                // Calculer la barre de maturation
+                const maturityStatus = window.cave.getMaturityStatus(bottle.drinkFrom, bottle.drinkTo);
+                const maturityPercent = window.cave.calculateMaturityPercentage(bottle.drinkFrom, bottle.drinkTo);
+                const periodText = bottle.drinkFrom && bottle.drinkTo ?
+                    `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
+                
                 return `
                     <div class="search-result-item" data-row="${bottle.row}" data-col="${bottle.col}">
                         <img src="${photoUrl}" alt="${bottle.name || 'Bouteille'}" class="bottle-image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3173/3173612.png'">
+                        <div class="bottle-maturity-bar ${maturityStatus || ''}">
+                            <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
+                        </div>
                         <div class="bottle-info">
                             <div class="bottle-name">${bottle.name || 'Bouteille inconnue'}</div>
                             <div class="bottle-details">
@@ -1078,6 +1091,7 @@ function performCaveSearch(searchTerm) {
                                 ${bottle.region ? `<span class="bottle-detail"><i class="fas fa-map-marker-alt"></i>${bottle.region}</span>` : ''}
                                 ${bottle.temperature ? `<span class="bottle-detail"><i class="fas fa-thermometer-half"></i>${bottle.temperature}</span>` : ''}
                             </div>
+                            <div class="bottle-period"><span class="period-text">${periodText}</span></div>
                         </div>
                         <div class="bottle-position">
                             <i class="fas fa-th"></i> ${bottle.row + 1},${bottle.col + 1}

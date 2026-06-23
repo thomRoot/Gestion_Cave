@@ -827,6 +827,40 @@ input:checked + .slider:before {
     flex-shrink: 0;
 }
 
+.search-result-item .bottle-maturity-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.search-result-item .bottle-maturity-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Couleurs selon le statut pour les résultats de recherche */
+.search-result-item .bottle-maturity-bar.waiting .bottle-maturity-fill {
+    background: #2196F3; /* Bleu - trop jeune */
+}
+
+.search-result-item .bottle-maturity-bar.ready .bottle-maturity-fill {
+    background: #4CAF50; /* Vert - prêt à boire */
+}
+
+.search-result-item .bottle-maturity-bar.past .bottle-maturity-fill {
+    background: #F44336; /* Rouge - dépassé */
+}
+
+.search-result-item .bottle-maturity-bar:not(.waiting):not(.ready):not(.past) .bottle-maturity-fill {
+    background: var(--text-muted);
+}
+
 .search-result-item .bottle-info {
     flex: 1;
     min-width: 0;
@@ -864,6 +898,15 @@ input:checked + .slider:before {
     text-align: right;
     display: flex;
     align-items: flex-end;
+}
+
+.search-result-item .bottle-period {
+    margin-top: 6px;
+    font-size: 0.75rem;
+}
+
+.search-result-item .bottle-period .period-text {
+    color: var(--text-muted);
 }
 
 /* Message "Aucun résultat" */
@@ -1137,6 +1180,16 @@ input:checked + .slider:before {
         height: 100px;
     }
 
+    .search-result-item .bottle-maturity-bar {
+        width: 80px;
+        height: 6px;
+        background: var(--bg);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 4px;
+        border: 1px solid var(--border);
+    }
+
     .search-result-item .bottle-info {
         width: 100%;
     }
@@ -1148,6 +1201,11 @@ input:checked + .slider:before {
     .search-result-item .bottle-position {
         justify-content: center;
         margin-top: 8px;
+    }
+
+    .search-result-item .bottle-period {
+        justify-content: center;
+        margin-top: 6px;
     }
     
     .header-actions {
