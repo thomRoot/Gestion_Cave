@@ -45,17 +45,11 @@ function initFileUpload() {
     const photoUpload = document.getElementById('photoUpload');
     const photoPreview = document.getElementById('bottlePhotoPreview');
     const cameraPreview = document.getElementById('cameraPreview');
-    const uploadButton = document.getElementById('uploadPhotoButton');
 
-    if (!photoUpload || !photoPreview || !uploadButton) {
+    if (!photoUpload || !photoPreview) {
         console.error("Éléments manquants pour la gestion des fichiers");
         return;
     }
-
-    // Gestion du clic sur le bouton "Sélectionner une image"
-    uploadButton.onclick = () => {
-        photoUpload.click();
-    };
 
     // Gestion du changement de fichier
     photoUpload.onchange = async (event) => {
@@ -81,14 +75,6 @@ function startCamera(resetImage = true) {
         if (cameraPreview) cameraPreview.style.display = 'none';
         currentImageDataUrl = null;
     }
-    
-    // Masquer les boutons de caméra (on n'utilise que la galerie)
-    const takePhotoButton = document.getElementById('takePhotoButton');
-    if (takePhotoButton) takePhotoButton.style.display = 'none';
-    
-    // Afficher le bouton Galerie
-    const uploadButton = document.getElementById('uploadPhotoButton');
-    if (uploadButton) uploadButton.style.display = 'inline-flex';
 
     // Initialiser la gestion des fichiers
     initFileUpload();
@@ -131,9 +117,6 @@ async function handleImageFile(file) {
             photoPreview.style.display = 'block';
         }
         if (cameraPreview) cameraPreview.style.display = 'none';
-        
-        const uploadButton = document.getElementById('uploadPhotoButton');
-        if (uploadButton) uploadButton.style.display = 'none';
         
         const photoUpload = document.getElementById('photoUpload');
         if (photoUpload) photoUpload.value = '';
