@@ -69,7 +69,10 @@ router.post('/analyze-two-step', upload.single('image'), async (req, res) => {
             year: req.body.year ? parseInt(req.body.year) : null
         } : null;
         
-        const result = await mistralAnalyzer.analyzeBottleWithTwoStepProcess(imagePath, false, manualData);
+        // Vérifier si la correction du nom est demandée (par défaut : true)
+        const correctName = req.body.correctName !== 'false';
+        
+        const result = await mistralAnalyzer.analyzeBottleWithTwoStepProcess(imagePath, false, manualData, correctName);
         
         res.json({
             success: true,

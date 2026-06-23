@@ -252,11 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Gestion du bouton "Analyser avec IA"
-    const analyzeWithAIButton = document.getElementById('analyzeWithAI');
-    if (analyzeWithAIButton) {
-        analyzeWithAIButton.addEventListener('click', analyzeWithAI);
-    }
+
 
     // Gestion du chat IA
     const aiChatInput = document.getElementById('aiChatInput');
@@ -612,7 +608,8 @@ async function analyzeWithAI() {
         
         formData.append('image', blob, 'bottle.jpg');
 
-        // NOUVEAU : Utiliser la route /analyze-two-step
+        // NOUVEAU : Utiliser la route /analyze-two-step avec demande de correction du nom
+        formData.append('correctName', 'true');
         const response = await fetch('/api/bottles/analyze-two-step', {
             method: 'POST',
             body: formData
@@ -715,7 +712,8 @@ async function submitManualInput() {
         formData.append('name', name);
         formData.append('year', year);
         
-        // Envoyer à la route /analyze-two-step
+        // Envoyer à la route /analyze-two-step avec demande de correction du nom
+        formData.append('correctName', 'true');
         const response = await fetch('/api/bottles/analyze-two-step', {
             method: 'POST',
             body: formData
