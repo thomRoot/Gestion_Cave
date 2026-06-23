@@ -1,6 +1,6 @@
-# Ma Cave à Vin v1.1
+# Ma Cave à Vin v2.4
 
-**Application de gestion de cave à vin intelligente avec reconnaissance d'étiquettes par IA**
+**Application de gestion de cave à vin intelligente avec reconnaissance d'étiquettes par IA et chatbot personnel**
 
 ---
 
@@ -25,7 +25,7 @@
 ### ✅ Fonctionnalités principales
 - **Reconnaissance d'étiquettes de vin** : Analyse automatique des bouteilles via photo (OCR + IA)
 - **Gestion de cave virtuelle** : Organisation visuelle de votre collection avec grille responsive
-- **Chat IA intégré** : Conseiller en vin pour les accords mets-vins, températures de service, conseils de dégustation
+- **Chat IA intégré avec accès à votre cave** : Conseiller en vin pour les accords mets-vins, températures de service, conseils de dégustation. **Le chatbot connaît tous vos vins enregistrés et peut vous recommander un vin de votre cave !**
 - **Analyse intelligente** : Extraction automatique des informations (nom, année, cépage, région, appellation, producteur, pays, degré d'alcool, période de consommation, accords mets-vins, température de service)
 - **Suivi de maturation** : Barre de progression colorée continue pour la période optimale de consommation
   - 🔵 **Bleu** = vin trop jeune (progression inverse : 100% si maturation l'année prochaine, 0% si maturation dans 15+ ans)
@@ -190,14 +190,16 @@ Au premier lancement, une popup vous demandera de configurer votre cave :
 ### 6. Utiliser le Chat IA
 1. Cliquez sur le bouton **💬 Chat IA** (en haut au centre)
 2. Posez votre question (exemples ci-dessous)
-3. Recevez une réponse instantanée
+3. Recevez une réponse instantanée **personnalisée avec vos vins !**
 
 **Exemples de questions :**
-- "Quel vin avec un bœuf bourguignon ?"
+- "Quel vin avec un bœuf bourguignon ?" → **Le chatbot vous recommandera un vin de votre cave adapté**
 - "À quelle température servir un Bordeaux 2018 ?"
 - "Quels sont les meilleurs cépages pour vieillir 10 ans ?"
 - "Peux-tu m'expliquer la différence entre AOC et IGP ?"
 - "Quel vin offrir pour un dîner romantique ?"
+- "Recommande-moi un vin pour ce soir" → **Le chatbot choisira parmi vos bouteilles prêtes à boire**
+- "Quel vin rouge as-tu dans ma cave ?" → **Le chatbot listera vos vins rouges enregistrés**
 
 ### 7. Vider la cave
 - Cliquez sur l'icône **🗑️** (en haut à droite)
@@ -238,6 +240,19 @@ Gestion_Cave/
 
 ## 📜 Historique des versions
 
+### v2.4 (23 juin 2026) - **NOUVEAU : Chatbot IA avec accès à la cave**
+**Nouvelle fonctionnalité principale :**
+- ✅ **Chatbot IA connecté à votre cave** : Le chatbot connaît maintenant tous les vins que vous avez enregistrés et peut vous conseiller un vin de votre cave
+- ✅ **Recommandations personnalisées** : Quand vous demandez "Quel vin avec..." ou "Recommande-moi un vin", le chatbot privilégie les vins de votre cave
+- ✅ **Fallback intelligent** : Même sans Mistral AI, le système peut recommander vos bouteilles localement
+- ✅ **Interface simplifiée** : Suppression du bouton "Sélectionner une image" (l'ouverture de la galerie est maintenant automatique)
+
+**Modifications techniques :**
+- Nouvelle route `/api/bottles/my-bottles` pour récupérer les bouteilles de la cave
+- Nouvelle fonction `askChatQuestionWithCave()` qui enrichit le prompt Mistral avec le contexte de la cave
+- Nouvelle fonction `generateCaveContext()` pour formater les bouteilles de la cave
+- Nouvelle fonction `generateFallbackResponseWithCave()` pour des réponses locales intelligentes
+
 ### v1.2 (20 juin 2026) - **En développement**
 **Nouvelle fonctionnalité :**
 - ✅ **Barre de progression de maturité continue** : Remplace les icônes (⏳/✅/⚠️) par une barre de progression colorée
@@ -245,7 +260,11 @@ Gestion_Cave/
   - 🟢 **Verte** : Vin prêt à boire - progression linéaire pendant la période de consommation
   - 🔴 **Rouge** : Vin dépassé - 100% après la période de consommation
 
-### v1.1 (20 juin 2026) - **Dernière version stable**
+### v2.4 (23 juin 2026) - **Version actuelle**
+**Dernière version stable avec :**
+- Toutes les fonctionnalités de la v1.1
+- Chatbot IA connecté à votre cave
+- Interface optimisée
 **Corrections demandées par l'utilisateur :**
 - ✅ Cave visible sans scroll (cellules réduites à 60px)
 - ✅ Indicateurs Mistral/Google plus petits (32x32px avec icônes)
@@ -288,7 +307,8 @@ Gestion_Cave/
 
 | Branche | Version | État | Description |
 |---------|---------|------|-------------|
-| **main** | v1.1 | ✅ Stable | Version principale avec toutes les corrections |
+| **main** | v2.4 | ✅ Stable | Version principale avec chatbot IA connecté à la cave |
+| **V2.4_chatbot_plus** | v2.4 | ✅ Stable | Chatbot IA avec accès à la base de données de la cave |
 | **vibe/progress-bar-maturity-50bbd0** | v1.2 | 🟡 En développement | Barre de progression de maturité colorée |
 | **1.1_interface_OK_IA_NOK** | v1.1 | ⚠️ Sauvegarde | Interface OK, IA à vérifier (problème de cache possible) |
 | **vibe/fix-bugs-design-28e8e5** | v1.0 | ❌ Obsolète | Ancienne version avant les corrections d'interface |
@@ -351,7 +371,7 @@ Les avis de copyright ci-dessus et cet avis de permission doivent être inclus d
 
 ---
 
-**Version** : 1.1  
-**Dernière mise à jour** : 20 juin 2026  
+**Version** : 2.4  
+**Dernière mise à jour** : 23 juin 2026  
 **Auteur** : [thomRoot](https://github.com/thomRoot)  
 **Dépôt** : [Gestion_Cave](https://github.com/thomRoot/Gestion_Cave)
