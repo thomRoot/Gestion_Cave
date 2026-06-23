@@ -227,6 +227,7 @@ input:checked + .slider:before {
     cursor: pointer;
     transition: var(--transition);
     min-height: 44px;
+    white-space: nowrap;
 }
 
 .btn-primary {
@@ -456,8 +457,8 @@ input:checked + .slider:before {
     background: var(--bg-card);
     border-radius: var(--radius);
     width: auto;
-    max-width: 450px;
-    min-width: 300px;
+    max-width: 600px;
+    min-width: 350px;
     max-height: 90vh;
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -521,7 +522,7 @@ input:checked + .slider:before {
 .form-group {
     margin: 0 auto 20px;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
@@ -530,12 +531,13 @@ input:checked + .slider:before {
 
 .form-group label {
     display: block;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--text-muted);
     margin-bottom: 8px;
     font-weight: 500;
     width: 100%;
-    text-align: center;
+    text-align: left;
+    padding: 0 10px;
 }
 
 .form-group label i {
@@ -547,13 +549,13 @@ input:checked + .slider:before {
 .form-group select,
 .form-group textarea {
     width: 100%;
-    max-width: 400px;
-    padding: 12px 14px;
+    max-width: 500px;
+    padding: 14px 16px;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text);
-    font-size: 0.95rem;
+    font-size: 1rem;
     transition: var(--transition);
     outline: none;
     margin: 0 auto;
@@ -572,18 +574,18 @@ input:checked + .slider:before {
 
 .form-row {
     display: flex;
-    gap: 16px;
+    gap: 20px;
     flex-wrap: wrap;
     justify-content: center;
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
     overflow-x: hidden;
 }
 
 .form-row .form-group {
     flex: 1;
-    min-width: 150px;
-    max-width: 300px;
+    min-width: 200px;
+    max-width: 400px;
     flex-basis: 0;
 }
 
@@ -606,8 +608,8 @@ input:checked + .slider:before {
 /* ==================== PHOTO PREVIEW ==================== */
 .photo-preview-container {
     width: 100%;
-    max-width: 400px;
-    height: 220px;
+    max-width: 500px;
+    height: 280px;
     background: var(--bg);
     border-radius: var(--radius);
     margin: 0 auto 20px;
@@ -631,16 +633,16 @@ input:checked + .slider:before {
     align-items: center;
     justify-content: center;
     margin: 0 auto;
-    max-width: 400px;
+    max-width: 500px;
     width: 100%;
 }
 
 .camera-buttons {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     justify-content: center;
-    margin: 12px auto 0;
-    max-width: 400px;
+    margin: 16px auto 0;
+    max-width: 500px;
     flex-wrap: wrap;
     overflow-x: hidden;
 }
@@ -652,40 +654,40 @@ input:checked + .slider:before {
 
 /* ==================== BOTTLE DETAILS ==================== */
 .bottle-details {
-    padding: 16px;
+    padding: 20px;
     overflow-x: hidden;
 }
 
 .bottle-image-container {
     text-align: center;
     margin: 0 auto 20px;
-    max-width: 300px;
+    max-width: 400px;
     overflow-x: hidden;
 }
 
 .bottle-image-container img {
     max-width: 100%;
-    max-height: 250px;
+    max-height: 300px;
     border-radius: var(--radius);
 }
 
 .bottle-info-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    max-width: 400px;
+    gap: 16px;
+    max-width: 500px;
     margin: 0 auto;
     overflow-x: hidden;
     justify-items: center;
 }
 
 .info-item {
-    padding: 12px;
+    padding: 14px;
     background: var(--bg);
     border-radius: 8px;
     border: 1px solid var(--border);
     width: 100%;
-    max-width: 300px;
+    max-width: 400px;
 }
 
 .info-item.full-width {
@@ -694,9 +696,9 @@ input:checked + .slider:before {
 
 .info-label {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     text-align: center;
 }
 
@@ -707,9 +709,10 @@ input:checked + .slider:before {
 
 .info-value {
     color: var(--text);
-    font-size: 0.95rem;
+    font-size: 1rem;
     text-align: center;
     display: block;
+    word-wrap: break-word;
 }
 
 .button-group {
@@ -930,7 +933,9 @@ input:checked + .slider:before {
 
 /* ==================== CHAT IA ==================== */
 .ai-chat-popup {
-    max-width: 500px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
 }
 
 .ai-send-btn {
@@ -943,48 +948,54 @@ input:checked + .slider:before {
 }
 
 .ai-messages {
-    max-height: 350px;
+    max-height: 500px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 16px;
+    padding: 20px;
     background: var(--bg);
     border-radius: 8px;
-    margin: 0 auto 16px;
-    max-width: 400px;
+    margin: 0 auto 20px;
+    max-width: 700px;
+    min-height: 300px;
 }
 
 .ai-message {
-    padding: 12px;
-    margin-bottom: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.03);
     border-left: 3px solid var(--accent);
+    max-width: 85%;
+    word-wrap: break-word;
 }
 
 .ai-message.user {
     background: rgba(114, 47, 55, 0.1);
     border-left-color: var(--primary);
     margin-left: 20px;
+    margin-right: 0;
+    text-align: right;
 }
 
 .ai-input-container {
     display: flex;
     gap: 12px;
     align-items: center;
-    max-width: 400px;
+    max-width: 700px;
     margin: 0 auto;
     overflow-x: hidden;
 }
 
 .ai-input-container input {
     flex: 1;
-    padding: 12px 16px;
+    padding: 14px 18px;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
-    font-size: 0.95rem;
+    font-size: 1rem;
     outline: none;
+    min-height: 50px;
 }
 
 .ai-input-container input:focus {
@@ -992,13 +1003,14 @@ input:checked + .slider:before {
 }
 
 .ai-send-btn {
-    padding: 12px 20px;
+    padding: 14px 24px;
     background: var(--primary);
     color: white;
     border: none;
     border-radius: var(--radius);
     cursor: pointer;
     transition: var(--transition);
+    min-height: 50px;
 }
 
 .ai-send-btn:hover {
@@ -1009,10 +1021,10 @@ input:checked + .slider:before {
     display: flex;
     justify-content: center;
     gap: 20px;
-    padding: 12px 0;
-    font-size: 0.85rem;
+    padding: 14px 0;
+    font-size: 0.9rem;
     color: var(--text-muted);
-    max-width: 400px;
+    max-width: 700px;
     margin: 0 auto;
     overflow-x: hidden;
 }
@@ -1159,6 +1171,24 @@ input:checked + .slider:before {
         font-size: 0.7rem;
     }
 
+    /* Chat IA plus grand même en mobile */
+    .ai-chat-popup {
+        max-width: 95%;
+        width: 95%;
+    }
+    
+    .ai-messages {
+        max-width: 90%;
+    }
+    
+    .ai-input-container {
+        max-width: 90%;
+    }
+    
+    .chat-info {
+        max-width: 90%;
+    }
+
     /* Popup de résultats en mobile */
     .search-results-popup {
         max-width: 95%;
@@ -1260,7 +1290,7 @@ input:checked + .slider:before {
     
     .popup-content {
         width: 95%;
-        max-width: 450px;
+        max-width: 500px;
     }
     
     .popup-content h2 {
@@ -1284,7 +1314,7 @@ input:checked + .slider:before {
     }
     
     .photo-preview-container {
-        height: 180px;
+        height: 220px;
     }
     
     .form-actions {
@@ -1330,7 +1360,20 @@ input:checked + .slider:before {
     
     .popup-content {
         width: 80%;
-        max-width: 550px;
+        max-width: 600px;
+    }
+    
+    /* Chat IA adapté pour tablette */
+    .ai-chat-popup {
+        max-width: 700px;
+    }
+    
+    .ai-messages {
+        max-width: 600px;
+    }
+    
+    .ai-input-container {
+        max-width: 600px;
     }
 }
 
@@ -1352,7 +1395,16 @@ input:checked + .slider:before {
     
     .popup-content {
         width: 70%;
-        max-width: 600px;
+        max-width: 700px;
+    }
+    
+    /* Chat IA encore plus grand sur grand écran */
+    .ai-chat-popup {
+        max-width: 800px;
+    }
+    
+    .ai-messages {
+        max-width: 700px;
     }
 }
 
