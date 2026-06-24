@@ -321,6 +321,7 @@ Gestion_Cave/
 | Branche | Version | État | Description |
 |---------|---------|------|-------------|
 | **main** | v2.5 | ✅ Stable | Version principale avec barre de recherche améliorée |
+| **V2.8_interface02** | v2.8 | 🟡 En développement | Suppression boutons Chat IA et Vider DB, fix duplication message IA, icônes pour modes Cave/IA, barre de recherche agrandie |
 | **V2.4_chatbot_plus** | v2.4 | ✅ Stable | Chatbot IA avec accès à la base de données de la cave |
 | **V2.5_barre_recherche** | v2.5 | ✅ Intégré | Fonctionnalités intégrées dans main |
 | **vibe/progress-bar-maturity-50bbd0** | v1.2 | 🟡 En développement | Barre de progression de maturité colorée |
