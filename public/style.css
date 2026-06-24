@@ -1187,6 +1187,47 @@ input:checked + .slider:before {
     color: var(--text-muted);
 }
 
+/* Actions pour les recommandations */
+.recommendation-bottle-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.recommendation-action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.recommendation-action-btn.in-cave {
+    background: var(--primary);
+    color: white;
+}
+
+.recommendation-action-btn.in-cave:hover {
+    background: var(--primary-light);
+}
+
+.recommendation-action-btn.add-to-cave {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.recommendation-action-btn.add-to-cave:hover {
+    background: var(--accent-light);
+}
+
+.recommendation-action-btn i {
+    font-size: 0.85rem;
+}
+
 /* Message d'introduction des recommandations */
 .recommendation-intro {
     margin-bottom: 12px;

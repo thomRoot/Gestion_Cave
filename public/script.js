@@ -609,13 +609,17 @@ function displayRecommendationsInChat(recommendationData) {
         contentDiv.appendChild(introDiv);
     }
     
+    // Vérifier si les bouteilles sont déjà dans la cave ou si ce sont des suggestions à ajouter
+    const caveGrid = window.cave ? window.cave.getCaveGrid() : null;
+    const bottlesInCave = caveGrid ? caveGrid.flat().filter(b => b !== null) : [];
+    
     // Créer le conteneur des recommandations
     const recommendationsContainer = document.createElement('div');
     recommendationsContainer.className = 'chat-recommendations-container';
     
     // Ajouter chaque bouteille recommandée
     recommendationData.bottles.forEach(bottle => {
-        const bottleElement = createRecommendationBottleElement(bottle);
+        const bottleElement = createRecommendationBottleElement(bottle, caveGrid);
         recommendationsContainer.appendChild(bottleElement);
     });
     
@@ -628,7 +632,7 @@ function displayRecommendationsInChat(recommendationData) {
 }
 
 // Créer un élément de bouteille pour les recommandations
-function createRecommendationBottleElement(bottle) {
+function createRecommendationBottleElement(bottle, caveGrid) {
     const bottleDiv = document.createElement('div');
     bottleDiv.className = 'chat-recommendation-item';
     
@@ -643,7 +647,20 @@ function createRecommendationBottleElement(bottle) {
     const periodText = bottle.drinkFrom && bottle.drinkTo ?
         `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
     
+    // Vérifier si la bouteille est déjà dans la cave
+    const isInCave = bottle.row !== undefined && bottle.col !== undefined && 
+                    caveGrid && caveGrid[bottle.row] && caveGrid[bottle.row][bottle.col];
+    
     // Créer le HTML de la bouteille
+    let actionButton = '';
+    if (isInCave) {
+        // Bouteille déjà dans la cave : bouton pour la sélectionner
+        actionButton = '<button class="recommendation-action-btn in-cave"><i class="fas fa-eye"></i> Voir</button>';
+    } else {
+        // Bouteille à ajouter : bouton pour l'ajouter
+        actionButton = '<button class="recommendation-action-btn add-to-cave"><i class="fas fa-plus"></i> Ajouter</button>';
+    }
+    
     bottleDiv.innerHTML = `
         <div class="recommendation-bottle-image-container">
             <img src="${photoUrl}" alt="${bottle.name || 'Bouteille'}" class="recommendation-bottle-image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3173/3173612.png'">
@@ -660,33 +677,78 @@ function createRecommendationBottleElement(bottle) {
                 ${bottle.temperature ? `<span class="recommendation-detail"><i class="fas fa-thermometer-half"></i>${bottle.temperature}</span>` : ''}
             </div>
             <div class="recommendation-bottle-period"><span class="period-text">${periodText}</span></div>
+            <div class="recommendation-bottle-actions">
+                ${actionButton}
+            </div>
         </div>
     `;
     
-    // Ajouter un clic pour sélectionner la bouteille dans la cave
-    if (bottle.row !== null && bottle.col !== null) {
+    // Ajouter les gestionnaires d'événements
+    if (isInCave) {
         bottleDiv.dataset.row = bottle.row;
         bottleDiv.dataset.col = bottle.col;
         bottleDiv.style.cursor = 'pointer';
-        bottleDiv.addEventListener('click', () => {
-            // Sélectionner la cellule correspondante dans la cave
-            const cell = document.querySelector(`.cave-cell[data-row="${bottle.row}"][data-col="${bottle.col}"]`);
-            if (cell) {
-                // Désélectionner toutes les cellules
-                document.querySelectorAll('.cave-cell').forEach(c => c.classList.remove('highlight'));
-                // Surligner la cellule sélectionnée
-                cell.classList.add('highlight');
-                // Ouvrir la popup de détails
-                const grid = window.cave.getCaveGrid();
-                const bottleData = grid[bottle.row][bottle.col];
-                if (bottleData) {
-                    window.cave.openBottleDetailsPopup(bottleData);
+        
+        const actionBtn = bottleDiv.querySelector('.recommendation-action-btn');
+        if (actionBtn) {
+            actionBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Sélectionner la cellule correspondante dans la cave
+                const cell = document.querySelector(`.cave-cell[data-row="${bottle.row}"][data-col="${bottle.col}"]`);
+                if (cell) {
+                    // Désélectionner toutes les cellules
+                    document.querySelectorAll('.cave-cell').forEach(c => c.classList.remove('highlight'));
+                    // Surligner la cellule sélectionnée
+                    cell.classList.add('highlight');
+                    // Ouvrir la popup de détails
+                    const grid = window.cave.getCaveGrid();
+                    const bottleData = grid[bottle.row][bottle.col];
+                    if (bottleData) {
+                        window.cave.openBottleDetailsPopup(bottleData);
+                    }
                 }
-            }
-        });
+            });
+        }
+    } else {
+        // Bouteille à ajouter
+        const actionBtn = bottleDiv.querySelector('.recommendation-action-btn');
+        if (actionBtn) {
+            actionBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Ouvrir la popup d'ajout avec les infos pré-remplies
+                openAddBottleFromRecommendation(bottle);
+            });
+        }
     }
     
     return bottleDiv;
+}
+
+// Ouvrir la popup d'ajout de bouteille avec les infos d'une recommandation
+function openAddBottleFromRecommendation(bottle) {
+    // Fermer le chat
+    const aiChatPopup = document.getElementById('aiChatPopup');
+    if (aiChatPopup) {
+        aiChatPopup.classList.remove('active');
+    }
+    
+    // Ouvrir la popup d'ajout
+    window.cave.openAddBottlePopup();
+    
+    // Pré-remplir le formulaire avec les infos de la recommandation
+    setTimeout(() => {
+        if (bottle.name) document.getElementById('bottleName').value = bottle.name;
+        if (bottle.year) document.getElementById('bottleYear').value = bottle.year;
+        if (bottle.grapes) document.getElementById('bottleGrapes').value = bottle.grapes;
+        if (bottle.region) document.getElementById('bottleRegion').value = bottle.region;
+        if (bottle.foodPairing) document.getElementById('bottleFoodPairing').value = bottle.foodPairing;
+        if (bottle.temperature) document.getElementById('bottleTemperature').value = bottle.temperature;
+        if (bottle.drinkFrom) document.getElementById('bottleDrinkFrom').value = bottle.drinkFrom;
+        if (bottle.drinkTo) document.getElementById('bottleDrinkTo').value = bottle.drinkTo;
+        
+        // Stocker la photo recommandée pour l'utiliser si l'utilisateur ne prend pas de photo
+        currentBottleImage = bottle.photo || null;
+    }, 100);
 }
 
 // Ajouter un message au chat
