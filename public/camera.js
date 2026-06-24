@@ -1,10 +1,9 @@
-// camera.js - Gestion de la galerie avec compression d'images pour l'IA
-// Version corrigée : bouton "Sélectionner une image" fonctionnel
+// camera.js - Gestion de la galerie avec compression d'images pour l'IA v3.0 - Optimisé Mobile
 
 let currentImageDataUrl = null;
 
 // Fonction pour compresser une image
-function compressImage(file, maxWidth = 800, maxHeight = 600, quality = 0.7) {
+function compressImage(file, maxWidth = 600, maxHeight = 450, quality = 0.6) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -97,16 +96,16 @@ async function handleImageFile(file) {
     }
 
     try {
-        // Compresser l'image
-        const compressedDataUrl = await compressImage(file, 800, 600, 0.7);
+        // Compresser l'image (plus agressif pour mobile)
+        const compressedDataUrl = await compressImage(file, 600, 450, 0.6);
         
-        // Vérifier que la taille compressée est raisonnable (< 1Mo)
+        // Vérifier que la taille compressée est raisonnable (< 0.5Mo)
         const base64Data = compressedDataUrl.split(',')[1];
         const byteSize = atob(base64Data).length;
         
-        if (byteSize > 1 * 1024 * 1024) {
+        if (byteSize > 0.5 * 1024 * 1024) {
             // Si toujours trop grand, compresser davantage
-            const moreCompressed = await compressImage(file, 600, 450, 0.5);
+            const moreCompressed = await compressImage(file, 400, 300, 0.4);
             currentImageDataUrl = moreCompressed;
         } else {
             currentImageDataUrl = compressedDataUrl;

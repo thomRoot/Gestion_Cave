@@ -1,5 +1,4 @@
-// script.js - Gestion principale de l'application Ma Cave à Vin
-// Version 5.0.0 - Corrigée et optimisée
+// script.js - Gestion principale de l'application Ma Cave à Vin v3.0 - Optimisé Mobile
 
 // Variables globales
 let currentBottleImage = null;
@@ -8,6 +7,15 @@ let currentAnalysisImage = null;
 let currentPartialData = null;
 let currentMissingFields = null;
 let searchTimeout = null;
+let isMobile = false;
+
+// Détecter si l'appareil est mobile
+function detectMobile() {
+    isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+               (navigator.maxTouchPoints > 0) || 
+               ('ontouchstart' in window);
+    return isMobile;
+}
 
 // Fonctions de gestion du chargement
 function showLoading(message = "Analyse en cours...") {
@@ -116,6 +124,9 @@ async function checkMistralStatus() {
 
 // Initialiser l'application au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
+    // Détecter si mobile
+    detectMobile();
+    
     // Masquer toutes les popups au chargement
     document.querySelectorAll('.popup').forEach(popup => {
         popup.classList.remove('active');
@@ -283,16 +294,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        
-        // Ne pas fermer la popup de résultats de recherche si on clique en dehors
-        // car elle est maintenant un dropdown sous la barre de recherche
     });
 
     // Gestion du bouton "Ajouter une bouteille" (header)
     const addBottleButton = document.getElementById('addBottleButton');
     if (addBottleButton) {
         addBottleButton.addEventListener('click', () => {
-            window.cave.openAddBottlePopup();
+            // Sur mobile, afficher un message si aucune cellule sélectionnée
+            if (isMobile && !window.cave.getSelectedCell()) {
+                alert("Veuillez d'abord cliquer sur une case vide de la cave pour ajouter une nouvelle bouteille.");
+            } else {
+                window.cave.openAddBottlePopup();
+            }
         });
     }
 
@@ -314,10 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
-
-
-
     // Gestion du chat IA
     const aiChatInput = document.getElementById('aiChatInput');
     const aiChatSendButton = document.getElementById('aiChatSendButton');
@@ -329,8 +338,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
 
+    // Gestion du clavier pour fermer les popups avec Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.popup.active').forEach(popup => {
+                popup.classList.remove('active');
+                window.camera.resetImage();
+            });
+        }
+    });
+
+    // Empêcher le zoom sur mobile pour les inputs
+    document.querySelectorAll('input, textarea, select').forEach(input => {
+        input.addEventListener('focus', () => {
+            if (isMobile) {
+                // Désactiver le zoom automatique sur mobile
+                document.querySelector('meta[name="viewport"]').setAttribute('content', 
+                    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            }
+        });
+        
+        input.addEventListener('blur', () => {
+            if (isMobile) {
+                // Réactiver le zoom après la perte de focus
+                document.querySelector('meta[name="viewport"]').setAttribute('content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+            }
+        });
+    });
+});
 
 // Vérifier le statut de Google Vision
 async function checkGoogleVisionStatus() {
@@ -446,9 +483,6 @@ async function sendAIChatMessage() {
     const typingDiv = document.createElement('div');
     typingDiv.className = 'ai-message bot';
     typingDiv.innerHTML = `
-        <div class="message-avatar">
-            <i class="fas fa-wine-glass-alt"></i>
-        </div>
         <div class="message-content">
             <div class="typing-indicator">
                 <span></span>
@@ -651,7 +685,12 @@ async function analyzeWithAI() {
 
             if (result.success && result.bottleInfo) {
                 fillBottleFormWithAIResult(result.bottleInfo);
-                alert("Analyse terminée ! Les champs ont été complétés automatiquement.");
+                if (isMobile) {
+                    // Message plus court pour mobile
+                    alert("Analyse terminée ! Les champs ont été complétés.");
+                } else {
+                    alert("Analyse terminée ! Les champs ont été complétés automatiquement.");
+                }
             } else {
                 let errorMsg = "Je n'ai pas pu compléter les informations.";
                 if (result.error) {
@@ -827,7 +866,11 @@ async function submitManualInput() {
             // Fermer la popup uniquement si tout est OK
             document.getElementById('manualInputPopup').classList.remove('active');
             
-            alert("Analyse terminée ! Les champs ont été complétés automatiquement par Mistral.");
+            if (isMobile) {
+                alert("Analyse terminée ! Les champs ont été complétés par Mistral.");
+            } else {
+                alert("Analyse terminée ! Les champs ont été complétés automatiquement par Mistral.");
+            }
         } else {
             let errorMsg = "Je n'ai pas pu compléter les informations.";
             if (result.error) {
@@ -1155,126 +1198,6 @@ async function performAISearch(query) {
         input.value = query;
         await sendAIChatMessage();
     }
-}
-
-// Réinitialiser la base de données
-function resetDatabase() {
-    fetch('/api/bottles/reset-db', {
-        method: 'POST'
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            alert("La cave a été vidée avec succès !");
-            window.cave.loadCaveGrid();
-        } else {
-            alert("Erreur lors de la réinitialisation : " + (result.error || "Inconnu"));
-        }
-    })
-    .catch(error => {
-        console.error("Erreur réinitialisation :", error);
-        alert("Erreur de connexion au serveur.");
-    });
-}
-
-// Générer une réponse IA locale (fallback)
-function generateAIResponse(prompt) {
-    const promptLower = prompt.toLowerCase();
-    const responses = {
-        greetings: [
-            "Bonjour ! Je suis votre assistant pour la gestion de cave à vin. Comment puis-je vous aider aujourd'hui ?",
-            "Salut ! Je suis là pour vous aider avec votre cave à vin. Que puis-je faire pour vous ?",
-            "Bonjour ! Besoin d'aide pour gérer votre collection de vins ? Je suis à votre disposition.",
-            "Hello ! Je suis votre assistant IA dédié au vin. Posez-moi vos questions !"
-        ],
-        howItWorks: [
-            "C'est simple : sélectionnez une image de bouteille, remplissez les champs (ou cliquez sur 'Analyser avec IA' pour les remplir automatiquement), puis enregistrez.",
-            "Pour ajouter une bouteille : 1) Cliquez sur une cellule vide, 2) Sélectionnez une image, 3) Remplissez les infos (ou utilisez l'IA), 4) Enregistrez.",
-            "L'application est intuitive : choisissez une photo de votre bouteille, l'IA peut vous aider à remplir les informations, puis sauvegardez.",
-            "Le fonctionnement est simple : ajoutez vos bouteilles avec une photo, l'IA vous aide à compléter les informations, et tout est organisé dans votre cave virtuelle."
-        ],
-        foodPairing: [
-            "Dites-moi quel vin ou quel plat vous intéresse, je vous conseillerai les meilleurs accords ! Exemple : 'Quel vin avec du bœuf ?' ou 'Que boire avec du fromage ?'",
-            "Pour les accords mets-vins, je peux vous suggérer des associations parfaites. Essayez : 'Quel vin avec du saumon ?' ou 'Que servir avec un Bordeaux ?'",
-            "Les accords mets-vins sont mon spécialité ! Demandez-moi par exemple : 'Quel vin avec une blanquette de veau ?'",
-            "Je connais tous les accords classiques : bœuf et Bordeaux, fromage et Bourgogne, poisson et blanc sec... Demandez-moi !"
-        ],
-        temperature: [
-            "Voici les températures de service idéales : 16-18°C pour les vins rouges, 10-12°C pour les blancs, 6-8°C pour les champagnes et crémants.",
-            "Températures recommandées : Rouges (16-18°C), Blancs secs (10-12°C), Blancs moelleux (8-10°C), Champagnes (6-8°C).",
-            "Pour une dégustation optimale : servez les rouges entre 16 et 18°C, les blancs entre 10 et 12°C, et les effervescents bien frais à 6-8°C.",
-            "La température est cruciale ! Un rouge trop froid perd ses arômes, un blanc trop chaud devient alcooleux. Respectez les températures que je vous indique."
-        ],
-        recognition: [
-            "Pour reconnaître une bouteille, sélectionnez une photo nette de l'étiquette, puis cliquez sur 'Analyser avec IA'. Je vais extraire les informations pour vous.",
-            "L'IA peut analyser les étiquettes de vin. Il suffit de prendre une photo claire et de cliquer sur 'Analyser avec IA'.",
-            "Sélectionnez une image de votre bouteille, puis utilisez le bouton 'Analyser avec IA' pour que je remplisse automatiquement les champs.",
-            "Avec une photo de l'étiquette, je peux identifier le nom, l'année, le cépage et la région de votre vin. Essayez !"
-        ],
-        noResults: [
-            "Désolé, je n'ai pas trouvé d'informations correspondantes dans ma base de données. Vérifiez l'orthographe ou essayez une autre recherche.",
-            "Aucun résultat trouvé pour cette requête. Peut-être que ce vin n'est pas dans ma base de connaissances... pour l'instant !",
-            "Je n'ai pas d'information sur ce sujet. Ma base de données contient principalement des vins français. Essayez avec un autre vin.",
-            "Aucun résultat. Mais je peux vous aider sur d'autres sujets : reconnaissance de bouteilles, accords mets-vins, températures de service..."
-        ],
-        default: [
-            "Je suis là pour vous aider avec votre cave à vin. Vous pouvez me demander comment reconnaître une bouteille, quels accords mets-vins choisir, ou toute autre question sur le vin !",
-            "Comment puis-je vous aider avec votre cave à vin aujourd'hui ?",
-            "Posez-moi une question sur le vin, la gestion de votre cave, ou les accords mets-vins !",
-            "Je suis votre assistant vinicole. Que puis-je faire pour vous aujourd'hui ?"
-        ]
-    };
-    
-    // Sélectionner une réponse aléatoire pour éviter la répétition
-    function getRandomResponse(category) {
-        const options = responses[category];
-        return options[Math.floor(Math.random() * options.length)];
-    }
-    
-    // Vérifier si la requête contient des mots-clés de vin connus
-    const wineKeywords = ['vin', 'bouteille', 'cépage', 'millésime', 'année', 'région', 'bordeaux', 'bourgogne', 'champagne', 'rouge', 'blanc', 'rosé'];
-    const hasWineKeyword = wineKeywords.some(keyword => promptLower.includes(keyword));
-    
-    if (promptLower.includes('bonjour') || promptLower.includes('salut') || promptLower.includes('hello') || promptLower.includes('hi') || promptLower.includes('coucou')) {
-        return getRandomResponse('greetings');
-    }
-    
-    if (promptLower.includes('comment ça marche') || promptLower.includes('comment utiliser') || promptLower.includes('comment faire') || promptLower.includes('tutoriel')) {
-        return getRandomResponse('howItWorks');
-    }
-    
-    if (promptLower.includes('accords') || promptLower.includes('mets') || promptLower.includes('nourriture') || promptLower.includes('food') || promptLower.includes('plat')) {
-        return getRandomResponse('foodPairing');
-    }
-    
-    if (promptLower.includes('température') || promptLower.includes('servir') || promptLower.includes('degré') || promptLower.includes('chaud') || promptLower.includes('froid')) {
-        return getRandomResponse('temperature');
-    }
-    
-    if (promptLower.includes('reconnaître') || promptLower.includes('photo') || promptLower.includes('image') || promptLower.includes('étiquette') || promptLower.includes('analyser')) {
-        return getRandomResponse('recognition');
-    }
-    
-    if (promptLower.includes('merci') || promptLower.includes('thank') || promptLower.includes('remerci') || promptLower.includes('super') || promptLower.includes('génial')) {
-        return "Avec plaisir ! N'hésitez pas si vous avez d'autres questions sur votre cave à vin. 🍷";
-    }
-    
-    // Si la requête contient des mots-clés de vin mais qu'on n'a pas de réponse spécifique
-    if (hasWineKeyword && !promptLower.includes('bonjour') && !promptLower.includes('merci')) {
-        // Essayer de donner une réponse générique mais utile
-        if (promptLower.includes('quel') || promptLower.includes('quels') || promptLower.includes('quelle')) {
-            return "Je vais essayer de vous aider. Pouvez-vous préciser votre question ? Par exemple : 'Quel vin avec du canard ?' ou 'Quelle est la température idéale pour un Bordeaux ?'";
-        }
-        return getRandomResponse('default');
-    }
-    
-    // Si aucune catégorie ne correspond
-    if (promptLower.trim() === '') {
-        return "Posez-moi une question sur le vin !";
-    }
-    
-    // Pour les questions sans réponse spécifique
-    return getRandomResponse('noResults');
 }
 
 // ==================== IMAGE ZOOM FUNCTIONALITY ====================

@@ -6,7 +6,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121212">
-    <title>Ma Cave à Vin v1.1 - Gestion Intelligente avec IA</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="HandheldFriendly" content="True">
+    <title>Ma Cave à Vin v3.0 - Mobile Optimisé</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,31 +20,41 @@
                 <i class="fas fa-wine-bottle"></i>
                 <h1>Ma Cave à Vin</h1>
             </div>
-            <div class="search-bar-container">
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Rechercher...">
-                    <button id="searchButton" class="btn btn-ai"><i class="fas fa-search"></i></button>
-                    <div class="search-switch">
-                        <label class="switch">
-                            <input type="checkbox" id="searchModeToggle" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <span id="searchModeLabel"><i class="fas fa-database"></i> Cave</span>
-                    </div>
-                </div>
-                <!-- Popup pour les résultats de recherche dans la cave -->
-                <div class="search-results-popup" id="searchResultsPopup">
-                    <span class="close">&times;</span>
-                    <h2><i class="fas fa-search"></i> Résultats de recherche</h2>
-                    <div class="search-results-container" id="searchResultsContainer">
-                        <!-- Les résultats seront ajoutés dynamiquement -->
-                    </div>
+            <div class="header-actions">
+                <button id="addBottleButton" class="btn btn-ai">
+                    <i class="fas fa-plus"></i>
+                    <span class="btn-text">Ajouter</span>
+                </button>
+                <button id="aiChatButton" class="btn btn-primary" onclick="openAIChatPopup()">
+                    <i class="fas fa-robot"></i>
+                    <span class="btn-text">IA</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="search-bar-container">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Rechercher dans ma cave...">
+                <button id="searchButton" class="btn btn-ai"><i class="fas fa-search"></i></button>
+                <div class="search-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="searchModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="searchModeLabel"><i class="fas fa-database"></i> Cave</span>
                 </div>
             </div>
-
+            <!-- Popup pour les résultats de recherche dans la cave -->
+            <div class="search-results-popup" id="searchResultsPopup">
+                <span class="close">&times;</span>
+                <h2><i class="fas fa-search"></i> Résultats de recherche</h2>
+                <div class="search-results-container" id="searchResultsContainer">
+                    <!-- Les résultats seront ajoutés dynamiquement -->
+                </div>
+            </div>
         </div>
-        <div class="header-status">
 
+        <div class="header-status">
             <div id="mistralStatus" class="mistral-status">
                 <i class="fas fa-robot"></i>
             </div>
@@ -56,7 +68,12 @@
         <!-- La grille sera générée dynamiquement ici -->
     </div>
 
-    <!-- Popup pour le Chat IA - Version Complète -->
+    <!-- Bouton flottant pour mobile -->
+    <button id="mobileAddButton" class="mobile-fab btn-ai">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Popup pour le Chat IA - Version Mobile Optimisée -->
     <div class="popup" id="aiChatPopup">
         <div class="popup-content ai-chat-popup">
             <span class="close">&times;</span>
@@ -103,6 +120,12 @@
                         </div>
                         <div class="camera-buttons">
                             <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('photoUpload').click()">
+                                <i class="fas fa-image"></i> Sélectionner
+                            </button>
+                            <button type="button" class="btn btn-ai" onclick="analyzeWithAI()">
+                                <i class="fas fa-magic"></i> Analyser IA
+                            </button>
                         </div>
                         <canvas id="photoCanvas" style="display: none;"></canvas>
                     </div>
@@ -113,17 +136,20 @@
                         <label for="bottleName"><i class="fas fa-tag"></i> Nom *</label>
                         <input type="text" id="bottleName" required placeholder="Ex: Château Margaux 2015">
                     </div>
-                    <div class="form-group">
-                        <label for="bottleYear"><i class="fas fa-calendar"></i> Année</label>
-                        <input type="number" id="bottleYear" min="1900" max="2099" placeholder="Ex: 2015">
-                    </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="bottleYear"><i class="fas fa-calendar"></i> Année</label>
+                        <input type="number" id="bottleYear" min="1900" max="2099" placeholder="Ex: 2015">
+                    </div>
+                    <div class="form-group">
                         <label for="bottleGrapes"><i class="fas fa-leaf"></i> Cépage</label>
                         <input type="text" id="bottleGrapes" placeholder="Ex: Cabernet Sauvignon">
                     </div>
+                </div>
+                
+                <div class="form-row">
                     <div class="form-group">
                         <label for="bottleRegion"><i class="fas fa-map-marker-alt"></i> Région</label>
                         <input type="text" id="bottleRegion" placeholder="Ex: Bordeaux">
@@ -248,7 +274,7 @@
         <div class="popup-content">
             <span class="close">&times;</span>
             <h2><i class="fas fa-edit"></i> Compléter les informations</h2>
-            <p style="margin-bottom: 20px; color: #ccc;">
+            <p style="margin-bottom: 20px; color: #ccc; font-size: 0.95rem;">
                 Google Vision n'a pas pu identifier le nom ou l'année de la bouteille. 
                 Veuillez les saisir manuellement pour que Mistral puisse compléter les autres informations.
             </p>

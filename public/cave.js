@@ -1,14 +1,23 @@
-// cave.js - Gestion de la grille de la cave à vin
-// Version 5.0.0 - Avec barre de progression de maturation
+// cave.js - Gestion de la grille de la cave à vin v3.0 - Optimisé Mobile
 
 // Variables globales
 let caveRows = 5;
 let caveCols = 10;
 let caveGrid = []; // Tableau 2D représentant la cave
 let selectedCell = null; // Cellule sélectionnée pour ajouter une bouteille
+let isTouchDevice = false;
+
+// Détecter si l'appareil est tactile
+function detectTouchDevice() {
+    isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    return isTouchDevice;
+}
 
 // Initialisation de la cave
 function initCave() {
+    // Détecter le type d'appareil
+    detectTouchDevice();
+    
     // Vérifier si la cave est déjà configurée
     fetch('/api/cave/config')
         .then(response => response.json())
@@ -66,7 +75,16 @@ function renderCaveGrid() {
     // Créer la grille
     const grid = document.createElement('div');
     grid.className = 'cave-grid';
-    grid.style.gridTemplateColumns = `repeat(${caveCols}, minmax(70px, 1fr))`;
+    
+    // Adapter le nombre de colonnes pour mobile
+    if (window.innerWidth < 400) {
+        grid.style.gridTemplateColumns = `repeat(${Math.min(caveCols, 6)}, minmax(50px, 1fr))`;
+    } else if (window.innerWidth < 768) {
+        grid.style.gridTemplateColumns = `repeat(${Math.min(caveCols, 8)}, minmax(55px, 1fr))`;
+    } else {
+        grid.style.gridTemplateColumns = `repeat(${caveCols}, minmax(60px, 1fr))`;
+    }
+    
     caveContainer.appendChild(grid);
 
     for (let row = 0; row < caveRows; row++) {
@@ -92,12 +110,13 @@ function renderCaveGrid() {
                 
                 // Texte de la période
                 const periodText = bottle.drinkFrom && bottle.drinkTo ?
-                    `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
+                    `${bottle.drinkFrom} - ${bottle.drinkTo}` : '';
 
+                cell.classList.add('has-bottle');
                 cell.innerHTML = `
                     <img src="${photoSrc}" class="bottle-thumbnail" alt="${escapeHtml(bottleName)}">
                     <div class="bottle-name">${escapeHtml(bottleName)}</div>
-                    <div class="bottle-period"><span class="period-text">${periodText}</span></div>
+                    ${periodText ? `<div class="bottle-period"><span class="period-text">${periodText}</span></div>` : ''}
                     <div class="bottle-maturity-bar ${maturityStatus || ''}">
                         <div class="bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
                     </div>
@@ -107,41 +126,65 @@ function renderCaveGrid() {
             // Gestion du clic sur une cellule
             cell.addEventListener('click', (e) => {
                 e.stopPropagation(); // Empêcher la propagation du clic
-                if (!caveGrid[row][col]) {
-                    // Cellule vide : ouvrir le formulaire d'ajout
-                    selectedCell = { row, col };
-                    openAddBottlePopup();
-                } else {
-                    // Cellule occupée : ouvrir la popup de détails
-                    selectedCell = { row, col };
-                    openBottleDetailsPopup(caveGrid[row][col]);
-                }
+                handleCellClick(row, col);
             });
 
-            // Gestion du touch pour mobile (appui long pour les détails)
-            cell.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                const startTime = Date.now();
+            // Gestion du touch pour mobile
+            if (isTouchDevice) {
+                let touchTimer = null;
                 
-                cell.addEventListener('touchend', (endEvent) => {
-                    const endTime = Date.now();
-                    const duration = endTime - startTime;
+                cell.addEventListener('touchstart', (e) => {
+                    // Empêcher le comportement par défaut pour éviter les conflits
+                    e.preventDefault();
                     
-                    // Si appui court sur cellule vide
-                    if (duration < 300 && !caveGrid[row][col]) {
-                        selectedCell = { row, col };
-                        openAddBottlePopup();
+                    // Démarrer un timer pour détecter un appui long
+                    touchTimer = setTimeout(() => {
+                        // Appui long : ouvrir les détails
+                        if (caveGrid[row][col]) {
+                            selectedCell = { row, col };
+                            openBottleDetailsPopup(caveGrid[row][col]);
+                        }
+                    }, 500); // 500ms pour un appui long
+                }, { passive: false });
+
+                cell.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    // Annuler le timer
+                    if (touchTimer) {
+                        clearTimeout(touchTimer);
+                        touchTimer = null;
                     }
-                    // Si appui long sur cellule occupée
-                    else if (duration >= 300 && caveGrid[row][col]) {
-                        selectedCell = { row, col };
-                        openBottleDetailsPopup(caveGrid[row][col]);
+                    
+                    // Appui court : gérer comme un clic normal
+                    handleCellClick(row, col);
+                }, { passive: false });
+
+                cell.addEventListener('touchcancel', () => {
+                    if (touchTimer) {
+                        clearTimeout(touchTimer);
+                        touchTimer = null;
                     }
-                }, { once: true });
-            });
+                });
+            }
 
             grid.appendChild(cell);
         }
+    }
+    
+    // Réinitialiser la cellule sélectionnée
+    selectedCell = null;
+}
+
+// Gérer le clic sur une cellule
+function handleCellClick(row, col) {
+    if (!caveGrid[row][col]) {
+        // Cellule vide : ouvrir le formulaire d'ajout
+        selectedCell = { row, col };
+        openAddBottlePopup();
+    } else {
+        // Cellule occupée : ouvrir la popup de détails
+        selectedCell = { row, col };
+        openBottleDetailsPopup(caveGrid[row][col]);
     }
 }
 
@@ -163,8 +206,6 @@ function calculateMaturityPercentage(drinkFrom, drinkTo) {
     
     if (status === 'waiting') {
         // Avant la période : progression de l'année courante vers drinkFrom
-        // Plus on est loin de drinkFrom, moins la barre bleue est remplie
-        // Plus on approche de drinkFrom, plus la barre bleue est remplie
         const yearsUntilReady = startYear - currentYear;
         const maxWaitingPeriod = Math.max(totalPeriod, 15); // Utiliser la période totale ou 15 ans max
         // Calculer le pourcentage : 0% si on est très loin, 100% si on est à drinkFrom
@@ -346,6 +387,21 @@ function getMaturityIcon(status) {
     }
 }
 
+// Adapter la grille au redimensionnement de la fenêtre
+function handleResize() {
+    // Re-rendre la grille avec les nouvelles dimensions
+    renderCaveGrid();
+}
+
+// Ajouter un écouteur de redimensionnement avec un délai pour éviter les calculs inutiles
+let resizeTimeout = null;
+window.addEventListener('resize', () => {
+    if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+    }
+    resizeTimeout = setTimeout(handleResize, 250);
+});
+
 // Exporter les fonctions pour les utiliser dans d'autres scripts
 window.cave = {
     initCave,
@@ -360,5 +416,6 @@ window.cave = {
     updateDrinkPeriodBar,
     calculateMaturityPercentage,
     getMaturityStatus,
-    getMaturityIcon
+    getMaturityIcon,
+    handleCellClick
 };
