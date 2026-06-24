@@ -177,10 +177,17 @@ input:checked + .slider:before {
     font-size: 0.8rem;
     color: var(--text-muted);
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 #searchModeLabel.ai-mode {
     color: var(--accent);
+}
+
+#searchModeLabel i {
+    font-size: 0.8rem;
 }
 
 .header-actions {

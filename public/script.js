@@ -203,14 +203,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mettre à jour l'affichage du label en fonction du mode
         function updateSearchModeLabel() {
             if (searchModeToggle.checked) {
-                searchModeLabel.textContent = 'IA';
+                searchModeLabel.innerHTML = '<i class="fas fa-robot"></i> IA';
                 searchModeLabel.classList.add('ai-mode');
                 // Fermer la popup de résultats de recherche si elle est ouverte
                 if (searchResultsPopup) {
                     searchResultsPopup.classList.remove('active');
                 }
             } else {
-                searchModeLabel.textContent = 'Cave';
+                searchModeLabel.innerHTML = '<i class="fas fa-database"></i> Cave';
                 searchModeLabel.classList.remove('ai-mode');
                 // Si on bascule en mode Cave et qu'il y a du texte, ouvrir la popup
                 if (searchInput && searchInput.value.trim()) {
