@@ -84,9 +84,10 @@ body {
 }
 
 .search-bar input {
-    flex: 2;
-    min-width: 300px;
-    padding: 14px 18px;
+    flex: 1;
+    min-width: 200px;
+    height: 48px;
+    padding: 0 18px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -94,6 +95,8 @@ body {
     font-size: 1rem;
     outline: none;
     transition: var(--transition);
+    display: flex;
+    align-items: center;
 }
 
 .search-bar input:focus {
@@ -105,13 +108,18 @@ body {
 }
 
 .search-bar button {
-    padding: 10px 14px;
+    height: 48px;
+    width: 48px;
+    padding: 0;
     background: var(--primary);
     border: none;
     border-radius: var(--radius);
     color: white;
     cursor: pointer;
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-bar button:hover {
