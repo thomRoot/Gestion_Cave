@@ -957,6 +957,9 @@ input:checked + .slider:before {
 }
 
 .ai-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
     padding: 14px 16px;
     margin-bottom: 14px;
     border-radius: 8px;
@@ -967,11 +970,45 @@ input:checked + .slider:before {
 }
 
 .ai-message.user {
+    display: flex;
+    flex-direction: row-reverse;
     background: rgba(114, 47, 55, 0.1);
     border-left-color: var(--primary);
     margin-left: 20px;
     margin-right: 0;
     text-align: right;
+}
+
+.ai-message.user .message-avatar {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+.ai-message.user .message-content {
+    text-align: right;
+}
+
+/* Avatar dans les messages */
+.message-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.message-avatar i {
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+/* Contenu du message */
+.message-content {
+    flex: 1;
 }
 
 .ai-input-container {
@@ -1024,6 +1061,142 @@ input:checked + .slider:before {
     max-width: 700px;
     margin: 0 auto;
     overflow-x: hidden;
+}
+
+/* ==================== RECOMMANDATIONS DANS LE CHAT ==================== */
+
+/* Conteneur des recommandations dans le chat */
+.chat-recommendations-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+/* Élément de recommandation de bouteille */
+.chat-recommendation-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: var(--transition);
+    cursor: default;
+}
+
+.chat-recommendation-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    transform: translateX(4px);
+}
+
+/* Conteneur de l'image pour les recommandations */
+.recommendation-bottle-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+
+/* Image de la bouteille dans les recommandations */
+.recommendation-bottle-image {
+    width: 60px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: var(--bg-card);
+}
+
+/* Barre de maturation pour les recommandations */
+.recommendation-bottle-maturity-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+    border: 1px solid var(--border);
+}
+
+.recommendation-bottle-maturity-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Couleurs selon le statut pour les recommandations */
+.recommendation-bottle-maturity-bar.waiting .recommendation-bottle-maturity-fill {
+    background: #2196F3; /* Bleu - trop jeune */
+}
+
+.recommendation-bottle-maturity-bar.ready .recommendation-bottle-maturity-fill {
+    background: #4CAF50; /* Vert - prêt à boire */
+}
+
+.recommendation-bottle-maturity-bar.past .recommendation-bottle-maturity-fill {
+    background: #F44336; /* Rouge - dépassé */
+}
+
+.recommendation-bottle-maturity-bar:not(.waiting):not(.ready):not(.past) .recommendation-bottle-maturity-fill {
+    background: var(--text-muted);
+}
+
+/* Informations de la bouteille dans les recommandations */
+.recommendation-bottle-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.recommendation-bottle-name {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-size: 1rem;
+}
+
+.recommendation-bottle-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.recommendation-detail {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.recommendation-detail i {
+    color: var(--accent);
+    font-size: 0.8rem;
+}
+
+.recommendation-bottle-period {
+    margin-top: 6px;
+    font-size: 0.75rem;
+}
+
+.recommendation-bottle-period .period-text {
+    color: var(--text-muted);
+}
+
+/* Message d'introduction des recommandations */
+.recommendation-intro {
+    margin-bottom: 12px;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.recommendation-intro p {
+    margin: 0;
+    line-height: 1.5;
 }
 
 /* ==================== LOADING ==================== */

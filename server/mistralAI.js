@@ -126,7 +126,7 @@ async function askChatQuestion(question) {
  * Poser une question au chat IA avec accès à la cave de l'utilisateur
  * @param {string} question - La question de l'utilisateur
  * @param {Array} bottles - Les bouteilles de la cave de l'utilisateur
- * @returns {Promise<string>} - La réponse du chat
+ * @returns {Promise<string|Object>} - La réponse du chat (peut être un objet structuré pour les recommandations)
  */
 async function askChatQuestionWithCave(question, bottles) {
     try {
@@ -141,12 +141,55 @@ Tu as accès à sa cave à vin personnelle.
 Analyse sa question en tenant compte des bouteilles qu'il possède.
 Si l'utilisateur demande une recommandation, privilégie les vins de sa cave.
 Si l'utilisateur demande "quel vin" ou "recommande moi un vin", propose toujours un vin de sa cave si possible.
-Réponds en français de manière claire et professionnelle.`;
+
+IMPORTANT : Si l'utilisateur demande une recommandation de vin, réponds UNIQUEMENT avec un objet JSON contenant :
+{
+  "type": "recommendations",
+  "message": "ton message d'introduction",
+  "bottles": [
+    {
+      "name": "nom du vin",
+      "year": année,
+      "grapes": "cépage",
+      "region": "région",
+      "foodPairing": "accords mets-vins",
+      "temperature": "température de service",
+      "drinkFrom": année_debut,
+      "drinkTo": année_fin,
+      "photo": "nom_du_fichier_photo"
+    }
+  ]
+}
+
+Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
         
         const response = await callMistral(
             enhancedPrompt,
             systemPrompt
         );
+        
+        // Essayer de parser comme JSON (pour les recommandations structurées)
+        try {
+            const trimmedResponse = response.trim();
+            // Supprimer les marqueurs markdown si présents
+            const cleanedResponse = trimmedResponse
+                .replace(/^```json\s*/, '')
+                .replace(/```\s*$/, '')
+                .replace(/^```\s*/, '');
+            
+            // Vérifier si c'est un JSON valide
+            const jsonMatch = cleanedResponse.match(/^\{[\[\]\s\S]*\}$/);
+            if (jsonMatch) {
+                const parsed = JSON.parse(cleanedResponse);
+                if (parsed.type === 'recommendations' && parsed.bottles) {
+                    return parsed;
+                }
+            }
+        } catch (e) {
+            // Ce n'est pas du JSON, retourner la réponse texte
+        }
+        
+        // Si ce n'est pas une recommandation structurée, retourner le texte
         return response;
     } catch (error) {
         // Fallback vers une réponse locale si Mistral échoue
@@ -185,17 +228,21 @@ function generateCaveContext(bottles) {
  * Générer une réponse de fallback avec accès à la cave
  * @param {string} question - La question
  * @param {Array} bottles - Les bouteilles de la cave
- * @returns {string} - Réponse basique
+ * @returns {string|Object} - Réponse basique ou objet structuré pour les recommandations
  */
 function generateFallbackResponseWithCave(question, bottles) {
     const questionLower = question.toLowerCase();
     
     // Si l'utilisateur demande une recommandation
     if (questionLower.includes('quel vin') || questionLower.includes('recommande') || 
-        questionLower.includes('conseil') || questionLower.includes('suggère')) {
+        questionLower.includes('conseil') || questionLower.includes('suggère') ||
+        questionLower.includes('conseille') || questionLower.includes('propose')) {
         
         if (!bottles || bottles.length === 0) {
-            return "Vous n'avez pas encore de bouteilles dans votre cave. Ajoutez-en pour que je puisse vous conseiller !";
+            return {
+                type: 'text',
+                content: "Vous n'avez pas encore de bouteilles dans votre cave. Ajoutez-en pour que je puisse vous conseiller !"
+            };
         }
         
         // Filtrer les bouteilles prêtes à boire
@@ -207,29 +254,63 @@ function generateFallbackResponseWithCave(question, bottles) {
             return currentYear >= drinkFrom && currentYear <= drinkTo;
         });
         
+        // Si on a des bouteilles prêtes, en proposer plusieurs (jusqu'à 5)
         if (readyBottles.length > 0) {
-            // Choisir une bouteille aléatoire parmi celles prêtes
-            const randomBottle = readyBottles[Math.floor(Math.random() * readyBottles.length)];
-            let response = `Je vous recommande : **${randomBottle.name}** (${randomBottle.year})`;
-            if (randomBottle.region) response += ` de ${randomBottle.region}`;
-            if (randomBottle.grapes) response += `, cépage ${randomBottle.grapes}`;
-            if (randomBottle.foodPairing) response += `.\nParfait avec : ${randomBottle.foodPairing}`;
-            if (randomBottle.temperature) response += `.\nÀ servir à : ${randomBottle.temperature}`;
-            return response;
+            // Trier par pertinence (si possible) ou prendre aléatoirement
+            const recommendedBottles = readyBottles
+                .sort(() => 0.5 - Math.random())
+                .slice(0, Math.min(5, readyBottles.length));
+            
+            return {
+                type: 'recommendations',
+                message: `Voici ${recommendedBottles.length} bouteille(s) prête(s) à être dégustée(s) dans votre cave :`,
+                bottles: recommendedBottles.map(bottle => ({
+                    name: bottle.name || 'Bouteille inconnue',
+                    year: bottle.year || null,
+                    grapes: bottle.grapes || null,
+                    region: bottle.region || null,
+                    foodPairing: bottle.foodPairing || null,
+                    temperature: bottle.temperature || null,
+                    drinkFrom: bottle.drinkFrom || null,
+                    drinkTo: bottle.drinkTo || null,
+                    photo: bottle.photo || null,
+                    row: bottle.row !== undefined ? bottle.row : null,
+                    col: bottle.col !== undefined ? bottle.col : null
+                }))
+            };
         }
         
-        // Si aucune bouteille n'est prête, proposer la première disponible
+        // Si aucune bouteille n'est prête, proposer celles qui sont disponibles
         if (bottles.length > 0) {
-            const firstBottle = bottles[0];
-            let response = `Je vous suggère : **${firstBottle.name}** (${firstBottle.year})`;
-            if (firstBottle.region) response += ` de ${firstBottle.region}`;
-            if (firstBottle.drinkFrom) response += `.\nÀ boire à partir de : ${firstBottle.drinkFrom}`;
-            return response;
+            const availableBottles = bottles
+                .sort(() => 0.5 - Math.random())
+                .slice(0, Math.min(5, bottles.length));
+            
+            return {
+                type: 'recommendations',
+                message: `Voici quelques bouteilles de votre cave que je vous suggère :`,
+                bottles: availableBottles.map(bottle => ({
+                    name: bottle.name || 'Bouteille inconnue',
+                    year: bottle.year || null,
+                    grapes: bottle.grapes || null,
+                    region: bottle.region || null,
+                    foodPairing: bottle.foodPairing || null,
+                    temperature: bottle.temperature || null,
+                    drinkFrom: bottle.drinkFrom || null,
+                    drinkTo: bottle.drinkTo || null,
+                    photo: bottle.photo || null,
+                    row: bottle.row !== undefined ? bottle.row : null,
+                    col: bottle.col !== undefined ? bottle.col : null
+                }))
+            };
         }
     }
     
     // Sinon, utiliser la réponse standard
-    return generateFallbackResponse(question);
+    return {
+        type: 'text',
+        content: generateFallbackResponse(question)
+    };
 }
 
 /**

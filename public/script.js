@@ -509,8 +509,16 @@ async function sendAIChatMessage() {
         typingDiv.remove();
         
         if (result.success && result.response) {
-            // Ajouter la réponse de Mistral
-            addChatMessage(result.response, 'bot', false);
+            const responseData = result.response;
+            
+            // Vérifier si la réponse est un objet structuré avec des recommandations
+            if (typeof responseData === 'object' && responseData.type === 'recommendations') {
+                // Afficher les recommandations sous forme graphique
+                displayRecommendationsInChat(responseData);
+            } else {
+                // Réponse texte normale
+                addChatMessage(responseData, 'bot', false);
+            }
             
             // Ajouter à l'historique
             conversationHistory.push({
@@ -519,7 +527,7 @@ async function sendAIChatMessage() {
             });
             conversationHistory.push({
                 role: 'assistant',
-                content: result.response
+                content: typeof responseData === 'object' ? JSON.stringify(responseData) : responseData
             });
             
             // Limiter l'historique à 20 échanges
@@ -555,6 +563,110 @@ async function sendAIChatMessage() {
         input.disabled = false;
         input.focus();
     }
+}
+
+// Afficher les recommandations de vin sous forme graphique dans le chat
+function displayRecommendationsInChat(recommendationData) {
+    const messagesContainer = document.getElementById('aiMessages');
+    if (!messagesContainer) return;
+    
+    // Créer le conteneur principal du message
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'ai-message bot';
+    
+    // Ajouter l'avatar
+    const avatarHtml = '<div class="message-avatar"><i class="fas fa-wine-glass-alt"></i></div>';
+    
+    // Créer le contenu du message
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    
+    // Ajouter le message d'introduction
+    if (recommendationData.message) {
+        const introDiv = document.createElement('div');
+        introDiv.className = 'recommendation-intro';
+        introDiv.innerHTML = `<p>${formatChatMessage(recommendationData.message)}</p>`;
+        contentDiv.appendChild(introDiv);
+    }
+    
+    // Créer le conteneur des recommandations
+    const recommendationsContainer = document.createElement('div');
+    recommendationsContainer.className = 'chat-recommendations-container';
+    
+    // Ajouter chaque bouteille recommandée
+    recommendationData.bottles.forEach(bottle => {
+        const bottleElement = createRecommendationBottleElement(bottle);
+        recommendationsContainer.appendChild(bottleElement);
+    });
+    
+    contentDiv.appendChild(recommendationsContainer);
+    messageDiv.innerHTML = avatarHtml;
+    messageDiv.appendChild(contentDiv);
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Créer un élément de bouteille pour les recommandations
+function createRecommendationBottleElement(bottle) {
+    const bottleDiv = document.createElement('div');
+    bottleDiv.className = 'chat-recommendation-item';
+    
+    // Déterminer l'URL de la photo
+    const photoUrl = bottle.photo ? 
+        (bottle.photo.startsWith('http') ? bottle.photo : `/uploads/${bottle.photo}`) :
+        'https://cdn-icons-png.flaticon.com/512/3173/3173612.png';
+    
+    // Calculer la barre de maturation
+    const maturityStatus = window.cave ? window.cave.getMaturityStatus(bottle.drinkFrom, bottle.drinkTo) : '';
+    const maturityPercent = window.cave ? window.cave.calculateMaturityPercentage(bottle.drinkFrom, bottle.drinkTo) : 0;
+    const periodText = bottle.drinkFrom && bottle.drinkTo ?
+        `${bottle.drinkFrom} - ${bottle.drinkTo}` : 'Non spécifié';
+    
+    // Créer le HTML de la bouteille
+    bottleDiv.innerHTML = `
+        <div class="recommendation-bottle-image-container">
+            <img src="${photoUrl}" alt="${bottle.name || 'Bouteille'}" class="recommendation-bottle-image" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3173/3173612.png'">
+            <div class="recommendation-bottle-maturity-bar ${maturityStatus || ''}">
+                <div class="recommendation-bottle-maturity-fill" style="width: ${maturityPercent}%"></div>
+            </div>
+        </div>
+        <div class="recommendation-bottle-info">
+            <div class="recommendation-bottle-name">${bottle.name || 'Bouteille inconnue'}</div>
+            <div class="recommendation-bottle-details">
+                ${bottle.year ? `<span class="recommendation-detail"><i class="fas fa-calendar"></i>${bottle.year}</span>` : ''}
+                ${bottle.grapes ? `<span class="recommendation-detail"><i class="fas fa-leaf"></i>${bottle.grapes}</span>` : ''}
+                ${bottle.region ? `<span class="recommendation-detail"><i class="fas fa-map-marker-alt"></i>${bottle.region}</span>` : ''}
+                ${bottle.temperature ? `<span class="recommendation-detail"><i class="fas fa-thermometer-half"></i>${bottle.temperature}</span>` : ''}
+            </div>
+            <div class="recommendation-bottle-period"><span class="period-text">${periodText}</span></div>
+        </div>
+    `;
+    
+    // Ajouter un clic pour sélectionner la bouteille dans la cave
+    if (bottle.row !== null && bottle.col !== null) {
+        bottleDiv.dataset.row = bottle.row;
+        bottleDiv.dataset.col = bottle.col;
+        bottleDiv.style.cursor = 'pointer';
+        bottleDiv.addEventListener('click', () => {
+            // Sélectionner la cellule correspondante dans la cave
+            const cell = document.querySelector(`.cave-cell[data-row="${bottle.row}"][data-col="${bottle.col}"]`);
+            if (cell) {
+                // Désélectionner toutes les cellules
+                document.querySelectorAll('.cave-cell').forEach(c => c.classList.remove('highlight'));
+                // Surligner la cellule sélectionnée
+                cell.classList.add('highlight');
+                // Ouvrir la popup de détails
+                const grid = window.cave.getCaveGrid();
+                const bottleData = grid[bottle.row][bottle.col];
+                if (bottleData) {
+                    window.cave.openBottleDetailsPopup(bottleData);
+                }
+            }
+        });
+    }
+    
+    return bottleDiv;
 }
 
 // Ajouter un message au chat
