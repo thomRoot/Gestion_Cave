@@ -509,7 +509,27 @@ async function sendAIChatMessage() {
         typingDiv.remove();
         
         if (result.success && result.response) {
-            const responseData = result.response;
+            let responseData = result.response;
+            
+            // Essayer de parser la réponse comme JSON (Mistral peut retourner du JSON dans une chaîne)
+            if (typeof responseData === 'string') {
+                try {
+                    // Nettoyer la réponse pour extraire le JSON
+                    let cleanedResponse = responseData.trim();
+                    cleanedResponse = cleanedResponse.replace(/^```json\s*/, '');
+                    cleanedResponse = cleanedResponse.replace(/```\s*$/, '');
+                    cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
+                    
+                    // Vérifier si c'est un JSON valide
+                    const jsonMatch = cleanedResponse.match(/^\{[\[\]\s\S]*\}$/);
+                    if (jsonMatch) {
+                        responseData = JSON.parse(cleanedResponse);
+                    }
+                } catch (e) {
+                    // Ce n'est pas du JSON, garder la chaîne originale
+                    console.log('Pas du JSON, affichage en texte:', e.message);
+                }
+            }
             
             // Vérifier si la réponse est un objet structuré avec des recommandations
             if (typeof responseData === 'object' && responseData.type === 'recommendations') {
