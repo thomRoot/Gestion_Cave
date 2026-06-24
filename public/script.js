@@ -314,23 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Gestion du bouton "Chat IA"
-    const aiChatButton = document.getElementById('aiChatButton');
-    if (aiChatButton) {
-        aiChatButton.addEventListener('click', () => {
-            openAIChatPopup();
-        });
-    }
 
-    // Gestion du bouton "Vider la cave"
-    const resetDbButton = document.getElementById('resetDbButton');
-    if (resetDbButton) {
-        resetDbButton.addEventListener('click', () => {
-            if (confirm("Êtes-vous sûr de vouloir vider toute votre cave ? Cette action est irréversible.")) {
-                resetDatabase();
-            }
-        });
-    }
 
 
 
@@ -1158,17 +1142,11 @@ function addResultItemClickListeners() {
 
 // Recherche IA (comme dans le chat IA)
 async function performAISearch(query) {
-    const aiMessages = document.getElementById('aiMessages');
     const aiChatPopup = document.getElementById('aiChatPopup');
     
     // Ouvrir la popup de chat IA si elle n'est pas déjà ouverte
     if (aiChatPopup && !aiChatPopup.classList.contains('active')) {
         openAIChatPopup();
-    }
-
-    // Ajouter la question de l'utilisateur dans le chat
-    if (aiMessages) {
-        addChatMessage(query, 'user', false);
     }
 
     // Envoyer la requête au chat IA
