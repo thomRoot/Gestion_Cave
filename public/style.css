@@ -72,7 +72,7 @@ body {
     position: relative;
     display: flex;
     flex-direction: column;
-    max-width: 450px;
+    max-width: 900px;
     width: 100%;
 }
 
@@ -85,7 +85,7 @@ body {
 
 .search-bar input {
     flex: 1;
-    min-width: 200px;
+    min-width: 400px;
     height: 48px;
     padding: 0 18px;
     background: var(--bg-card);
@@ -95,8 +95,6 @@ body {
     font-size: 1rem;
     outline: none;
     transition: var(--transition);
-    display: flex;
-    align-items: center;
 }
 
 .search-bar input:focus {
