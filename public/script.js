@@ -511,32 +511,35 @@ async function sendAIChatMessage() {
         if (result.success && result.response) {
             let responseData = result.response;
             
-            // Essayer de parser la réponse comme JSON (Mistral peut retourner du JSON dans une chaîne)
+            // Vérifier si c'est déjà un objet (cas normal quand le backend parse le JSON)
+            // ou si c'est une chaîne JSON à parser
             if (typeof responseData === 'string') {
+                // Essayer de parser comme JSON
                 try {
-                    // Nettoyer la réponse pour extraire le JSON
-                    let cleanedResponse = responseData.trim();
-                    cleanedResponse = cleanedResponse.replace(/^```json\s*/, '');
-                    cleanedResponse = cleanedResponse.replace(/```\s*$/, '');
-                    cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
+                    // Nettoyer la réponse
+                    let cleanedResponse = responseData.trim()
+                        .replace(/^```json\s*/, '')
+                        .replace(/```\s*$/, '')
+                        .replace(/^```\s*/, '');
                     
                     // Vérifier si c'est un JSON valide
-                    const jsonMatch = cleanedResponse.match(/^\{[\[\]\s\S]*\}$/);
-                    if (jsonMatch) {
+                    if (cleanedResponse.startsWith('{') && cleanedResponse.endsWith('}')) {
                         responseData = JSON.parse(cleanedResponse);
                     }
                 } catch (e) {
-                    // Ce n'est pas du JSON, garder la chaîne originale
-                    console.log('Pas du JSON, affichage en texte:', e.message);
+                    // Ce n'est pas du JSON, garder la chaîne
+                    console.log('Réponse non-JSON:', e.message);
                 }
             }
             
-            // Vérifier si la réponse est un objet structuré avec des recommandations
-            if (typeof responseData === 'object' && responseData.type === 'recommendations') {
+            // Vérifier si c'est un objet structuré avec des recommandations
+            if (responseData && typeof responseData === 'object' && responseData.type === 'recommendations' && Array.isArray(responseData.bottles)) {
                 // Afficher les recommandations sous forme graphique
+                console.log('Affichage des recommandations:', responseData);
                 displayRecommendationsInChat(responseData);
             } else {
                 // Réponse texte normale
+                console.log('Réponse texte:', typeof responseData, responseData);
                 addChatMessage(responseData, 'bot', false);
             }
             

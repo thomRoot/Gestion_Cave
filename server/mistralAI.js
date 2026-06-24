@@ -168,7 +168,8 @@ Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
             systemPrompt
         );
         
-        // Essayer de parser comme JSON (pour les recommandations structurées)
+        // TOUJOURS essayer de parser comme JSON en premier
+        // Mistral peut retourner du JSON même sans qu'on le lui demande explicitement
         try {
             const trimmedResponse = response.trim();
             // Supprimer les marqueurs markdown si présents
@@ -178,15 +179,15 @@ Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
                 .replace(/^```\s*/, '');
             
             // Vérifier si c'est un JSON valide
-            const jsonMatch = cleanedResponse.match(/^\{[\[\]\s\S]*\}$/);
-            if (jsonMatch) {
+            if (cleanedResponse.startsWith('{') && cleanedResponse.endsWith('}')) {
                 const parsed = JSON.parse(cleanedResponse);
-                if (parsed.type === 'recommendations' && parsed.bottles) {
+                // Si c'est un objet avec type et bottles, c'est une recommandation
+                if (parsed && typeof parsed === 'object' && parsed.type === 'recommendations' && Array.isArray(parsed.bottles)) {
                     return parsed;
                 }
             }
         } catch (e) {
-            // Ce n'est pas du JSON, retourner la réponse texte
+            // Ce n'est pas du JSON, continuer
         }
         
         // Si ce n'est pas une recommandation structurée, retourner le texte
