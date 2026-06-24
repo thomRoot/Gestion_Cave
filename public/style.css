@@ -84,8 +84,7 @@ body {
 }
 
 .search-bar input {
-    flex: 1;
-    min-width: 200px;
+    width: 248px;
     height: 48px;
     padding: 0 18px;
     background: var(--bg-card);
@@ -95,8 +94,6 @@ body {
     font-size: 1rem;
     outline: none;
     transition: var(--transition);
-    display: flex;
-    align-items: center;
 }
 
 .search-bar input:focus {
