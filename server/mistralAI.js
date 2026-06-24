@@ -142,26 +142,29 @@ Analyse sa question en tenant compte des bouteilles qu'il possède.
 Si l'utilisateur demande une recommandation, privilégie les vins de sa cave.
 Si l'utilisateur demande "quel vin" ou "recommande moi un vin", propose toujours un vin de sa cave si possible.
 
-IMPORTANT : Si l'utilisateur demande une recommandation de vin, réponds UNIQUEMENT avec un objet JSON contenant :
+RÈGLE ABSOLUE : Si l'utilisateur demande une recommandation de vin (mots-clés: recommande, conseil, suggère, propose, quel vin, quelle bouteille), 
+réponds EXCLUSIVEMENT avec un objet JSON valide, SANS AUCUN texte avant ou après, SANS balises HTML, SANS markdown.
+
+Format JSON requis :
 {
   "type": "recommendations",
   "message": "ton message d'introduction",
   "bottles": [
     {
       "name": "nom du vin",
-      "year": année,
+      "year": année (nombre),
       "grapes": "cépage",
       "region": "région",
       "foodPairing": "accords mets-vins",
       "temperature": "température de service",
-      "drinkFrom": année_debut,
-      "drinkTo": année_fin,
+      "drinkFrom": année_debut (nombre),
+      "drinkTo": année_fin (nombre),
       "photo": "nom_du_fichier_photo"
     }
   ]
 }
 
-Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
+Pour TOUTES les autres questions, réponds en français normal, sans JSON.`;
         
         const response = await callMistral(
             enhancedPrompt,
@@ -173,13 +176,10 @@ Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
         try {
             let cleanedResponse = response.trim();
             
-            // Supprimer les balises <code> que Mistral peut ajouter
-            cleanedResponse = cleanedResponse.replace(/<\/code>/g, '').replace(/<code>/g, '');
+            // Supprimer TOUTES les balises HTML
+            cleanedResponse = cleanedResponse.replace(/<[^>]*>/g, '');
             
-            // Supprimer les balises HTML comme <br> que Mistral peut ajouter
-            cleanedResponse = cleanedResponse.replace(/<br\s*\/?>/g, '');
-            
-            // Supprimer les marqueurs markdown si présents
+            // Supprimer les marqueurs markdown
             cleanedResponse = cleanedResponse
                 .replace(/^```json\s*/, '')
                 .replace(/```\s*$/, '')
@@ -188,9 +188,11 @@ Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
             // Supprimer le mot "json" au début si présent
             cleanedResponse = cleanedResponse.replace(/^json\s*/i, '');
             
-            // Vérifier si c'est un JSON valide
-            if (cleanedResponse.startsWith('{') && cleanedResponse.endsWith('}')) {
-                const parsed = JSON.parse(cleanedResponse);
+            // Essayer de trouver un objet JSON dans la réponse
+            // Mistral peut ajouter du texte avant/après le JSON
+            const jsonMatch = cleanedResponse.match(/\{[\[\]\s\S]*\}/);
+            if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
                 // Si c'est un objet avec type et bottles, c'est une recommandation
                 if (parsed && typeof parsed === 'object' && parsed.type === 'recommendations' && Array.isArray(parsed.bottles)) {
                     return parsed;

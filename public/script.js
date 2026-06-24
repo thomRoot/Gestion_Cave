@@ -516,19 +516,18 @@ async function sendAIChatMessage() {
             if (typeof responseData === 'string') {
                 // Essayer de parser comme JSON
                 try {
-                    // Nettoyer la réponse
+                    // Nettoyer la réponse : supprimer TOUTES les balises HTML
                     let cleanedResponse = responseData.trim()
-                        .replace(/<\/code>/g, '')  // Supprimer </code>
-                        .replace(/<code>/g, '')    // Supprimer <code>
-                        .replace(/<br\s*\/?>/g, '')  // Supprimer les <br> HTML
+                        .replace(/<[^>]*>/g, '')  // Supprimer TOUTES les balises HTML
                         .replace(/^```json\s*/, '')
                         .replace(/```\s*$/, '')
                         .replace(/^```\s*/, '')
                         .replace(/^json\s*/i, '');  // Supprimer "json" au début
                     
-                    // Vérifier si c'est un JSON valide
-                    if (cleanedResponse.startsWith('{') && cleanedResponse.endsWith('}')) {
-                        responseData = JSON.parse(cleanedResponse);
+                    // Essayer de trouver un objet JSON dans la réponse
+                    const jsonMatch = cleanedResponse.match(/\{[\[]\s\S*\}\}/);
+                    if (jsonMatch) {
+                        responseData = JSON.parse(jsonMatch[0]);
                     }
                 } catch (e) {
                     // Ce n'est pas du JSON, garder la chaîne
