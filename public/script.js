@@ -518,9 +518,11 @@ async function sendAIChatMessage() {
                 try {
                     // Nettoyer la réponse
                     let cleanedResponse = responseData.trim()
+                        .replace(/<br\s*\/?>/g, '')  // Supprimer les <br> HTML
                         .replace(/^```json\s*/, '')
                         .replace(/```\s*$/, '')
-                        .replace(/^```\s*/, '');
+                        .replace(/^```\s*/, '')
+                        .replace(/^json\s*/i, '');  // Supprimer "json" au début
                     
                     // Vérifier si c'est un JSON valide
                     if (cleanedResponse.startsWith('{') && cleanedResponse.endsWith('}')) {

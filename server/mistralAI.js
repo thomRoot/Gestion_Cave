@@ -171,12 +171,19 @@ Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
         // TOUJOURS essayer de parser comme JSON en premier
         // Mistral peut retourner du JSON même sans qu'on le lui demande explicitement
         try {
-            const trimmedResponse = response.trim();
+            let cleanedResponse = response.trim();
+            
+            // Supprimer les balises HTML comme <br> que Mistral peut ajouter
+            cleanedResponse = cleanedResponse.replace(/<br\s*\/?>/g, '');
+            
             // Supprimer les marqueurs markdown si présents
-            const cleanedResponse = trimmedResponse
+            cleanedResponse = cleanedResponse
                 .replace(/^```json\s*/, '')
                 .replace(/```\s*$/, '')
                 .replace(/^```\s*/, '');
+            
+            // Supprimer le mot "json" au début si présent
+            cleanedResponse = cleanedResponse.replace(/^json\s*/i, '');
             
             // Vérifier si c'est un JSON valide
             if (cleanedResponse.startsWith('{') && cleanedResponse.endsWith('}')) {
@@ -188,6 +195,7 @@ Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
             }
         } catch (e) {
             // Ce n'est pas du JSON, continuer
+            console.error('Erreur parsing JSON:', e.message);
         }
         
         // Si ce n'est pas une recommandation structurée, retourner le texte
