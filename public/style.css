@@ -123,6 +123,7 @@ body {
     align-items: center;
     gap: 8px;
     margin-left: 8px;
+    width: 90px;
 }
 
 .switch {
@@ -180,6 +181,8 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     gap: 5px;
+    min-width: 50px;
+    justify-content: center;
 }
 
 #searchModeLabel.ai-mode {
