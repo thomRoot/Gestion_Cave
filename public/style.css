@@ -72,7 +72,7 @@ body {
     position: relative;
     display: flex;
     flex-direction: column;
-    max-width: 450px;
+    max-width: 900px;
     width: 100%;
 }
 
@@ -85,12 +85,14 @@ body {
 
 .search-bar input {
     flex: 1;
-    padding: 10px 14px;
+    min-width: 400px;
+    height: 48px;
+    padding: 0 18px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
-    font-size: 0.9rem;
+    font-size: 1rem;
     outline: none;
     transition: var(--transition);
 }
@@ -104,13 +106,18 @@ body {
 }
 
 .search-bar button {
-    padding: 10px 14px;
+    height: 48px;
+    width: 48px;
+    padding: 0;
     background: var(--primary);
     border: none;
     border-radius: var(--radius);
     color: white;
     cursor: pointer;
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-bar button:hover {
@@ -123,12 +130,13 @@ body {
     align-items: center;
     gap: 8px;
     margin-left: 8px;
+    width: 90px;
 }
 
 .switch {
     position: relative;
     display: inline-block;
-    width: 40px;
+    width: 44px;
     height: 20px;
 }
 
@@ -169,7 +177,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-    transform: translateX(20px);
+    transform: translateX(24px);
     background-color: var(--bg);
 }
 
@@ -177,10 +185,19 @@ input:checked + .slider:before {
     font-size: 0.8rem;
     color: var(--text-muted);
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 50px;
+    justify-content: center;
 }
 
 #searchModeLabel.ai-mode {
     color: var(--accent);
+}
+
+#searchModeLabel i {
+    font-size: 0.8rem;
 }
 
 .header-actions {
