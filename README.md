@@ -260,6 +260,19 @@ Gestion_Cave/
   - 🟢 **Verte** : Vin prêt à boire - progression linéaire pendant la période de consommation
   - 🔴 **Rouge** : Vin dépassé - 100% après la période de consommation
 
+### v2.8 (25 juin 2026) - **V2.8_interface02**
+**Modifications :**
+- ❌ **Suppression du bouton Chat IA** (`fas fa-comments`) : Le bouton dédié au chat IA a été retiré de l'interface.
+- ❌ **Suppression du bouton Vider DB** (`resetDbButton`) : Le bouton pour vider la base de données a été retiré.
+- ✅ **Fix duplication message IA** : Correction du problème où la demande apparaissait deux fois de suite dans le chat lors du basculement en mode IA.
+- ✅ **Ajout d'icônes pour les modes Cave/IA** : 
+  - Mode **Cave** : Icône de base de données (`fas fa-database`) + texte "Cave".
+  - Mode **IA** : Icône de robot (`fas fa-robot`) + texte "IA".
+- ✅ **Barre de recherche agrandie** : 
+  - `search-bar-container` : `max-width` passé à **900px** (2 × 450px).
+  - `searchInput` : `min-width` passé à **400px** (2 × 200px), `height` à **48px**.
+  - `searchButton` : `height` et `width` à **48px** pour un alignement parfait.
+
 ### v2.5 (24 juin 2026) - **Version actuelle**
 **Nouveautés :**
 - ✅ Résultats de recherche superposés sous la barre de recherche (plus de popup plein écran)
@@ -321,6 +334,7 @@ Gestion_Cave/
 | Branche | Version | État | Description |
 |---------|---------|------|-------------|
 | **main** | v2.5 | ✅ Stable | Version principale avec barre de recherche améliorée |
+| **V2.8_interface02** | v2.8 | ✅ Stable | Suppression boutons Chat IA et Vider DB, fix duplication message IA, icônes pour modes Cave/IA, barre de recherche agrandie |
 | **V2.4_chatbot_plus** | v2.4 | ✅ Stable | Chatbot IA avec accès à la base de données de la cave |
 | **V2.5_barre_recherche** | v2.5 | ✅ Intégré | Fonctionnalités intégrées dans main |
 | **vibe/progress-bar-maturity-50bbd0** | v1.2 | 🟡 En développement | Barre de progression de maturité colorée |
