@@ -173,6 +173,9 @@ Sinon, réponds normalement en texte. NE JAMAIS mélanger les deux formats.`;
         try {
             let cleanedResponse = response.trim();
             
+            // Supprimer les balises <code> que Mistral peut ajouter
+            cleanedResponse = cleanedResponse.replace(/<\/code>/g, '').replace(/<code>/g, '');
+            
             // Supprimer les balises HTML comme <br> que Mistral peut ajouter
             cleanedResponse = cleanedResponse.replace(/<br\s*\/?>/g, '');
             
