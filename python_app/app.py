@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 import base64
 
 # Initialize Flask app
-app = Flask(__name__, static_folder='static', static_url_path='')
+app = Flask(__name__, static_folder='../public', static_url_path='')
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
