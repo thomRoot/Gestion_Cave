@@ -19,9 +19,7 @@ class Config:
     MISTRAL_MODEL = os.environ.get('MISTRAL_MODEL', 'mistral-tiny')
     MISTRAL_BASE_URL = 'https://api.mistral.ai/v1/'
     
-    # Configuration Google Vision
-    GOOGLE_VISION_API_KEY = os.environ.get('GOOGLE_VISION_API_KEY', None)
-    
+        
     # Prompt système pour le chat IA
     SYSTEM_PROMPT = """Tu es un expert en vin et en gestion de cave à vin. 
 Tu dois répondre de manière précise, professionnelle et utile aux questions sur :

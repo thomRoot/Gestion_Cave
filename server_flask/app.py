@@ -14,7 +14,7 @@ from .database import (
     save_bottle, get_all_bottles, delete_bottle, reset_database
 )
 from .mistral_ai import MistralAI
-from .google_vision import GoogleVision
+from .easy_ocr import EasyOCR
 
 # Initialiser l'application Flask
 app = Flask(__name__, static_folder='../public')
@@ -29,11 +29,11 @@ mistral_ai = MistralAI(
     model=Config.MISTRAL_MODEL,
     base_url=Config.MISTRAL_BASE_URL
 )
-google_vision = GoogleVision()
+easy_ocr = EasyOCR()
 
 # Créer l'analyseur avec les instances
 from .mistral_analyzer import MistralAnalyzer
-mistral_analyzer = MistralAnalyzer(mistral_ai, google_vision, Config)
+mistral_analyzer = MistralAnalyzer(mistral_ai, easy_ocr, Config)
 
 # Assurer que le dossier d'upload existe
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

@@ -1,14 +1,14 @@
 """
-Analyseur de bouteilles de vin avec Mistral AI et Google Vision
+Analyseur de bouteilles de vin avec Mistral AI et EasyOCR
 """
 import json
 import re
 
 
 class MistralAnalyzer:
-    def __init__(self, mistral_ai_instance, google_vision_instance, config):
+    def __init__(self, mistral_ai_instance, easy_ocr_instance, config):
         self.mistral = mistral_ai_instance
-        self.google_vision = google_vision_instance
+        self.easy_ocr = easy_ocr_instance
         self.config = config
     
     def get_fallback_bottle_info(self, error_message=None):
@@ -65,18 +65,18 @@ class MistralAnalyzer:
             return self.get_fallback_bottle_info(str(e))
     
     def analyze_bottle_with_two_step_process(self, image_path=None, is_base64=False, manual_data=None, correct_name=True):
-        """Analyser une bouteille en deux étapes : OCR puis Mistral"""
+        """Analyser une bouteille en deux étapes : EasyOCR puis Mistral"""
         try:
             extracted_text = None
             
-            # Étape 1 : Extraire le texte avec Google Vision
+            # Étape 1 : Extraire le texte avec EasyOCR
             if image_path:
                 if is_base64:
-                    extracted_text = self.google_vision.extract_text_from_base64(image_path)
+                    extracted_text = self.easy_ocr.extract_text_from_base64(image_path)
                 else:
-                    extracted_text = self.google_vision.extract_text_from_image(image_path)
+                    extracted_text = self.easy_ocr.extract_text_from_image(image_path)
                 
-                print(f"DEBUG - Texte extrait par OCR: {extracted_text[:200] if extracted_text else 'None'}")
+                print(f"DEBUG - Texte extrait par EasyOCR: {extracted_text[:200] if extracted_text else 'None'}")
             
             # Nettoyer le texte extrait
             if extracted_text:
@@ -110,7 +110,7 @@ class MistralAnalyzer:
                         'drinkTo': None,
                         'foodPairing': None,
                         'temperature': None,
-                        'analysisMethod': 'Google Vision + Mistral',
+                        'analysisMethod': 'EasyOCR + Mistral',
                         'extractedText': extracted_text,
                         'requiresManualInput': False,
                         'missingFields': None,
