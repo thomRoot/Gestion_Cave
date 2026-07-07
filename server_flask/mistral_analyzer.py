@@ -10,35 +10,6 @@ class MistralAnalyzer:
         self.mistral = mistral_ai_instance
         self.google_vision = google_vision_instance
         self.config = config
-        
-        # Prompts système
-        self.SYSTEM_PROMPT = """Tu es un expert en vin et en gestion de cave à vin. 
-Tu dois répondre de manière précise, professionnelle et utile aux questions sur :
-- Les accords mets-vins (quel vin avec quel plat)
-- Les températures de service
-- Les cépages, régions et appellations
-- La gestion d'une cave à vin
-- L'analyse d'étiquettes de vin
-
-Réponds toujours en français, de manière claire et concise. 
-Si tu ne connais pas la réponse, dis-le honnêtement et propose des alternatives.
-Ne fais pas de blagues, reste professionnel.
-Utilise des emojis vinicoles (🍷, 🍇) avec modération."""
-        
-        self.ANALYSIS_SYSTEM_PROMPT = """Tu es un expert en reconnaissance d'étiquettes de vin. 
-On va te donner du texte extrait d'une étiquette de vin à analyser.
-Ton rôle est d'analyser ce texte et d'extraire les informations suivantes :
-- Nom du vin (ou du domaine/château)
-- Année/millésime (si présente)
-- Cépage(s) principal(aux)
-- Région/appellation
-- Producteur (si identifiable)
-- Pays d'origine
-- Degré d'alcool
-
-Format de réponse : UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, appellation, producer, country, alcohol.
-Si une information n'est pas trouvée, mets null.
-Ne réponds JAMAIS autre chose que le JSON."""
     
     def get_fallback_bottle_info(self, error_message=None):
         """Retourner des informations par défaut pour une bouteille"""
@@ -82,7 +53,7 @@ Ne réponds JAMAIS autre chose que le JSON."""
         try:
             # Si c'est une image base64, essayer de l'analyser directement
             if is_base64 and image_path:
-                # Pour l'instant, on ne peut pas analyser directement l'image avec Mistral
+                # On ne peut pas analyser directement l'image avec Mistral (pas de vision)
                 # On retourne des informations par défaut
                 return self.get_fallback_bottle_info('Analyse directe non disponible')
             
@@ -104,15 +75,21 @@ Ne réponds JAMAIS autre chose que le JSON."""
                     extracted_text = self.google_vision.extract_text_from_base64(image_path)
                 else:
                     extracted_text = self.google_vision.extract_text_from_image(image_path)
+                
+                print(f"DEBUG - Texte extrait par OCR: {extracted_text[:200] if extracted_text else 'None'}")
             
             # Nettoyer le texte extrait
             if extracted_text:
                 extracted_text = self.clean_extracted_text(extracted_text)
+                print(f"DEBUG - Texte nettoyé: {extracted_text[:200]}")
             
             # Étape 2 : Analyser avec Mistral
             if extracted_text:
+                print("DEBUG - Appel à Mistral pour analyse...")
                 analysis = self.mistral.analyze_bottle_text(extracted_text)
-                if analysis:
+                print(f"DEBUG - Analyse Mistral: {analysis}")
+                
+                if analysis and isinstance(analysis, dict):
                     # Fusionner avec les données manuelles si fournies
                     if manual_data:
                         for key, value in manual_data.items():
@@ -150,13 +127,19 @@ Ne réponds JAMAIS autre chose que le JSON."""
                     result['requiresManualInput'] = bool(missing_fields)
                     result['missingFields'] = missing_fields if missing_fields else None
                     
+                    print(f"DEBUG - Résultat final: {result}")
                     return result
+                else:
+                    print(f"DEBUG - Analyse a retourné: {analysis} (type: {type(analysis)})")
             
             # Si on arrive ici, l'analyse a échoué
-            return self.get_fallback_bottle_info('Échec de l\'analyse OCR')
+            print("DEBUG - Analyse échouée, retour fallback")
+            return self.get_fallback_bottle_info('Échec de l\'analyse OCR ou Mistral')
             
         except Exception as e:
-            print(f"Erreur lors de l'analyse en deux étapes: {e}")
+            print(f"❌ Erreur lors de l'analyse en deux étapes: {e}")
+            import traceback
+            traceback.print_exc()
             return self.get_fallback_bottle_info(str(e))
     
     def analyze_with_manual_text(self, manual_data):
@@ -181,7 +164,7 @@ Ne réponds JAMAIS autre chose que le JSON."""
             # Analyser avec Mistral
             analysis = self.mistral.analyze_bottle_text(extracted_text)
             
-            if analysis:
+            if analysis and isinstance(analysis, dict):
                 # Fusionner avec les données manuelles
                 for key, value in manual_data.items():
                     if value and key in analysis:

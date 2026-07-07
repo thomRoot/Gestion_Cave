@@ -7,6 +7,41 @@ import base64
 
 
 class MistralAI:
+    # Prompts système (variables de classe)
+    SYSTEM_PROMPT = """Tu es un expert en vin et en gestion de cave à vin. 
+Tu dois répondre de manière précise, professionnelle et utile aux questions sur :
+- Les accords mets-vins (quel vin avec quel plat)
+- Les températures de service
+- Les cépages, régions et appellations
+- La gestion d'une cave à vin
+- L'analyse d'étiquettes de vin
+
+Réponds toujours en français, de manière claire et concise. 
+Si tu ne connais pas la réponse, dis-le honnêtement et propose des alternatives.
+Ne fais pas de blagues, reste professionnel.
+Utilise des emojis vinicoles (🍷, 🍇) avec modération."""
+    
+    ANALYSIS_SYSTEM_PROMPT = """Tu es un expert en reconnaissance d'étiquettes de vin. 
+On va te donner du texte extrait d'une étiquette de vin à analyser.
+Ton rôle est d'analyser ce texte et d'extraire les informations suivantes :
+- Nom du vin (ou du domaine/château)
+- Année/millésime (si présente)
+- Cépage(s) principal(aux)
+- Région/appellation
+- Producteur (si identifiable)
+- Pays d'origine
+- Degré d'alcool
+
+Format de réponse : UNIQUEMENT un objet JSON valide avec EXACTEMENT ces champs :
+{"name": "nom du vin", "year": 2020, "grapes": "cépage", "region": "région", "appellation": "AOC", "producer": "domaine", "country": "pays", "alcohol": 12.5}
+
+Règles strictes :
+1. Réponds UNIQUEMENT avec un objet JSON valide
+2. Si une information est manquante, mets null
+3. Ne réponds JAMAIS autre chose que le JSON
+4. Le JSON doit être parsable par Python json.loads()
+5. Utilise des doubles quotes pour les strings"""
+
     def __init__(self, api_key=None, model=None, base_url=None):
         self.api_key = api_key
         self.model = model or 'mistral-tiny'
@@ -51,30 +86,61 @@ class MistralAI:
     def analyze_bottle_text(self, extracted_text):
         """Analyser le texte extrait d'une étiquette de vin"""
         if not extracted_text:
+            print("⚠️  Aucun texte extrait fourni")
             return None
         
-        prompt = f"Analyse cette étiquette de vin et extrait les informations :\n\n{extracted_text}"
+        # Utiliser le prompt d'analyse strict
+        prompt = f"Analyse ce texte d'étiquette de vin et extrait les informations dans un JSON valide:\n\n{extracted_text}"
         
         result = self.call_mistral(
             prompt,
             system_prompt=self.ANALYSIS_SYSTEM_PROMPT,
-            temperature=0.3,
+            temperature=0.1,  # Température très basse pour plus de déterminisme
             max_tokens=500
         )
         
         if result and 'choices' in result and len(result['choices']) > 0:
             content = result['choices'][0]['message']['content']
+            print(f"DEBUG - Réponse brute de Mistral: {content}")
+            
             try:
-                # Essayer de parser le JSON
+                # Nettoyer le contenu pour extraire le JSON
                 import re
-                # Extraire le JSON du contenu
-                json_match = re.search(r'\{[^{}]*\}', content, re.DOTALL)
+                
+                # Essayer de trouver le JSON dans le contenu
+                # Pattern pour matcher un objet JSON complet
+                json_pattern = r'\{[^{}]*\}'
+                json_match = re.search(json_pattern, content, re.DOTALL)
+                
                 if json_match:
-                    return json.loads(json_match.group(0))
-                return json.loads(content)
-            except json.JSONDecodeError:
-                # Retourner le contenu brut si ce n'est pas du JSON
-                return {'raw_response': content}
+                    json_str = json_match.group(0)
+                    # Corriger les simples quotes en doubles quotes si nécessaire
+                    json_str = json_str.replace("'", '"')
+                    # Corriger les problèmes de format
+                    json_str = json_str.replace('\n', ' ').replace('\r', ' ')
+                    
+                    print(f"DEBUG - JSON extrait: {json_str}")
+                    return json.loads(json_str)
+                else:
+                    # Si pas de JSON trouvé, essayer de parser tout le contenu
+                    print(f"DEBUG - Tentative de parse direct du contenu")
+                    return json.loads(content)
+                    
+            except json.JSONDecodeError as e:
+                print(f"❌ Erreur de parse JSON: {e}")
+                print(f"Contenu non parsable: {content}")
+                # Retourner un objet par défaut avec le texte brut
+                return {
+                    'name': extracted_text[:100] if extracted_text else None,
+                    'year': None,
+                    'grapes': None,
+                    'region': None,
+                    'appellation': None,
+                    'producer': None,
+                    'country': None,
+                    'alcohol': None,
+                    'raw_response': content
+                }
         
         return None
     
@@ -155,37 +221,3 @@ class MistralAI:
         prompt = f"Donne-moi des informations sur le vin: {name}"
         result = self.ask_chat_question(prompt)
         return result if result else None
-
-
-# Prompts système (déplacés ici pour éviter les dépendances circulaires)
-SYSTEM_PROMPT = """Tu es un expert en vin et en gestion de cave à vin. 
-Tu dois répondre de manière précise, professionnelle et utile aux questions sur :
-- Les accords mets-vins (quel vin avec quel plat)
-- Les températures de service
-- Les cépages, régions et appellations
-- La gestion d'une cave à vin
-- L'analyse d'étiquettes de vin
-
-Réponds toujours en français, de manière claire et concise. 
-Si tu ne connais pas la réponse, dis-le honnêtement et propose des alternatives.
-Ne fais pas de blagues, reste professionnel.
-Utilise des emojis vinicoles (🍷, 🍇) avec modération."""
-
-ANALYSIS_SYSTEM_PROMPT = """Tu es un expert en reconnaissance d'étiquettes de vin. 
-On va te donner du texte extrait d'une étiquette de vin à analyser.
-Ton rôle est d'analyser ce texte et d'extraire les informations suivantes :
-- Nom du vin (ou du domaine/château)
-- Année/millésime (si présente)
-- Cépage(s) principal(aux)
-- Région/appellation
-- Producteur (si identifiable)
-- Pays d'origine
-- Degré d'alcool
-
-Format de réponse : UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, appellation, producer, country, alcohol.
-Si une information n'est pas trouvée, mets null.
-Ne réponds JAMAIS autre chose que le JSON."""
-
-# Ajout des prompts à la classe pour qu'ils soient accessibles
-MistralAI.SYSTEM_PROMPT = SYSTEM_PROMPT
-MistralAI.ANALYSIS_SYSTEM_PROMPT = ANALYSIS_SYSTEM_PROMPT
