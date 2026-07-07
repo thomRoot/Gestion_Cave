@@ -4,17 +4,18 @@ Intégration avec l'API Mistral AI
 import requests
 import json
 import base64
-from .config import Config
+
 
 class MistralAI:
-    def __init__(self):
-        self.api_key = Config.MISTRAL_API_KEY
-        self.model = Config.MISTRAL_MODEL
-        self.base_url = Config.MISTRAL_BASE_URL
+    def __init__(self, api_key=None, model=None, base_url=None):
+        self.api_key = api_key
+        self.model = model or 'mistral-tiny'
+        self.base_url = base_url or 'https://api.mistral.ai/v1/'
     
     def call_mistral(self, prompt, system_prompt=None, temperature=0.7, max_tokens=500):
         """Appeler l'API Mistral avec un prompt"""
         if not self.api_key:
+            print("⚠️  MISTRAL_API_KEY non configurée")
             return None
         
         headers = {
@@ -44,7 +45,7 @@ class MistralAI:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Erreur lors de l'appel à Mistral AI: {e}")
+            print(f"❌ Erreur lors de l'appel à Mistral AI: {e}")
             return None
     
     def analyze_bottle_text(self, extracted_text):
@@ -56,7 +57,7 @@ class MistralAI:
         
         result = self.call_mistral(
             prompt,
-            system_prompt=Config.ANALYSIS_SYSTEM_PROMPT,
+            system_prompt=self.ANALYSIS_SYSTEM_PROMPT,
             temperature=0.3,
             max_tokens=500
         )
@@ -86,7 +87,7 @@ class MistralAI:
         
         result = self.call_mistral(
             prompt,
-            system_prompt=Config.SYSTEM_PROMPT,
+            system_prompt=self.SYSTEM_PROMPT,
             temperature=0.7,
             max_tokens=1000
         )
@@ -155,5 +156,36 @@ class MistralAI:
         result = self.ask_chat_question(prompt)
         return result if result else None
 
-# Instance globale
-mistral_ai = MistralAI()
+
+# Prompts système (déplacés ici pour éviter les dépendances circulaires)
+SYSTEM_PROMPT = """Tu es un expert en vin et en gestion de cave à vin. 
+Tu dois répondre de manière précise, professionnelle et utile aux questions sur :
+- Les accords mets-vins (quel vin avec quel plat)
+- Les températures de service
+- Les cépages, régions et appellations
+- La gestion d'une cave à vin
+- L'analyse d'étiquettes de vin
+
+Réponds toujours en français, de manière claire et concise. 
+Si tu ne connais pas la réponse, dis-le honnêtement et propose des alternatives.
+Ne fais pas de blagues, reste professionnel.
+Utilise des emojis vinicoles (🍷, 🍇) avec modération."""
+
+ANALYSIS_SYSTEM_PROMPT = """Tu es un expert en reconnaissance d'étiquettes de vin. 
+On va te donner du texte extrait d'une étiquette de vin à analyser.
+Ton rôle est d'analyser ce texte et d'extraire les informations suivantes :
+- Nom du vin (ou du domaine/château)
+- Année/millésime (si présente)
+- Cépage(s) principal(aux)
+- Région/appellation
+- Producteur (si identifiable)
+- Pays d'origine
+- Degré d'alcool
+
+Format de réponse : UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, appellation, producer, country, alcohol.
+Si une information n'est pas trouvée, mets null.
+Ne réponds JAMAIS autre chose que le JSON."""
+
+# Ajout des prompts à la classe pour qu'ils soient accessibles
+MistralAI.SYSTEM_PROMPT = SYSTEM_PROMPT
+MistralAI.ANALYSIS_SYSTEM_PROMPT = ANALYSIS_SYSTEM_PROMPT

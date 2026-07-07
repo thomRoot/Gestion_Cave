@@ -3,14 +3,42 @@ Analyseur de bouteilles de vin avec Mistral AI et Google Vision
 """
 import json
 import re
-from .mistral_ai import mistral_ai
-from .google_vision import google_vision
-from .config import Config
+
 
 class MistralAnalyzer:
-    def __init__(self):
-        self.mistral = mistral_ai
-        self.google_vision = google_vision
+    def __init__(self, mistral_ai_instance, google_vision_instance, config):
+        self.mistral = mistral_ai_instance
+        self.google_vision = google_vision_instance
+        self.config = config
+        
+        # Prompts système
+        self.SYSTEM_PROMPT = """Tu es un expert en vin et en gestion de cave à vin. 
+Tu dois répondre de manière précise, professionnelle et utile aux questions sur :
+- Les accords mets-vins (quel vin avec quel plat)
+- Les températures de service
+- Les cépages, régions et appellations
+- La gestion d'une cave à vin
+- L'analyse d'étiquettes de vin
+
+Réponds toujours en français, de manière claire et concise. 
+Si tu ne connais pas la réponse, dis-le honnêtement et propose des alternatives.
+Ne fais pas de blagues, reste professionnel.
+Utilise des emojis vinicoles (🍷, 🍇) avec modération."""
+        
+        self.ANALYSIS_SYSTEM_PROMPT = """Tu es un expert en reconnaissance d'étiquettes de vin. 
+On va te donner du texte extrait d'une étiquette de vin à analyser.
+Ton rôle est d'analyser ce texte et d'extraire les informations suivantes :
+- Nom du vin (ou du domaine/château)
+- Année/millésime (si présente)
+- Cépage(s) principal(aux)
+- Région/appellation
+- Producteur (si identifiable)
+- Pays d'origine
+- Degré d'alcool
+
+Format de réponse : UNIQUEMENT un objet JSON avec les champs : name, year, grapes, region, appellation, producer, country, alcohol.
+Si une information n'est pas trouvée, mets null.
+Ne réponds JAMAIS autre chose que le JSON."""
     
     def get_fallback_bottle_info(self, error_message=None):
         """Retourner des informations par défaut pour une bouteille"""
@@ -220,6 +248,3 @@ class MistralAnalyzer:
         
         # Réponse générique
         return f"Dans votre cave, vous avez {len(bottles)} bouteilles. Je peux vous aider à choisir un vin si vous me donnez plus de détails."
-
-# Instance globale
-mistral_analyzer = MistralAnalyzer()

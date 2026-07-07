@@ -13,8 +13,8 @@ from .database import (
     init_database, save_cave_config, get_cave_config,
     save_bottle, get_all_bottles, delete_bottle, reset_database
 )
-from .mistral_analyzer import mistral_analyzer
-from .mistral_ai import mistral_ai
+from .mistral_ai import MistralAI
+from .google_vision import GoogleVision
 
 # Initialiser l'application Flask
 app = Flask(__name__, static_folder='../public')
@@ -22,6 +22,18 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Configuration
 app.config.from_object(Config)
+
+# Initialiser les instances IA avec la configuration chargée
+mistral_ai = MistralAI(
+    api_key=Config.MISTRAL_API_KEY,
+    model=Config.MISTRAL_MODEL,
+    base_url=Config.MISTRAL_BASE_URL
+)
+google_vision = GoogleVision()
+
+# Créer l'analyseur avec les instances
+from .mistral_analyzer import MistralAnalyzer
+mistral_analyzer = MistralAnalyzer(mistral_ai, google_vision, Config)
 
 # Assurer que le dossier d'upload existe
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
